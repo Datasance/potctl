@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# bootstrap.sh will check for and install any dependencies we have for building and using iofogctl
+# bootstrap.sh will check for and install any dependencies we have for building and using potctl
 #
 # Usage: ./bootstrap.sh
 #
@@ -11,7 +11,7 @@ set -e
 # Import our helper functions
 . script/utils.sh
 
-prettyTitle "Installing iofogctl Dependencies"
+prettyTitle "Installing potctl Dependencies"
 echo
 
 # Check whether Brew is installed

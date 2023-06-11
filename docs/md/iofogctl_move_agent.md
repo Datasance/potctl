@@ -1,4 +1,4 @@
-## iofogctl move agent
+## potctl move agent
 
 Move an Agent to another Namespace
 
@@ -7,13 +7,13 @@ Move an Agent to another Namespace
 Move an Agent to another Namespace
 
 ```
-iofogctl move agent NAME DEST_NAMESPACE [flags]
+potctl move agent NAME DEST_NAMESPACE [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl move agent NAME DEST_NAMESPACE
+potctl move agent NAME DEST_NAMESPACE
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl move agent NAME DEST_NAMESPACE
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl move](iofogctl_move.md)	 - Move an existing resources inside the current Namespace
+* [potctl move](potctl_move.md)	 - Move an existing resources inside the current Namespace
 
 

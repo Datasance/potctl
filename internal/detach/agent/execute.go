@@ -16,11 +16,11 @@ package detachagent
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/internal/execute"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type executor struct {
@@ -43,8 +43,8 @@ func (exe executor) Execute() error {
 	// Check doesn't already exist with same name
 	if _, err := config.GetDetachedAgent(exe.name); err == nil {
 		msg := `An Agent with the name '%s' is already detached. Rename one of the Agents and try to detach again:
-iofogctl rename agent %s %s-2 -n %s
-iofogctl rename agent %s %s-2 -n %s --detached`
+potctl rename agent %s %s-2 -n %s
+potctl rename agent %s %s-2 -n %s --detached`
 		return util.NewConflictError(fmt.Sprintf(msg, exe.name, exe.name, exe.name, exe.namespace, exe.name, exe.name, exe.namespace))
 	}
 

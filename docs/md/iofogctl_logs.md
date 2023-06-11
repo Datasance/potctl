@@ -1,4 +1,4 @@
-## iofogctl logs
+## potctl logs
 
 Get log contents of deployed resource
 
@@ -7,13 +7,13 @@ Get log contents of deployed resource
 Get log contents of deployed resource
 
 ```
-iofogctl logs RESOURCE NAME [flags]
+potctl logs RESOURCE NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl logs controller   NAME
+potctl logs controller   NAME
               agent        NAME
               microservice NAME
 ```
@@ -29,11 +29,11 @@ iofogctl logs controller   NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

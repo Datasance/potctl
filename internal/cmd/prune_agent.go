@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	prune "github.com/eclipse-iofog/iofogctl/v3/internal/prune/agent"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	prune "github.com/eclipse-iofog/potctl/v3/internal/prune/agent"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newPruneAgentCommand() *cobra.Command {
 		Use:     "agent NAME",
 		Short:   "Remove all dangling images from Agent",
 		Long:    `Remove all the images which are not used by existing containers on the specified Agent`,
-		Example: `iofogctl prune agent NAME`,
+		Example: `potctl prune agent NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of agent

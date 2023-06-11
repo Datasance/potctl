@@ -20,9 +20,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/iofog"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/pkg/iofog"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )

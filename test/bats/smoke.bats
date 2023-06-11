@@ -3,88 +3,88 @@
 . test/func/include.bash
 
 @test "Help" {
-  iofogctl --help
+  potctl --help
 }
 
 @test "Help w/o Flag" {
-  iofogctl help
+  potctl help
 }
 
 @test "Create Help" {
-  iofogctl create --help
+  potctl create --help
 }
 
 @test "Delete Help" {
-  iofogctl delete --help
+  potctl delete --help
 }
 
 @test "Deploy Help" {
-  iofogctl deploy --help
+  potctl deploy --help
 }
 
 @test "Describe Help" {
-  iofogctl describe --help
+  potctl describe --help
 }
 
 @test "Connect Help" {
-  iofogctl connect --help
+  potctl connect --help
 }
 
 @test "Disconnect Help" {
-  iofogctl disconnect --help
+  potctl disconnect --help
 }
 
 @test "Legacy Help" {
-  iofogctl legacy --help
+  potctl legacy --help
 }
 
 @test "Logs Help" {
-  iofogctl logs --help
+  potctl logs --help
 }
 
 @test "Get Help" {
-  iofogctl get --help
+  potctl get --help
 }
 
 @test "Version" {
-  iofogctl version
+  potctl version
 }
 
 @test "Get All" {
-  iofogctl get all
+  potctl get all
 }
 
 @test "Get Namespaces" {
-  iofogctl get namespaces
+  potctl get namespaces
 }
 
 @test "Get Controllers" {
-  iofogctl get controllers
+  potctl get controllers
 }
 
 @test "Get Agents" {
-  iofogctl get agents
+  potctl get agents
 }
 
 @test "Get Microservices" {
-  iofogctl get microservices
+  potctl get microservices
 }
 
 @test "Get Applications" {
-  iofogctl get applications
+  potctl get applications
 }
 
 @test "Create Namespace" {
-  iofogctl create namespace smoketestsnamespace1234
+  potctl create namespace smoketestsnamespace1234
 }
 
 @test "Set Default Namespace" {
-  iofogctl configure current-namespace smoketestsnamespace1234
-  iofogctl get all
+  potctl configure current-namespace smoketestsnamespace1234
+  potctl get all
 }
 
 @test "Delete Namespace" {
-  iofogctl delete namespace smoketestsnamespace1234
-  iofogctl get all
-  iofogctl get namespaces
+  potctl delete namespace smoketestsnamespace1234
+  potctl get all
+  potctl get namespaces
 }

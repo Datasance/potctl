@@ -1,4 +1,4 @@
-## iofogctl move
+## potctl move
 
 Move an existing resources inside the current Namespace
 
@@ -17,13 +17,13 @@ Move an existing resources inside the current Namespace
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl move agent](iofogctl_move_agent.md)	 - Move an Agent to another Namespace
-* [iofogctl move microservice](iofogctl_move_microservice.md)	 - Move a Microservice to another Agent in the same Namespace
+* [potctl](potctl.md)	 - 
+* [potctl move agent](potctl_move_agent.md)	 - Move an Agent to another Namespace
+* [potctl move microservice](potctl_move_microservice.md)	 - Move a Microservice to another Agent in the same Namespace
 
 

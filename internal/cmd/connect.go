@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/connect"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/connect"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -32,12 +32,12 @@ func newConnectCommand() *cobra.Command {
 This command must be executed within an empty or non-existent Namespace.
 All resources provisioned with the corresponding Control Plane will become visible under the Namespace.
 Visit iofog.org to view all YAML specifications usable with this command.`,
-		Example: `iofogctl connect -f controlplane.yaml
+		Example: `potctl connect -f controlplane.yaml
 
-iofogctl connect --email EMAIL --pass PASSWORD --kube     FILE 
+potctl connect --email EMAIL --pass PASSWORD --kube     FILE 
                  --email EMAIL --pass PASSWORD --ecn-addr ENDPOINT --name NAME
 
-iofogctl connect --generate`,
+potctl connect --generate`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
 			opt.Namespace, err = cmd.Flags().GetString("namespace")

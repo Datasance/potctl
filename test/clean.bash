@@ -5,6 +5,6 @@
 echo "Cleaning namespace $NAMESPACE"
 
 kubectl delete ns "$NAMESPACE"
-iofogctl disconnect -n "$NAMESPACE" -v
+potctl disconnect -n "$NAMESPACE" -v
 
 exit 0

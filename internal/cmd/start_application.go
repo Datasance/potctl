@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	startapplication "github.com/eclipse-iofog/iofogctl/v3/internal/start"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	startapplication "github.com/eclipse-iofog/potctl/v3/internal/start"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func newStartApplicationCommand() *cobra.Command {
 		Use:     "application NAME",
 		Short:   "Starts an application",
 		Long:    "Starts an application",
-		Example: `iofogctl start application NAME`,
+		Example: `potctl start application NAME`,
 		Args:    cobra.ExactValidArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error

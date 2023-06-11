@@ -1,4 +1,4 @@
-## iofogctl describe controller
+## potctl describe controller
 
 Get detailed information about a  Controller
 
@@ -7,13 +7,13 @@ Get detailed information about a  Controller
 Get detailed information about a named Controller.
 
 ```
-iofogctl describe controller NAME [flags]
+potctl describe controller NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe controller NAME
+potctl describe controller NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe controller NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

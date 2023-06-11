@@ -16,8 +16,8 @@ package cmd
 import (
 	"errors"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/deploy"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/deploy"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 

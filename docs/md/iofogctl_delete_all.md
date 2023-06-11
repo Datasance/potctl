@@ -1,4 +1,4 @@
-## iofogctl delete all
+## potctl delete all
 
 Delete all resources within a namespace
 
@@ -11,13 +11,13 @@ Tears down all components of an Edge Compute Network.
 If you don't want to tear down the deployments but would like to free up the Namespace, use the disconnect command instead.
 
 ```
-iofogctl delete all [flags]
+potctl delete all [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete all -n NAMESPACE
+potctl delete all -n NAMESPACE
 ```
 
 ### Options
@@ -33,11 +33,11 @@ iofogctl delete all -n NAMESPACE
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

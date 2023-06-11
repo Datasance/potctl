@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	create "github.com/eclipse-iofog/iofogctl/v3/internal/create/namespace"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	create "github.com/eclipse-iofog/potctl/v3/internal/create/namespace"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +27,8 @@ func newCreateNamespaceCommand() *cobra.Command {
 
 A Namespace contains all components of an Edge Compute Network.
 
-A single instance of iofogctl can be used to manage any number of Edge Compute Networks.`,
-		Example: `iofogctl create namespace NAME`,
+A single instance of potctl can be used to manage any number of Edge Compute Networks.`,
+		Example: `potctl create namespace NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of agent

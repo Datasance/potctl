@@ -1,4 +1,4 @@
-## iofogctl get
+## potctl get
 
 Get information of existing resources
 
@@ -9,13 +9,13 @@ Get information of existing resources.
 Resources like Agents will require a working Controller in the namespace to display all information.
 
 ```
-iofogctl get RESOURCE [flags]
+potctl get RESOURCE [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl get all
+potctl get all
              namespaces
              controllers
              agents
@@ -41,11 +41,11 @@ iofogctl get all
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

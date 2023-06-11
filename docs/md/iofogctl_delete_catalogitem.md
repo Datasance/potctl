@@ -1,4 +1,4 @@
-## iofogctl delete catalogitem
+## potctl delete catalogitem
 
 Delete a Catalog item
 
@@ -7,13 +7,13 @@ Delete a Catalog item
 Delete a Catalog item from the Controller.
 
 ```
-iofogctl delete catalogitem NAME [flags]
+potctl delete catalogitem NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete catalogitem NAME
+potctl delete catalogitem NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl delete catalogitem NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

@@ -17,7 +17,7 @@ NS2="$NS"-2
 
 @test "Create namespace" {
   startTest
-  iofogctl create namespace "$NS"
+  potctl create namespace "$NS"
   stopTest
 }
 
@@ -70,7 +70,7 @@ spec:
     email: $USER_EMAIL
     password: $USER_PW" > test/conf/vanilla.yaml
 
-  iofogctl -v deploy -f test/conf/vanilla.yaml
+  potctl -v deploy -f test/conf/vanilla.yaml
   checkController
   stopTest
 }
@@ -93,21 +93,21 @@ spec:
 
 @test "Controller legacy commands after vanilla deploy" {
   startTest
-  iofogctl -v legacy controller "$NAME" iofog list
+  potctl -v legacy controller "$NAME" iofog list
   checkLegacyController
   stopTest
 }
 
 @test "Get Controller logs after vanilla deploy" {
   startTest
-  iofogctl -v logs controller "$NAME"
+  potctl -v logs controller "$NAME"
   stopTest
 }
 
 @test "Deploy Agents against vanilla Controller" {
   startTest
   initRemoteAgentsFile
-  iofogctl --debug deploy -f test/conf/agents.yaml
+  potctl --debug deploy -f test/conf/agents.yaml
   checkAgents
   # Wait for router microservice
   local SSH_KEY_PATH=$KEY_FILE
@@ -154,7 +154,7 @@ spec:
   initAgents
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v legacy agent "$AGENT_NAME" status
+    potctl -v legacy agent "$AGENT_NAME" status
     checkLegacyAgent "$AGENT_NAME"
   done
   stopTest
@@ -165,7 +165,7 @@ spec:
   initVanillaController
   initAgents
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v prune agent "$AGENT_NAME"
+  potctl -v prune agent "$AGENT_NAME"
   local CONTROLLER_ENDPOINT="$VANILLA_HOST:51121"
   echo "$CONTROLLER_ENDPOINT"
   local SSH_KEY_PATH=$KEY_FILE
@@ -180,7 +180,7 @@ spec:
 @test "Detach agent" {
   startTest
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v detach agent "$AGENT_NAME"
+  potctl -v detach agent "$AGENT_NAME"
   checkAgentNegative "$AGENT_NAME"
   checkDetachedAgent "$AGENT_NAME"
   stopTest
@@ -190,10 +190,10 @@ spec:
   startTest
   local OLD_NAME="${NAME}-0"
   local NEW_NAME="${NAME}-renamed"
-  iofogctl -v rename agent "$OLD_NAME" "$NEW_NAME" --detached
+  potctl -v rename agent "$OLD_NAME" "$NEW_NAME" --detached
   checkDetachedAgentNegative "$OLD_NAME"
   checkDetachedAgent "$NEW_NAME"
-  iofogctl -v rename agent "$NEW_NAME" "$OLD_NAME" --detached
+  potctl -v rename agent "$NEW_NAME" "$OLD_NAME" --detached
   checkDetachedAgentNegative "$NEW_NAME"
   checkDetachedAgent "$OLD_NAME"
   stopTest
@@ -202,7 +202,7 @@ spec:
 @test "Attach agent" {
   startTest
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v attach agent "$AGENT_NAME"
+  potctl -v attach agent "$AGENT_NAME"
   checkAgent "$AGENT_NAME"
   checkDetachedAgentNegative "$AGENT_NAME"
   stopTest
@@ -217,7 +217,7 @@ spec:
 @test "Deploy application" {
   startTest
   initApplicationFileWithRoutes
-  iofogctl -v deploy -f test/conf/application.yaml
+  potctl -v deploy -f test/conf/application.yaml
   checkApplication
   waitForMsvc "$MSVC1_NAME" "$NS"
   waitForMsvc "$MSVC2_NAME" "$NS"
@@ -233,13 +233,13 @@ spec:
 
 @test "Microservice logs" {
   startTest
-  iofogctl -v logs microservice "$APPLICATION_NAME"/"$MSVC2_NAME" | grep "node index.js"
+  potctl -v logs microservice "$APPLICATION_NAME"/"$MSVC2_NAME" | grep "node index.js"
   stopTest
 }
 
 @test "Deploy application and test deploy idempotence" {
   startTest
-  iofogctl -v deploy -f test/conf/application.yaml
+  potctl -v deploy -f test/conf/application.yaml
   checkApplication
   waitForMsvc "$MSVC1_NAME" "$NS"
   waitForMsvc "$MSVC2_NAME" "$NS"
@@ -261,7 +261,7 @@ spec:
   # Hit the endpoint
   EXT_IP=$VANILLA_HOST
   testDefaultProxyConfig "$EXT_IP"
-  PUBLIC_ENDPOINT=$(iofogctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
+  PUBLIC_ENDPOINT=$(potctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
   echo "PUBLIC_ENDPOINT: $PUBLIC_ENDPOINT"
   hitMsvcEndpoint "$PUBLIC_ENDPOINT"
   stopTest
@@ -269,7 +269,7 @@ spec:
 
 @test "Move microservice to another agent" {
   startTest
-  iofogctl -v move microservice $APPLICATION_NAME/$MSVC2_NAME ${NAME}-1
+  potctl -v move microservice $APPLICATION_NAME/$MSVC2_NAME ${NAME}-1
   checkMovedMicroservice $MSVC2_NAME ${NAME}-1
   # Avoid checking RUNNING state of msvc on first agent
   waitForMsvc "$MSVC2_NAME" "$NS"
@@ -290,7 +290,7 @@ spec:
   # Hit the endpoint
   EXT_IP=$VANILLA_HOST
   testDefaultProxyConfig "$EXT_IP"
-  PUBLIC_ENDPOINT=$(iofogctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
+  PUBLIC_ENDPOINT=$(potctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
   echo "PUBLIC_ENDPOINT: $PUBLIC_ENDPOINT"
   hitMsvcEndpoint "$PUBLIC_ENDPOINT"
   stopTest
@@ -300,21 +300,21 @@ spec:
   startTest
   initVanillaController
   testGenerateConnectionString "http://$VANILLA_HOST:51121"
-  CNCT=$(iofogctl -n "$NS" connect --generate)
+  CNCT=$(potctl -n "$NS" connect --generate)
   eval "$CNCT -n ${NS}-2"
-  iofogctl disconnect -n "${NS}-2"
+  potctl disconnect -n "${NS}-2"
   stopTest
 }
 
 @test "Connect in another namespace using file" {
   startTest
-  iofogctl -v -n "$NS2" connect -f test/conf/vanilla.yaml
+  potctl -v -n "$NS2" connect -f test/conf/vanilla.yaml
   checkControllerAfterConnect "$NS2"
   checkAgents "$NS2"
   checkApplication "$NS2"
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS2" legacy agent "$AGENT_NAME" status
+    potctl -v -n "$NS2" legacy agent "$AGENT_NAME" status
   done
   stopTest
 }
@@ -322,17 +322,17 @@ spec:
 @test "Test you can access logs in other namespace" {
   startTest
   initVanillaController
-  iofogctl -v -n "$NS2" configure controller "$NAME" --user "$VANILLA_USER" --key "$KEY_FILE" --port $VANILLA_PORT
+  potctl -v -n "$NS2" configure controller "$NAME" --user "$VANILLA_USER" --key "$KEY_FILE" --port $VANILLA_PORT
   checkControllerAfterConfigure "$NS2"
-  iofogctl -v -n "$NS2" logs controller "$NAME"
+  potctl -v -n "$NS2" logs controller "$NAME"
   stopTest
 }
 
 @test "Disconnect other namespace" {
   startTest
-  iofogctl -v -n "$NS2" disconnect
+  potctl -v -n "$NS2" disconnect
   checkNamespaceExistsNegative "$NS2"
-  iofogctl -v -n "$NS2" disconnect # Idempotent
+  potctl -v -n "$NS2" disconnect # Idempotent
   stopTest
 }
 
@@ -340,7 +340,7 @@ spec:
   startTest
   initVanillaController
   CONTROLLER_ENDPOINT="$VANILLA_HOST:51121"
-  iofogctl -v -n "$NS2" connect --name "$NAME" --ecn-addr "$CONTROLLER_ENDPOINT" --email "$USER_EMAIL" --pass "$USER_PW"
+  potctl -v -n "$NS2" connect --name "$NAME" --ecn-addr "$CONTROLLER_ENDPOINT" --email "$USER_EMAIL" --pass "$USER_PW"
   checkControllerAfterConnect "$NS2"
   checkAgents "$NS2"
   stopTest
@@ -349,29 +349,29 @@ spec:
 @test "Configure Controller" {
   startTest
   initVanillaController
-  iofogctl -v -n "$NS2" configure controller "$NAME" --user "$VANILLA_USER" --port $VANILLA_PORT --key "$KEY_FILE"
+  potctl -v -n "$NS2" configure controller "$NAME" --user "$VANILLA_USER" --port $VANILLA_PORT --key "$KEY_FILE"
   checkControllerAfterConfigure "$NS2"
-  iofogctl -v -n "$NS2" logs controller "$NAME"
+  potctl -v -n "$NS2" logs controller "$NAME"
 
-  iofogctl -v -n "$NS2" configure controllers "$NAME" --user "$VANILLA_USER" --port $VANILLA_PORT --key "$KEY_FILE"
+  potctl -v -n "$NS2" configure controllers "$NAME" --user "$VANILLA_USER" --port $VANILLA_PORT --key "$KEY_FILE"
   checkControllerAfterConfigure "$NS2"
-  iofogctl -v -n "$NS2" logs controller "$NAME"
+  potctl -v -n "$NS2" logs controller "$NAME"
   stopTest
 }
 
 @test "Configure Agents" {
   startTest
   initAgents
-  iofogctl -v -n "$NS2" configure agents --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
+  potctl -v -n "$NS2" configure agents --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS2" logs agent "$AGENT_NAME"
+    potctl -v -n "$NS2" logs agent "$AGENT_NAME"
     checkLegacyAgent "$AGENT_NAME" "$NS2"
   done
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS2" configure agent "$AGENT_NAME" --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
-    iofogctl -v -n "$NS2" logs agent "$AGENT_NAME"
+    potctl -v -n "$NS2" configure agent "$AGENT_NAME" --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
+    potctl -v -n "$NS2" logs agent "$AGENT_NAME"
     checkLegacyAgent "$AGENT_NAME" "$NS2"
   done
   stopTest
@@ -381,9 +381,9 @@ spec:
   startTest
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS2" rename agent "$AGENT_NAME" "newname"
+    potctl -v -n "$NS2" rename agent "$AGENT_NAME" "newname"
     checkRenamedResource agents "$AGENT_NAME" "newname" "$NS2"
-    iofogctl -v -n "$NS2" rename agent "newname" "$AGENT_NAME"
+    potctl -v -n "$NS2" rename agent "newname" "$AGENT_NAME"
     checkRenamedResource agents "newname" "$AGENT_NAME" "$NS2"
   done
   stopTest
@@ -391,45 +391,45 @@ spec:
 
 @test "Rename Controller" {
   startTest
-  iofogctl -v -n "$NS2" rename controller "$NAME" "newname"
+  potctl -v -n "$NS2" rename controller "$NAME" "newname"
   checkRenamedResource controllers "$NAME" "newname" "$NS2"
-  iofogctl -v -n "$NS2" rename controller "newname" "$NAME"
+  potctl -v -n "$NS2" rename controller "newname" "$NAME"
   checkRenamedResource controllers "newname" "$NAME" "$NS2"
   stopTest
 }
 
 @test "Rename Namespace" {
   startTest
-  iofogctl -v rename namespace "${NS2}" "newname"
+  potctl -v rename namespace "${NS2}" "newname"
   checkRenamedNamespace "$NS2" "newname"
-  iofogctl -v rename namespace "newname" "${NS2}"
+  potctl -v rename namespace "newname" "${NS2}"
   checkRenamedNamespace "newname" "$NS2"
   stopTest
 }
 
 @test "Rename Application" {
   startTest
-  iofogctl -v rename application "$APPLICATION_NAME" "application-name"
-  iofogctl get all
+  potctl -v rename application "$APPLICATION_NAME" "application-name"
+  potctl get all
   checkRenamedApplication "$APPLICATION_NAME" "application-name" "$NS"
-  iofogctl -v rename application "application-name" "$APPLICATION_NAME"
+  potctl -v rename application "application-name" "$APPLICATION_NAME"
   checkRenamedApplication "application-name" "$APPLICATION_NAME" "$NS"
   stopTest
 }
 
 @test "Disconnect other namespace again" {
   startTest
-  iofogctl -v -n "$NS2" disconnect
+  potctl -v -n "$NS2" disconnect
   checkNamespaceExistsNegative "$NS2"
   stopTest
 }
 
 @test "Deploy again to check it doesn't lose database" {
   startTest
-  iofogctl -v deploy -f test/conf/vanilla.yaml
+  potctl -v deploy -f test/conf/vanilla.yaml
   checkController
   initRemoteAgentsFile
-  iofogctl -v deploy -f test/conf/agents.yaml
+  potctl -v deploy -f test/conf/agents.yaml
   checkAgents
   checkApplication
   stopTest
@@ -438,14 +438,14 @@ spec:
 # Delete all does not delete application
 @test "Delete application" {
   startTest
-  iofogctl -v delete application "$APPLICATION_NAME"
+  potctl -v delete application "$APPLICATION_NAME"
   checkApplicationNegative
   stopTest
 }
 
 @test "Delete all" {
   startTest
-  iofogctl -v delete all
+  potctl -v delete all
   initVanillaController
   checkVanillaResourceDeleted $VANILLA_USER $VANILLA_HOST $VANILLA_PORT $KEY_FILE "iofog-controller"
  
@@ -461,7 +461,7 @@ spec:
 
 @test "Delete namespaces" {
   startTest
-  iofogctl delete namespace "$NS"
+  potctl delete namespace "$NS"
   checkNamespaceExistsNegative "$NS"
   stopTest
 }

@@ -1,4 +1,4 @@
-## iofogctl describe application
+## potctl describe application
 
 Get detailed information about an Application
 
@@ -7,13 +7,13 @@ Get detailed information about an Application
 Get detailed information about an Application.
 
 ```
-iofogctl describe application NAME [flags]
+potctl describe application NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe application NAME
+potctl describe application NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe application NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

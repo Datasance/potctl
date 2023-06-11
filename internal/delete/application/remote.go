@@ -15,9 +15,9 @@ package deleteapplication
 
 import (
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/execute"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/execute"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type Executor struct {

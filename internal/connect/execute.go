@@ -17,12 +17,12 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	connectk8scontrolplane "github.com/eclipse-iofog/iofogctl/v3/internal/connect/controlplane/k8s"
-	connectremotecontrolplane "github.com/eclipse-iofog/iofogctl/v3/internal/connect/controlplane/remote"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	connectk8scontrolplane "github.com/eclipse-iofog/potctl/v3/internal/connect/controlplane/k8s"
+	connectremotecontrolplane "github.com/eclipse-iofog/potctl/v3/internal/connect/controlplane/remote"
+	"github.com/eclipse-iofog/potctl/v3/internal/execute"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type Options struct {
@@ -169,7 +169,7 @@ func generateConnectionString(namespace string) error {
 	if err != nil {
 		return util.NewError("Could not get Control Plane endpoint")
 	}
-	msg := fmt.Sprintf("iofogctl connect --ecn-addr %s --name remote --email %s --pass %s --b64", endpoint, controlPlane.GetUser().Email, controlPlane.GetUser().Password)
+	msg := fmt.Sprintf("potctl connect --ecn-addr %s --name remote --email %s --pass %s --b64", endpoint, controlPlane.GetUser().Email, controlPlane.GetUser().Password)
 	fmt.Println(msg)
 	return nil
 }

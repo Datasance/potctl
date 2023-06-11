@@ -1,4 +1,4 @@
-## iofogctl stop
+## potctl stop
 
 Stops a resource
 
@@ -17,12 +17,12 @@ Stops a resource
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl stop application](iofogctl_stop_application.md)	 - Stop an application
+* [potctl](potctl.md)	 - 
+* [potctl stop application](potctl_stop_application.md)	 - Stop an application
 
 

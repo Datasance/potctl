@@ -1,4 +1,4 @@
-## iofogctl prune agent
+## potctl prune agent
 
 Remove all dangling images from Agent
 
@@ -7,13 +7,13 @@ Remove all dangling images from Agent
 Remove all the images which are not used by existing containers on the specified Agent
 
 ```
-iofogctl prune agent NAME [flags]
+potctl prune agent NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl prune agent NAME
+potctl prune agent NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl prune agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl prune](iofogctl_prune.md)	 - prune ioFog resources
+* [potctl prune](potctl_prune.md)	 - prune ioFog resources
 
 

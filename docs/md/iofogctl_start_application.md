@@ -1,4 +1,4 @@
-## iofogctl start application
+## potctl start application
 
 Starts an application
 
@@ -7,13 +7,13 @@ Starts an application
 Starts an application
 
 ```
-iofogctl start application NAME [flags]
+potctl start application NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl start application NAME
+potctl start application NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl start application NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl start](iofogctl_start.md)	 - Starts a resource
+* [potctl start](potctl_start.md)	 - Starts a resource
 
 

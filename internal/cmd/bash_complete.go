@@ -19,7 +19,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ func newBashCompleteCommand(rootCmd *cobra.Command) *cobra.Command {
 		Hidden: true,
 		Short:  "Generate bash autocomplete file",
 		Long:   "Generate bash autocomplete file",
-		Example: `iofogctl autocomplete bash
+		Example: `potctl autocomplete bash
                       zsh`,
 		Args: cobra.ExactValidArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

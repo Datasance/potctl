@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	rename "github.com/eclipse-iofog/iofogctl/v3/internal/rename/route"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rename "github.com/eclipse-iofog/potctl/v3/internal/rename/route"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newRenameRouteCommand() *cobra.Command {
 		Use:     "route NAME NEW_NAME",
 		Short:   "Rename a Route",
 		Long:    `Rename a Route`,
-		Example: `iofogctl rename route NAME NEW_NAME`,
+		Example: `potctl rename route NAME NEW_NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and new name of the route

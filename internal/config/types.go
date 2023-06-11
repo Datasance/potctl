@@ -10,8 +10,8 @@ const (
 	AgentConfigKind            Kind = "AgentConfig"
 	CatalogItemKind            Kind = "CatalogItem"
 	EdgeResourceKind           Kind = "EdgeResource"
-	IofogctlConfigKind         Kind = "IofogctlConfig"
-	IofogctlNamespaceKind      Kind = "Namespace"
+	potctlConfigKind         Kind = "potctlConfig"
+	potctlNamespaceKind      Kind = "Namespace"
 	RegistryKind               Kind = "Registry"
 	VolumeKind                 Kind = "Volume"
 	LocalAgentKind             Kind = "LocalAgent"
@@ -41,11 +41,11 @@ type configuration struct {
 	DefaultNamespace string `yaml:"defaultNamespace"`
 }
 
-type iofogctlConfig struct {
+type potctlConfig struct {
 	Header `yaml:",inline"`
 }
 
-type iofogctlNamespace struct {
+type potctlNamespace struct {
 	Header `yaml:",inline"`
 }
 

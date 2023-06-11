@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/describe"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/describe"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newDescribeNamespaceCommand() *cobra.Command {
 		Use:     "namespace NAME",
 		Short:   "Get detailed information about a  Namespace",
 		Long:    `Get detailed information about a Namespace.`,
-		Example: `iofogctl describe namespace NAME`,
+		Example: `potctl describe namespace NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

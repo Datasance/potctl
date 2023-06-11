@@ -20,8 +20,8 @@ import (
 	"os"
 	"path"
 
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	homedir "github.com/mitchellh/go-homedir"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -41,9 +41,9 @@ const (
 	defaultDirname       = ".iofog/" + latestVersion
 	namespaceDirname     = "namespaces/"
 	defaultFilename      = "config.yaml"
-	configV2             = "iofogctl/v2"
-	configV3             = "iofogctl/v3"
-	configV1             = "iofogctl/v1"
+	configV2             = "potctl/v2"
+	configV3             = "potctl/v3"
+	configV1             = "potctl/v1"
 	CurrentConfigVersion = configV3
 	detachedNamespace    = "_detached"
 )
@@ -86,7 +86,7 @@ func Init(configFolderArg string) {
 	}
 
 	// Unmarshall the config file
-	confHeader := iofogctlConfig{}
+	confHeader := potctlConfig{}
 	err = util.UnmarshalYAML(configFilename, &confHeader)
 	util.Check(err)
 
@@ -120,13 +120,13 @@ func getNamespaceFile(name string) string {
 	return path.Join(namespaceDirectory, name+".yaml")
 }
 
-func updateConfigToV2(header *iofogctlConfig) {
+func updateConfigToV2(header *potctlConfig) {
 	if header != nil {
 		header.APIVersion = configV2
 	}
 }
 
-func getConfigFromHeader(header *iofogctlConfig) (conf configuration, err error) {
+func getConfigFromHeader(header *potctlConfig) (conf configuration, err error) {
 	switch header.APIVersion {
 	case CurrentConfigVersion:
 		// All good
@@ -139,7 +139,7 @@ func getConfigFromHeader(header *iofogctlConfig) (conf configuration, err error)
 		updateConfigToV2(header)
 		return getConfigFromHeader(header)
 	default:
-		return conf, util.NewInputError("Invalid iofogctl config version")
+		return conf, util.NewInputError("Invalid potctl config version")
 	}
 	bytes, err := yaml.Marshal(header.Spec)
 	if err != nil {
@@ -151,7 +151,7 @@ func getConfigFromHeader(header *iofogctlConfig) (conf configuration, err error)
 	return conf, err
 }
 
-func getNamespaceFromHeader(header *iofogctlNamespace) (ns *rsc.Namespace, err error) {
+func getNamespaceFromHeader(header *potctlNamespace) (ns *rsc.Namespace, err error) {
 	// Check header not supported
 	switch header.APIVersion {
 	case CurrentConfigVersion:
@@ -161,7 +161,7 @@ func getNamespaceFromHeader(header *iofogctlNamespace) (ns *rsc.Namespace, err e
 		err = util.NewError("Namespace file is out of date.")
 		return
 	default:
-		err = util.NewInputError("Invalid iofogctl config version")
+		err = util.NewInputError("Invalid potctl config version")
 		return
 	}
 	// Unmarshal Namespace spec
@@ -177,9 +177,9 @@ func getNamespaceFromHeader(header *iofogctlNamespace) (ns *rsc.Namespace, err e
 }
 
 func getConfigYAMLFile(conf configuration) ([]byte, error) {
-	confHeader := iofogctlConfig{
+	confHeader := potctlConfig{
 		Header: Header{
-			Kind:       IofogctlConfigKind,
+			Kind:       potctlConfigKind,
 			APIVersion: CurrentConfigVersion,
 			Spec:       conf,
 		},
@@ -189,9 +189,9 @@ func getConfigYAMLFile(conf configuration) ([]byte, error) {
 }
 
 func getNamespaceYAMLFile(ns *rsc.Namespace) ([]byte, error) {
-	namespaceHeader := iofogctlNamespace{
+	namespaceHeader := potctlNamespace{
 		Header{
-			Kind:       IofogctlNamespaceKind,
+			Kind:       potctlNamespaceKind,
 			APIVersion: CurrentConfigVersion,
 			Metadata: HeaderMetadata{
 				Name: ns.Name,

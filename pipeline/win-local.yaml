@@ -13,15 +13,15 @@ jobs:
   - bash: |
       dir=/mnt/c/Users/$(azure.windows.user)/AppData/Local/Microsoft/WindowsApps/
       echo moving
-      mv windows/iofogctl $dir
+      mv windows/potctl $dir
 
       echo chmodding
-      chmod +x $dir/iofogctl
+      chmod +x $dir/potctl
 
       echo version
-      $dir/iofogctl version
-      iofogctl version
-    displayName: 'Prepare iofogctl binary'
+      $dir/potctl version
+      potctl version
+    displayName: 'Prepare potctl binary'
   - bash: |
       if [[ -z $(which docker) ]]; then
         apt-get update -y

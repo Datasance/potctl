@@ -1,4 +1,4 @@
-## iofogctl delete agent
+## potctl delete agent
 
 Delete an Agent
 
@@ -10,16 +10,16 @@ The Agent will be unprovisioned from the Controller within the namespace.
 
 The Agent stack will be uninstalled from the host.
 
-If you wish to not remove the Agent stack from the host, please use iofogctl detach agent
+If you wish to not remove the Agent stack from the host, please use potctl detach agent
 
 ```
-iofogctl delete agent NAME [flags]
+potctl delete agent NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete agent NAME
+potctl delete agent NAME
 ```
 
 ### Options
@@ -35,11 +35,11 @@ iofogctl delete agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

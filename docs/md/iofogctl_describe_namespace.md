@@ -1,4 +1,4 @@
-## iofogctl describe namespace
+## potctl describe namespace
 
 Get detailed information about a  Namespace
 
@@ -7,13 +7,13 @@ Get detailed information about a  Namespace
 Get detailed information about a Namespace.
 
 ```
-iofogctl describe namespace NAME [flags]
+potctl describe namespace NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe namespace NAME
+potctl describe namespace NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe namespace NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

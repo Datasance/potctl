@@ -1,4 +1,4 @@
-## iofogctl delete volume
+## potctl delete volume
 
 Delete an Volume
 
@@ -9,13 +9,13 @@ Delete an Volume.
 The Volume will be deleted from the Agents that it is stored on.
 
 ```
-iofogctl delete volume NAME [flags]
+potctl delete volume NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete volume NAME
+potctl delete volume NAME
 ```
 
 ### Options
@@ -29,11 +29,11 @@ iofogctl delete volume NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

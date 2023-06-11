@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	detach "github.com/eclipse-iofog/iofogctl/v3/internal/detach/edgeresource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	detach "github.com/eclipse-iofog/potctl/v3/internal/detach/edgeresource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func newDetachEdgeResourceCommand() *cobra.Command {
 		Use:     "edge-resource NAME VERSION AGENT_NAME",
 		Short:   "Detaches an Edge Resource from an Agent",
 		Long:    `Detaches an Edge Resource from an Agent.`,
-		Example: `iofogctl detach edge-resource NAME VERSION AGENT_NAME`,
+		Example: `potctl detach edge-resource NAME VERSION AGENT_NAME`,
 		Args:    cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of edge resource

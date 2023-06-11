@@ -1,4 +1,4 @@
-## iofogctl rollback
+## potctl rollback
 
 Rollback ioFog resources
 
@@ -7,13 +7,13 @@ Rollback ioFog resources
 Rollback ioFog resources to latest versions available.
 
 ```
-iofogctl rollback RESOURCE NAME [flags]
+potctl rollback RESOURCE NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl rollback agent NAME
+potctl rollback agent NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl rollback agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

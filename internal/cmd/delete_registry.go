@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/registry"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/registry"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newDeleteRegistryCommand() *cobra.Command {
 		Use:     "registry ID",
 		Short:   "Delete a Registry",
 		Long:    `Delete a Registry from the Controller.`,
-		Example: `iofogctl delete registry ID`,
+		Example: `potctl delete registry ID`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace

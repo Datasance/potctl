@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/describe"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/describe"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newDescribeApplicationTemplateCommand() *cobra.Command {
 		Use:     "application-template NAME",
 		Short:   "Get detailed information about an Application Template",
 		Long:    `Get detailed information about an Application Template.`,
-		Example: `iofogctl describe application-template NAME`,
+		Example: `potctl describe application-template NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

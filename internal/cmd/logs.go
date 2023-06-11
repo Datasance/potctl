@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/logs"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/logs"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newLogsCommand() *cobra.Command {
 		Use:   "logs RESOURCE NAME",
 		Short: "Get log contents of deployed resource",
 		Long:  `Get log contents of deployed resource`,
-		Example: `iofogctl logs controller   NAME
+		Example: `potctl logs controller   NAME
               agent        NAME
               microservice NAME`,
 		Args: cobra.ExactValidArgs(2),

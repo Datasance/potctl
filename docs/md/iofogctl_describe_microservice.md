@@ -1,4 +1,4 @@
-## iofogctl describe microservice
+## potctl describe microservice
 
 Get detailed information about a  Microservice
 
@@ -7,13 +7,13 @@ Get detailed information about a  Microservice
 Get detailed information about a Microservice.
 
 ```
-iofogctl describe microservice NAME [flags]
+potctl describe microservice NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe microservice NAME
+potctl describe microservice NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe microservice NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

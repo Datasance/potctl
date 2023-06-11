@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	attach "github.com/eclipse-iofog/iofogctl/v3/internal/attach/agent"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/agent"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func newAttachAgentCommand() *cobra.Command {
 		Long: `Attach a detached Agent to an existing Namespace.
 
 The Agent will be provisioned with the Controller within the Namespace.`,
-		Example: `iofogctl attach agent NAME`,
+		Example: `potctl attach agent NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of agent

@@ -17,12 +17,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/iofog/install"
+	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	sshErrMsg = "legacy commands requires SSH access.\n%s %s SSH details are not available.\nUse `iofogctl configure --help` to find out how to add SSH details"
+	sshErrMsg = "legacy commands requires SSH access.\n%s %s SSH details are not available.\nUse `potctl configure --help` to find out how to add SSH details"
 )
 
 func k8sExecute(kubeConfig, namespace, podSelector string, cliCmd, cmd []string) {
@@ -98,8 +98,8 @@ func newLegacyCommand() *cobra.Command {
 Legacy commands require SSH access to the corresponding Agent or Controller.
 
 Use the configure command to add SSH details to Agents and Controllers if necessary.`,
-		Example: `iofogctl legacy controller NAME COMMAND
-iofogctl legacy agent      NAME COMMAND`,
+		Example: `potctl legacy controller NAME COMMAND
+potctl legacy agent      NAME COMMAND`,
 		Args: cobra.MinimumNArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type arg

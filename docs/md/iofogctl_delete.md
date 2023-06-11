@@ -1,4 +1,4 @@
-## iofogctl delete
+## potctl delete
 
 Delete an existing ioFog resource
 
@@ -7,7 +7,7 @@ Delete an existing ioFog resource
 Delete an existing ioFog resource.
 
 ```
-iofogctl delete [flags]
+potctl delete [flags]
 ```
 
 ### Options
@@ -22,23 +22,23 @@ iofogctl delete [flags]
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl delete agent](iofogctl_delete_agent.md)	 - Delete an Agent
-* [iofogctl delete all](iofogctl_delete_all.md)	 - Delete all resources within a namespace
-* [iofogctl delete application](iofogctl_delete_application.md)	 - Delete an application
-* [iofogctl delete application-template](iofogctl_delete_application-template.md)	 - Delete an application-template
-* [iofogctl delete catalogitem](iofogctl_delete_catalogitem.md)	 - Delete a Catalog item
-* [iofogctl delete controller](iofogctl_delete_controller.md)	 - Delete a Controller
-* [iofogctl delete edge-resource](iofogctl_delete_edge-resource.md)	 - Delete an Edge Resource
-* [iofogctl delete microservice](iofogctl_delete_microservice.md)	 - Delete a Microservice
-* [iofogctl delete namespace](iofogctl_delete_namespace.md)	 - Delete a Namespace
-* [iofogctl delete registry](iofogctl_delete_registry.md)	 - Delete a Registry
-* [iofogctl delete route](iofogctl_delete_route.md)	 - Delete a Route
-* [iofogctl delete volume](iofogctl_delete_volume.md)	 - Delete an Volume
+* [potctl](potctl.md)	 - 
+* [potctl delete agent](potctl_delete_agent.md)	 - Delete an Agent
+* [potctl delete all](potctl_delete_all.md)	 - Delete all resources within a namespace
+* [potctl delete application](potctl_delete_application.md)	 - Delete an application
+* [potctl delete application-template](potctl_delete_application-template.md)	 - Delete an application-template
+* [potctl delete catalogitem](potctl_delete_catalogitem.md)	 - Delete a Catalog item
+* [potctl delete controller](potctl_delete_controller.md)	 - Delete a Controller
+* [potctl delete edge-resource](potctl_delete_edge-resource.md)	 - Delete an Edge Resource
+* [potctl delete microservice](potctl_delete_microservice.md)	 - Delete a Microservice
+* [potctl delete namespace](potctl_delete_namespace.md)	 - Delete a Namespace
+* [potctl delete registry](potctl_delete_registry.md)	 - Delete a Registry
+* [potctl delete route](potctl_delete_route.md)	 - Delete a Route
+* [potctl delete volume](potctl_delete_volume.md)	 - Delete an Volume
 
 

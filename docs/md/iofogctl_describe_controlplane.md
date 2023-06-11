@@ -1,4 +1,4 @@
-## iofogctl describe controlplane
+## potctl describe controlplane
 
 Get detailed information about a  Control Plane
 
@@ -7,13 +7,13 @@ Get detailed information about a  Control Plane
 Get detailed information about the Control Plane in a single Namespace.
 
 ```
-iofogctl describe controlplane [flags]
+potctl describe controlplane [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe controlplane
+potctl describe controlplane
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe controlplane
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

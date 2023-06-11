@@ -1,4 +1,4 @@
-## iofogctl detach agent
+## potctl detach agent
 
 Detaches an Agent
 
@@ -14,13 +14,13 @@ You cannot detach unprovisioned Agents.
 The Agent stack will not be uninstalled from the host.
 
 ```
-iofogctl detach agent NAME [flags]
+potctl detach agent NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl detach agent NAME
+potctl detach agent NAME
 ```
 
 ### Options
@@ -35,11 +35,11 @@ iofogctl detach agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl detach](iofogctl_detach.md)	 - Detach one ioFog resource from another
+* [potctl detach](potctl_detach.md)	 - Detach one ioFog resource from another
 
 

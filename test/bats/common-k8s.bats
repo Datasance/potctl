@@ -30,7 +30,7 @@
   startTest
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS" legacy agent "$AGENT_NAME" status
+    potctl -v -n "$NS" legacy agent "$AGENT_NAME" status
     checkLegacyAgent "$AGENT_NAME"
   done
   stopTest
@@ -40,7 +40,7 @@
   startTest
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS" logs agent "$AGENT_NAME"
+    potctl -v -n "$NS" logs agent "$AGENT_NAME"
   done
   stopTest
 }
@@ -49,7 +49,7 @@
   startTest
   initAgents
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v -n "$NS" prune agent "$AGENT_NAME"
+  potctl -v -n "$NS" prune agent "$AGENT_NAME"
   local CONTROLLER_ENDPOINT=$(cat /tmp/endpoint.txt)
   local SSH_KEY_PATH=$KEY_FILE
   if [[ ! -z $WSL_KEY_FILE ]]; then
@@ -63,7 +63,7 @@
 @test "Disconnect from cluster" {
   startTest
   initAgents
-  iofogctl -v -n "$NS" disconnect
+  potctl -v -n "$NS" disconnect
   checkNamespaceExistsNegative "$NS"
   stopTest
 }
@@ -71,7 +71,7 @@
 @test "Connect to cluster using deploy file" {
   startTest
   CONTROLLER_ENDPOINT=$(cat /tmp/endpoint.txt)
-  iofogctl -v -n "$NS" connect -f test/conf/k8s.yaml
+  potctl -v -n "$NS" connect -f test/conf/k8s.yaml
   checkControllerK8s
   checkAgents
   stopTest
@@ -81,25 +81,25 @@
   startTest
   local IP=$(kctl get svc -l name=controller -n "$NS" | awk 'FNR > 1 {print $4}')
   testGenerateConnectionString "http://$IP:51121" # Disable this on local run
-  CNCT=$(iofogctl -n "$NS" connect --generate)
+  CNCT=$(potctl -n "$NS" connect --generate)
   eval "$CNCT -n ${NS}-2"
-  iofogctl disconnect -n "${NS}-2"
+  potctl disconnect -n "${NS}-2"
   stopTest
 }
 
 @test "Disconnect from cluster again" {
   startTest
   initAgents
-  iofogctl -v -n "$NS" disconnect
+  potctl -v -n "$NS" disconnect
   checkNamespaceExistsNegative "$NS"
-  iofogctl -v -n "$NS2" disconnect # Idempotent
+  potctl -v -n "$NS2" disconnect # Idempotent
   stopTest
 }
 
 @test "Connect to cluster using flags" {
   startTest
   CONTROLLER_ENDPOINT=$(cat /tmp/endpoint.txt)
-  iofogctl -v -n "$NS" connect --kube "$KUBE_CONFIG" --email "$USER_EMAIL" --pass "$USER_PW"
+  potctl -v -n "$NS" connect --kube "$KUBE_CONFIG" --email "$USER_EMAIL" --pass "$USER_PW"
   checkControllerK8s
   checkAgents
   stopTest
@@ -121,7 +121,7 @@
 @test "Deploy application" {
   startTest
   initApplicationFiles
-  iofogctl -v deploy -f test/conf/application.yaml
+  potctl -v deploy -f test/conf/application.yaml
   checkApplication
   waitForMsvc "$MSVC1_NAME" "$NS"
   waitForMsvc "$MSVC2_NAME" "$NS"
@@ -131,7 +131,7 @@
 @test "Deploy route" {
   startTest
   initRouteFile
-  iofogctl -v -n "$NS" deploy -f test/conf/route.yaml
+  potctl -v -n "$NS" deploy -f test/conf/route.yaml
   checkRoute "$ROUTE_NAME" "$MSVC1_NAME" "$MSVC2_NAME"
   stopTest
 }
@@ -154,7 +154,7 @@
   EXT_IP=$(waitForSvc "$NS" http-proxy)
   testDefaultProxyConfig "$EXT_IP"
   # Hit the endpoint
-  PUBLIC_ENDPOINT=$(iofogctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
+  PUBLIC_ENDPOINT=$(potctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
   echo "PUBLIC_ENDPOINT: $PUBLIC_ENDPOINT"
   hitMsvcEndpoint "$PUBLIC_ENDPOINT"
   stopTest
@@ -162,7 +162,7 @@
 
 @test "Move microservice to another agent" {
   startTest
-  iofogctl -v move microservice $APPLICATION_NAME/$MSVC2_NAME ${NAME}-1
+  potctl -v move microservice $APPLICATION_NAME/$MSVC2_NAME ${NAME}-1
   checkMovedMicroservice $MSVC2_NAME ${NAME}-1
   initAgents
   local SSH_KEY_PATH=$KEY_FILE
@@ -179,7 +179,7 @@
   # Wait for k8s service
   EXT_IP=$(waitForSvc "$NS" http-proxy)
   testDefaultProxyConfig "$EXT_IP"
-  PUBLIC_ENDPOINT=$(iofogctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
+  PUBLIC_ENDPOINT=$(potctl -n "$NS" -v describe microservice $APPLICATION_NAME/"$MSVC2_NAME" | grep "\- http://" | sed 's|.*http://|http://|g')
   echo "PUBLIC_ENDPOINT: $PUBLIC_ENDPOINT"
   hitMsvcEndpoint "$PUBLIC_ENDPOINT"
   stopTest
@@ -190,7 +190,7 @@
   initApplicationFiles
   initApplicationWithPortFile
   EXT_IP=$(waitForSvc "$NS" http-proxy)
-  iofogctl -v deploy -f test/conf/application.yaml
+  potctl -v deploy -f test/conf/application.yaml
   # Wait for port to update to 6666
   PORT=""
   SECS=0
@@ -212,7 +212,7 @@
   initApplicationWithoutPortsFiles
 
   # Update application
-  iofogctl -v deploy -f test/conf/application.yaml
+  potctl -v deploy -f test/conf/application.yaml
 
   # Wait for port to be deleted
   RET=0
@@ -230,7 +230,7 @@
 # Delete all does not delete application
 @test "Delete application" {
   startTest
-  iofogctl -v delete application "$APPLICATION_NAME"
+  potctl -v delete application "$APPLICATION_NAME"
   checkApplicationNegative
   stopTest
 }
@@ -238,7 +238,7 @@
 @test "Deploy Agents for idempotence" {
   startTest
   initRemoteAgentsFile
-  iofogctl -v -n "$NS" deploy -f test/conf/agents.yaml
+  potctl -v -n "$NS" deploy -f test/conf/agents.yaml
   checkAgents
   stopTest
 }
@@ -246,10 +246,10 @@
 @test "Configure Agents" {
   startTest
   initAgents
-  iofogctl -v -n "$NS" configure agents --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
+  potctl -v -n "$NS" configure agents --port "${PORTS[IDX]}" --key "$KEY_FILE" --user "${USERS[IDX]}"
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS" logs agent "$AGENT_NAME"
+    potctl -v -n "$NS" logs agent "$AGENT_NAME"
     checkLegacyAgent "$AGENT_NAME"
   done
   stopTest
@@ -258,7 +258,7 @@
 @test "Detach agent" {
   startTest
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v detach agent "$AGENT_NAME"
+  potctl -v detach agent "$AGENT_NAME"
   checkAgentNegative "$AGENT_NAME"
   checkDetachedAgent "$AGENT_NAME"
   stopTest
@@ -269,31 +269,31 @@
   local A0="${NAME}-0"
   local A1="${NAME}-1"
   # Rename and fail
-  iofogctl -v rename agent $A1 $A0
-  run iofogctl -v detach agent $A0
+  potctl -v rename agent $A1 $A0
+  run potctl -v detach agent $A0
   [ "$status" -eq 1 ]
   # Rename attached and succeed
-  iofogctl -v rename agent $A0 $A1
-  iofogctl -v detach agent $A1
+  potctl -v rename agent $A0 $A1
+  potctl -v detach agent $A1
   # Return to attached
-  iofogctl -v attach agent $A1
+  potctl -v attach agent $A1
   checkAgent $A1
   checkDetachedAgentNegative $A1
   # Rename detached and succeed
-  iofogctl -v rename agent $A1 $A0
-  iofogctl -v rename agent $A0 albert --detached
-  iofogctl -v detach agent $A0
+  potctl -v rename agent $A1 $A0
+  potctl -v rename agent $A0 albert --detached
+  potctl -v detach agent $A0
   # Return to attached
-  iofogctl -v attach agent $A0
-  iofogctl -v rename agent $A0 $A1
-  iofogctl -v rename agent albert $A0 --detached
+  potctl -v attach agent $A0
+  potctl -v rename agent $A0 $A1
+  potctl -v rename agent albert $A0 --detached
   stopTest
 }
 
 @test "Attach agent" {
   startTest
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v attach agent "$AGENT_NAME"
+  potctl -v attach agent "$AGENT_NAME"
   checkAgent "$AGENT_NAME"
   checkDetachedAgentNegative "$AGENT_NAME"
   stopTest
@@ -302,7 +302,7 @@
 @test "Move Agent" {
   startTest
   local AGENT_NAME="${NAME}-0"
-  iofogctl -v -n "$NS" move "$AGENT_NAME" "$NS"
-  iofogctl -v -n "$NS" get agents | grep "$AGENT_NAME"
+  potctl -v -n "$NS" move "$AGENT_NAME" "$NS"
+  potctl -v -n "$NS" get agents | grep "$AGENT_NAME"
   stopTest
 }

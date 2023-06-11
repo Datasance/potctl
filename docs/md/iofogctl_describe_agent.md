@@ -1,4 +1,4 @@
-## iofogctl describe agent
+## potctl describe agent
 
 Get detailed information about an Agent
 
@@ -7,13 +7,13 @@ Get detailed information about an Agent
 Get detailed information about a named Agent.
 
 ```
-iofogctl describe agent NAME [flags]
+potctl describe agent NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe agent NAME
+potctl describe agent NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

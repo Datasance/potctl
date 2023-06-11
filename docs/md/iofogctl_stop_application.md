@@ -1,4 +1,4 @@
-## iofogctl stop application
+## potctl stop application
 
 Stop an application
 
@@ -7,13 +7,13 @@ Stop an application
 Stop an application
 
 ```
-iofogctl stop application NAME [flags]
+potctl stop application NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl stop application NAME
+potctl stop application NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl stop application NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl stop](iofogctl_stop.md)	 - Stops a resource
+* [potctl stop](potctl_stop.md)	 - Stops a resource
 
 

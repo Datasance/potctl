@@ -23,7 +23,7 @@ import (
 	ioclient "github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	iofogv3 "github.com/eclipse-iofog/iofog-operator/v3/apis"
 	cpv3 "github.com/eclipse-iofog/iofog-operator/v3/apis/controlplanes/v3"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	extsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -326,7 +326,7 @@ func (k8s *Kubernetes) monitorOperator(errCh chan error) {
 
 		// podLogsStr := buf.String()
 		// Allow errors, need to fix iofog-operator to not have errors anymore
-		// errDelim := `ERROR` // TODO: Decouple iofogctl-operator err string
+		// errDelim := `ERROR` // TODO: Decouple potctl-operator err string
 		// if strings.Contains(podLogsStr, errDelim) {
 		// 	msg := ""
 		// 	logLines := strings.Split(podLogsStr, "\n")

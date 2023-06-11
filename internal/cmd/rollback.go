@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/rollback"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/rollback"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func newRollbackCommand() *cobra.Command {
 		Use:     "rollback RESOURCE NAME",
 		Short:   "Rollback ioFog resources",
 		Long:    `Rollback ioFog resources to latest versions available.`,
-		Example: `iofogctl rollback agent NAME`,
+		Example: `potctl rollback agent NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

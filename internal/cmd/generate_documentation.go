@@ -19,7 +19,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -33,10 +33,10 @@ func newGenerateDocumentationCommand(rootCmd *cobra.Command) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:    "documentation TYPE",
 		Hidden: true,
-		Short:  "Generate iofogctl documentation",
-		Long:   "Generate iofogctl documentation as markdown or man page",
-		Example: `iofogctl documentation md
-		 iofogctl documentation man`,
+		Short:  "Generate potctl documentation",
+		Long:   "Generate potctl documentation as markdown or man page",
+		Example: `potctl documentation md
+		 potctl documentation man`,
 		Args: cobra.ExactValidArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			if docDir == "" {
@@ -57,7 +57,7 @@ func newGenerateDocumentationCommand(rootCmd *cobra.Command) *cobra.Command {
 				err = os.MkdirAll(manDir, 0755)
 				util.Check(err)
 				header := &doc.GenManHeader{
-					Title:   "iofogctl",
+					Title:   "potctl",
 					Section: "1",
 				}
 				err := doc.GenManTree(rootCmd, header, manDir)

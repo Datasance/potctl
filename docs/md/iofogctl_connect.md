@@ -1,4 +1,4 @@
-## iofogctl connect
+## potctl connect
 
 Connect to an existing Control Plane
 
@@ -11,18 +11,18 @@ All resources provisioned with the corresponding Control Plane will become visib
 Visit iofog.org to view all YAML specifications usable with this command.
 
 ```
-iofogctl connect [flags]
+potctl connect [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl connect -f controlplane.yaml
+potctl connect -f controlplane.yaml
 
-iofogctl connect --email EMAIL --pass PASSWORD --kube     FILE 
+potctl connect --email EMAIL --pass PASSWORD --kube     FILE 
                  --email EMAIL --pass PASSWORD --ecn-addr ENDPOINT --name NAME
 
-iofogctl connect --generate
+potctl connect --generate
 ```
 
 ### Options
@@ -45,11 +45,11 @@ iofogctl connect --generate
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

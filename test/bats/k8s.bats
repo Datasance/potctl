@@ -38,7 +38,7 @@ NS="$NAMESPACE"
 
 @test "Create namespace" {
   startTest
-  iofogctl create namespace "$NS"
+  potctl create namespace "$NS"
   stopTest
 }
 
@@ -70,14 +70,14 @@ spec:
     router: $ROUTER_IMAGE
     kubelet: $KUBELET_IMAGE" > test/conf/k8s.yaml
 
-  iofogctl -v -n "$NS" deploy -f test/conf/k8s.yaml
+  potctl -v -n "$NS" deploy -f test/conf/k8s.yaml
   checkControllerK8s
   stopTest
 }
 
 @test "Get endpoint" {
   startTest
-  CONTROLLER_ENDPOINT=$(iofogctl -v -n "$NS" describe controlplane | grep endpoint | sed "s|.*endpoint: ||")
+  CONTROLLER_ENDPOINT=$(potctl -v -n "$NS" describe controlplane | grep endpoint | sed "s|.*endpoint: ||")
   [[ ! -z "$CONTROLLER_ENDPOINT" ]]
   echo "$CONTROLLER_ENDPOINT" > /tmp/endpoint.txt
   stopTest
@@ -85,7 +85,7 @@ spec:
 
 @test "Get Controller logs on K8s after deploy" {
   startTest
-  iofogctl -v -n "$NS" logs controller "$NAME" | grep "api/v3"
+  potctl -v -n "$NS" logs controller "$NAME" | grep "api/v3"
   stopTest
 }
 
@@ -97,19 +97,19 @@ spec:
     NEW_KUBE="C:\tmp\new-kubeconfig"
     TEST_KUBE='C:\\tmp\\new-kubeconfig'
   fi
-  iofogctl -v -n "$NS" configure controlplane --kube "$NEW_KUBE"
-  DESC=$(iofogctl -v -n "$NS" describe controlplane)
+  potctl -v -n "$NS" configure controlplane --kube "$NEW_KUBE"
+  DESC=$(potctl -v -n "$NS" describe controlplane)
   echo $NEW_KUBE
   echo $DESC
-  iofogctl -v -n "$NS" describe controlplane | grep $TEST_KUBE
-  iofogctl -v -n "$NS" configure controlplane --kube "$KUBE_CONFIG"
+  potctl -v -n "$NS" describe controlplane | grep $TEST_KUBE
+  potctl -v -n "$NS" configure controlplane --kube "$KUBE_CONFIG"
   stopTest
 }
 
 @test "Deploy Agents" {
   startTest
   initRemoteAgentsFile
-  iofogctl -v -n "$NS" deploy -f test/conf/agents.yaml
+  potctl -v -n "$NS" deploy -f test/conf/agents.yaml
   checkAgents
     # Wait for router microservice
   local SSH_KEY_PATH=$KEY_FILE
@@ -130,7 +130,7 @@ spec:
   initAgents
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS" delete agent "$AGENT_NAME"
+    potctl -v -n "$NS" delete agent "$AGENT_NAME"
   done
   checkAgentsNegative
   stopTest
@@ -158,14 +158,14 @@ spec:
     router: $ROUTER_IMAGE
     kubelet: $KUBELET_IMAGE" > test/conf/k8s.yaml
 
-  iofogctl -v -n "$NS" deploy -f test/conf/k8s.yaml
+  potctl -v -n "$NS" deploy -f test/conf/k8s.yaml
   checkControllerK8s
   stopTest
 }
 
 @test "Delete all" {
   startTest
-  iofogctl -v -n "$NS" delete all
+  potctl -v -n "$NS" delete all
   checkControllerNegativeK8s
   checkAgentsNegative
   stopTest
@@ -173,7 +173,7 @@ spec:
 
 @test "Delete namespace" {
   startTest
-  iofogctl delete namespace "$NS"
-  [[ -z $(iofogctl get namespaces | grep "$NS") ]]
+  potctl delete namespace "$NS"
+  [[ -z $(potctl get namespaces | grep "$NS") ]]
   stopTest
 }

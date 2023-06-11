@@ -69,19 +69,19 @@ stages:
       - script: |
           set -e
           go install github.com/goreleaser/goreleaser@v1.1.0
-        displayName: 'iofogctl: Install Goreleaser'
+        displayName: 'potctl: Install Goreleaser'
       - script: |
           set -e
-          goreleaser --snapshot --rm-dist --debug --config ./.goreleaser-iofogctl.yml
-        displayName: 'iofogctl: Build packages'
+          goreleaser --snapshot --rm-dist --debug --config ./.goreleaser-potctl.yml
+        displayName: 'potctl: Build packages'
         env:
           GITHUB_TOKEN: $(github_token)
       - task: PublishBuildArtifacts@1
         condition: always()
         inputs:
           PathtoPublish: '$(System.DefaultWorkingDirectory)/dist'
-          ArtifactName: iofogctl
-        displayName: 'Publish iofogctl binaries'
+          ArtifactName: potctl
+        displayName: 'Publish potctl binaries'
 
 - stage: Test
   jobs:
@@ -101,7 +101,7 @@ stages:
 
 - stage: Publish
   jobs:
-    - job: Publish_Iofogctl_Dev
+    - job: Publish_potctl_Dev
       condition: or(and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/develop')), and(succeeded(), startsWith(variables['build.sourceBranch'], 'refs/tags/')))
       pool:
         vmImage: 'Ubuntu-22.04'
@@ -124,27 +124,27 @@ stages:
         - script: |
             set -e
             go install github.com/goreleaser/goreleaser@v1.1.0
-          displayName: 'iofogctl: Install Goreleaser'
+          displayName: 'potctl: Install Goreleaser'
         - script: |
             go install github.com/edgeworx/packagecloud@v0.1.1
-          displayName: 'iofogctl: Install packagecloud CLI'
+          displayName: 'potctl: Install packagecloud CLI'
         - script: |
             set -e
-            goreleaser --snapshot --rm-dist --debug --config ./.goreleaser-iofogctl-dev.yml
+            goreleaser --snapshot --rm-dist --debug --config ./.goreleaser-potctl-dev.yml
             ./.packagecloud-publish.sh
-          displayName: 'iofogctl: Build and Release dev only packages'
+          displayName: 'potctl: Build and Release dev only packages'
           env:
             PACKAGECLOUD_TOKEN: $(packagecloud_token)
-            PACKAGECLOUD_REPO: "iofog/iofogctl-snapshots"
+            PACKAGECLOUD_REPO: "iofog/potctl-snapshots"
             GITHUB_TOKEN: $(github_token)
         - task: PublishBuildArtifacts@1
           condition: always()
           inputs:
             PathtoPublish: '$(System.DefaultWorkingDirectory)/dist'
-            ArtifactName: iofogctl_dev
-          displayName: 'Publish iofogctl binaries'
+            ArtifactName: potctl_dev
+          displayName: 'Publish potctl binaries'
 
-    - job: Publish_Iofogctl_Prod
+    - job: Publish_potctl_Prod
       condition: and(succeeded(), eq(variables['isTaggedCommit'], true))
       pool:
         vmImage: 'Ubuntu-22.04'
@@ -167,22 +167,22 @@ stages:
         - script: |
             set -e
             go install github.com/goreleaser/goreleaser@v1.1.0
-          displayName: 'iofogctl: Install Goreleaser'
+          displayName: 'potctl: Install Goreleaser'
         - script: |
             go install github.com/edgeworx/packagecloud@v0.1.1
-          displayName: 'iofogctl: Install packagecloud CLI'
+          displayName: 'potctl: Install packagecloud CLI'
         - script: |
             set -e
-            goreleaser --rm-dist --debug --config ./.goreleaser-iofogctl.yml
+            goreleaser --rm-dist --debug --config ./.goreleaser-potctl.yml
             ./.packagecloud-publish.sh
-          displayName: 'iofogctl: Build and Release packages'
+          displayName: 'potctl: Build and Release packages'
           env:
             PACKAGECLOUD_TOKEN: $(packagecloud_token)
-            PACKAGECLOUD_REPO: "iofog/iofogctl"
+            PACKAGECLOUD_REPO: "iofog/potctl"
             GITHUB_TOKEN: $(github_token)
         - task: PublishBuildArtifacts@1
           condition: always()
           inputs:
             PathtoPublish: '$(System.DefaultWorkingDirectory)/dist'
-            ArtifactName: iofogctl
-          displayName: 'Publish iofogctl binaries'
+            ArtifactName: potctl
+          displayName: 'Publish potctl binaries'

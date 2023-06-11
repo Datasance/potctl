@@ -15,9 +15,9 @@ package cmd
 
 import (
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +28,9 @@ const TitleHeader = "     _       ____                 __  __    \n" +
 	" /_/\\____/_/  \\____/\\__, /\\___/\\__/_/  \n" +
 	"                   /____/                   \n"
 
-const TitleMessage = "iofogctl is the CLI for ioFog. Think of it as a mix between terraform and kubectl.\n" +
+const TitleMessage = "potctl is the CLI for ioFog. Think of it as a mix between terraform and kubectl.\n" +
 	"\n" +
-	"Use `iofogctl version` to display the current version.\n\n"
+	"Use `potctl version` to display the current version.\n\n"
 
 func printHeader() {
 	util.PrintInfo(TitleHeader)
@@ -40,7 +40,7 @@ func printHeader() {
 
 func NewRootCommand() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use: "iofogctl",
+		Use: "potctl",
 		//Short: "ioFog Unified Command Line Interface",
 		PreRun: func(cmd *cobra.Command, args []string) {
 			printHeader()
@@ -58,7 +58,7 @@ func NewRootCommand() *cobra.Command {
 	cobra.OnInitialize(initialize)
 
 	// Global flags
-	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Toggle for displaying verbose output of iofogctl")
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Toggle for displaying verbose output of potctl")
 	cmd.PersistentFlags().BoolVar(&debug, "debug", false, "Toggle for displaying verbose output of API clients (HTTP and SSH)")
 	cmd.PersistentFlags().StringP("namespace", "n", config.GetDefaultNamespaceName(), "Namespace to execute respective command within")
 

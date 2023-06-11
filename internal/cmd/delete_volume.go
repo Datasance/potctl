@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/volume"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/volume"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func newDeleteVolumeCommand() *cobra.Command {
 		Long: `Delete an Volume.
 
 The Volume will be deleted from the Agents that it is stored on.`,
-		Example: `iofogctl delete volume NAME`,
+		Example: `potctl delete volume NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of volume

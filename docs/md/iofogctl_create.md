@@ -1,4 +1,4 @@
-## iofogctl create
+## potctl create
 
 Create a resource
 
@@ -17,12 +17,12 @@ Create a component of an Edge Compute Network.
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl create namespace](iofogctl_create_namespace.md)	 - Create a Namespace
+* [potctl](potctl.md)	 - 
+* [potctl create namespace](potctl_create_namespace.md)	 - Create a Namespace
 
 

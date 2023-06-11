@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	rename "github.com/eclipse-iofog/iofogctl/v3/internal/rename/controller"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rename "github.com/eclipse-iofog/potctl/v3/internal/rename/controller"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newRenameControllerCommand() *cobra.Command {
 		Use:     "controller NAME NEW_NAME",
 		Short:   "Rename a Controller",
 		Long:    `Rename a Controller`,
-		Example: `iofogctl rename controller NAME NEW_NAME`,
+		Example: `potctl rename controller NAME NEW_NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and the new name of Controller

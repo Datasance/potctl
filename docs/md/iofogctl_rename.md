@@ -1,4 +1,4 @@
-## iofogctl rename
+## potctl rename
 
 Rename the iofog resources that are currently deployed
 
@@ -17,18 +17,18 @@ Rename the iofog resources that are currently deployed
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl rename agent](iofogctl_rename_agent.md)	 - Rename an Agent
-* [iofogctl rename application](iofogctl_rename_application.md)	 - Rename an Application
-* [iofogctl rename controller](iofogctl_rename_controller.md)	 - Rename a Controller
-* [iofogctl rename edge-resource](iofogctl_rename_edge-resource.md)	 - Rename an Edge Resource
-* [iofogctl rename microservice](iofogctl_rename_microservice.md)	 - Rename a Microservice
-* [iofogctl rename namespace](iofogctl_rename_namespace.md)	 - Rename a Namespace
-* [iofogctl rename route](iofogctl_rename_route.md)	 - Rename a Route
+* [potctl](potctl.md)	 - 
+* [potctl rename agent](potctl_rename_agent.md)	 - Rename an Agent
+* [potctl rename application](potctl_rename_application.md)	 - Rename an Application
+* [potctl rename controller](potctl_rename_controller.md)	 - Rename a Controller
+* [potctl rename edge-resource](potctl_rename_edge-resource.md)	 - Rename an Edge Resource
+* [potctl rename microservice](potctl_rename_microservice.md)	 - Rename a Microservice
+* [potctl rename namespace](potctl_rename_namespace.md)	 - Rename a Namespace
+* [potctl rename route](potctl_rename_route.md)	 - Rename a Route
 
 

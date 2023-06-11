@@ -1,4 +1,4 @@
-## iofogctl attach edge-resource
+## potctl attach edge-resource
 
 Attach an Edge Resource to an existing Agent
 
@@ -7,13 +7,13 @@ Attach an Edge Resource to an existing Agent
 Attach an Edge Resource to an existing Agent.
 
 ```
-iofogctl attach edge-resource NAME VERSION AGENT_NAME [flags]
+potctl attach edge-resource NAME VERSION AGENT_NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl attach edge-resource NAME VERSION AGENT_NAME
+potctl attach edge-resource NAME VERSION AGENT_NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl attach edge-resource NAME VERSION AGENT_NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl attach](iofogctl_attach.md)	 - Attach one ioFog resource to another
+* [potctl attach](potctl_attach.md)	 - Attach one ioFog resource to another
 
 

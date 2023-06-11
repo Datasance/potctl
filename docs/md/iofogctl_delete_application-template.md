@@ -1,4 +1,4 @@
-## iofogctl delete application-template
+## potctl delete application-template
 
 Delete an application-template
 
@@ -7,13 +7,13 @@ Delete an application-template
 Delete an application-template
 
 ```
-iofogctl delete application-template NAME [flags]
+potctl delete application-template NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete application-template NAME
+potctl delete application-template NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl delete application-template NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

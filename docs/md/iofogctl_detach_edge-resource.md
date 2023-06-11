@@ -1,4 +1,4 @@
-## iofogctl detach edge-resource
+## potctl detach edge-resource
 
 Detaches an Edge Resource from an Agent
 
@@ -7,13 +7,13 @@ Detaches an Edge Resource from an Agent
 Detaches an Edge Resource from an Agent.
 
 ```
-iofogctl detach edge-resource NAME VERSION AGENT_NAME [flags]
+potctl detach edge-resource NAME VERSION AGENT_NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl detach edge-resource NAME VERSION AGENT_NAME
+potctl detach edge-resource NAME VERSION AGENT_NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl detach edge-resource NAME VERSION AGENT_NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl detach](iofogctl_detach.md)	 - Detach one ioFog resource from another
+* [potctl detach](potctl_detach.md)	 - Detach one ioFog resource from another
 
 

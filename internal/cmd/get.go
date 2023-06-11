@@ -16,9 +16,9 @@ package cmd
 import (
 	"errors"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/get"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/internal/get"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +43,7 @@ func newGetCommand() *cobra.Command {
 		Long: `Get information of existing resources.
 
 Resources like Agents will require a working Controller in the namespace to display all information.`,
-		Example: `iofogctl get all
+		Example: `potctl get all
              namespaces
              controllers
              agents

@@ -1,4 +1,4 @@
-## iofogctl detach
+## potctl detach
 
 Detach one ioFog resource from another
 
@@ -23,13 +23,13 @@ detach
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl detach agent](iofogctl_detach_agent.md)	 - Detaches an Agent
-* [iofogctl detach edge-resource](iofogctl_detach_edge-resource.md)	 - Detaches an Edge Resource from an Agent
+* [potctl](potctl.md)	 - 
+* [potctl detach agent](potctl_detach_agent.md)	 - Detaches an Agent
+* [potctl detach edge-resource](potctl_detach_edge-resource.md)	 - Detaches an Edge Resource from an Agent
 
 

@@ -1,6 +1,6 @@
-![iofogctl-logo](iofogctl-logo.png?raw=true "iofogctl logo")
+![potctl-logo](potctl-logo.png?raw=true "potctl logo")
 
-`iofogctl` is a CLI for the installation, configuration, and operation of ioFog 
+`potctl` is a CLI for the installation, configuration, and operation of ioFog 
 [Edge Compute Networks](https://iofog.org/docs/2/getting-started/core-concepts.html) (ECNs).
 It can be used to remotely manage multiple ECNs from a single host. It is built for ioFog users and DevOps engineers 
 wanting to manage ECNs. It is modelled on existing tools such as Terraform or kubectl that can be used to automate
@@ -13,36 +13,36 @@ infrastructure-as-code.
 Mac users can use Homebrew:
 
 ```bash
-brew tap eclipse-iofog/iofogctl
-brew install iofogctl
+brew tap eclipse-iofog/potctl
+brew install potctl
 ```
 
 #### Linux
 
 The Debian package can be installed like so:
 ```bash
-https://packagecloud.io/install/repositories/iofog/iofogctl/script.deb.sh | sudo bash
-sudo apt install iofogctl
+https://packagecloud.io/install/repositories/iofog/potctl/script.deb.sh | sudo bash
+sudo apt install potctl
 ```
 
 And similarly, the RPM package can be installed like so:
 ```
-https://packagecloud.io/install/repositories/iofog/iofogctl/script.rpm.sh | sudo bash
-sudo apt install iofogctl
+https://packagecloud.io/install/repositories/iofog/potctl/script.rpm.sh | sudo bash
+sudo apt install potctl
 ```
 
 ## Usage
 
 ### Documentation
 
-The best way to learn how to use `iofogctl` is through the [iofog.org](https://iofog.org/docs/2/getting-started/quick-start-local.html) learning resources.
+The best way to learn how to use `potctl` is through the [iofog.org](https://iofog.org/docs/2/getting-started/quick-start-local.html) learning resources.
 
 #### Quick Start
 
-See all iofogctl options
+See all potctl options
 
 ```
-iofogctl --help
+potctl --help
 ```
 
 Current options include:
@@ -57,18 +57,18 @@ Current options include:
 
 
 
-Welcome to the cool new iofogctl Cli!
+Welcome to the cool new potctl Cli!
 
-Use `iofogctl version` to display the current version.
+Use `potctl version` to display the current version.
 
 
 Usage:
-  iofogctl [flags]
-  iofogctl [command]
+  potctl [flags]
+  potctl [command]
 
 Available Commands:
   attach        Attach an existing ioFog resource to Control Plane
-  configure     Configure iofogctl or ioFog resources
+  configure     Configure potctl or ioFog resources
   connect       Connect to an existing Control Plane
   create        Create a resource
   delete        Delete an existing ioFog resource
@@ -90,34 +90,34 @@ Available Commands:
 
 Flags:
       --detached           Use/Show detached resources
-  -h, --help               help for iofogctl
+  -h, --help               help for potctl
       --http-verbose       Toggle for displaying verbose output of API client
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 
-Use "iofogctl [command] --help" for more information about a command.
+Use "potctl [command] --help" for more information about a command.
 
 ```
 
 ### Autocomplete
 
-If you are running BASH or ZSH, iofogctl comes with shell autocompletion scripts.
+If you are running BASH or ZSH, potctl comes with shell autocompletion scripts.
 In order to generate those scripts, run:
 
 ```bash
-iofogctl autocomplete bash
+potctl autocomplete bash
 ```
 OR
 
 ```bash
-iofogctl autocomplete zsh
+potctl autocomplete zsh
 ```
 
 Then follow the instructions output by the command.
 
 Example:
 ```bash
-iofogctl autocomplete bash
+potctl autocomplete bash
 ✔ $HOME/.iofog/completion.bash.sh generated
 Run `source $HOME/.iofog/completion.bash.sh` to update your current session
 Add `source $HOME/.iofog/completion.bash.sh` to your bash profile to have it saved
@@ -144,10 +144,10 @@ make
 To build and install, go ahead and run:
 ```
 make build install
-iofogctl --help
+potctl --help
 ```
 
-iofogctl is installed in `/usr/local/bin`
+potctl is installed in `/usr/local/bin`
 
 ## Running Tests
 
@@ -156,7 +156,7 @@ Run project unit tests:
 make test
 ```
 
-This will output a JUnit compatible file into `reports/TEST-iofogctl.xml` that can be imported in most CI systems.
+This will output a JUnit compatible file into `reports/TEST-potctl.xml` that can be imported in most CI systems.
 
 ## Embed assets
 

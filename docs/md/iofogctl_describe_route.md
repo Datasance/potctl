@@ -1,4 +1,4 @@
-## iofogctl describe route
+## potctl describe route
 
 Get detailed information about a  Route
 
@@ -7,13 +7,13 @@ Get detailed information about a  Route
 Get detailed information about a Route.
 
 ```
-iofogctl describe route NAME [flags]
+potctl describe route NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe route NAME
+potctl describe route NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe route NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

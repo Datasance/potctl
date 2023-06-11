@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/catalogitem"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/catalogitem"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newDeleteCatalogItemCommand() *cobra.Command {
 		Use:     "catalogitem NAME",
 		Short:   "Delete a Catalog item",
 		Long:    `Delete a Catalog item from the Controller.`,
-		Example: `iofogctl delete catalogitem NAME`,
+		Example: `potctl delete catalogitem NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace

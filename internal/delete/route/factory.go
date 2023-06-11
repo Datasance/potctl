@@ -14,9 +14,9 @@
 package deleteroute
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/execute"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/internal/execute"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
 )
 
 type executor struct {

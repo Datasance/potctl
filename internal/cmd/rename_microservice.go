@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	rename "github.com/eclipse-iofog/iofogctl/v3/internal/rename/microservice"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rename "github.com/eclipse-iofog/potctl/v3/internal/rename/microservice"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newRenameMicroserviceCommand() *cobra.Command {
 		Use:     "microservice NAME NEW_NAME",
 		Short:   "Rename a Microservice",
 		Long:    `Rename a Microservice`,
-		Example: `iofogctl rename microservice NAME NEW_NAME`,
+		Example: `potctl rename microservice NAME NEW_NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and new name of the microservice

@@ -14,8 +14,8 @@
 package resource
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type RemoteSystemMicroservices = install.RemoteSystemMicroservices

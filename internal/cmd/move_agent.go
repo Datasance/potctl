@@ -14,10 +14,10 @@
 package cmd
 
 import (
-	attach "github.com/eclipse-iofog/iofogctl/v3/internal/attach/agent"
-	detach "github.com/eclipse-iofog/iofogctl/v3/internal/detach/agent"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/agent"
+	detach "github.com/eclipse-iofog/potctl/v3/internal/detach/agent"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func newMoveAgentCommand() *cobra.Command {
 		Use:     "agent NAME DEST_NAMESPACE",
 		Short:   "Move an Agent to another Namespace",
 		Long:    `Move an Agent to another Namespace`,
-		Example: `iofogctl move agent NAME DEST_NAMESPACE`,
+		Example: `potctl move agent NAME DEST_NAMESPACE`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get args

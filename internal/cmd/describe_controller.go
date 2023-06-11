@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/describe"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/describe"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newDescribeControllerCommand() *cobra.Command {
 		Use:     "controller NAME",
 		Short:   "Get detailed information about a  Controller",
 		Long:    `Get detailed information about a named Controller.`,
-		Example: `iofogctl describe controller NAME`,
+		Example: `potctl describe controller NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

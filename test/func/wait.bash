@@ -23,7 +23,7 @@ function waitForMsvc() {
 
   run findMsvcState $NS $MS $STATE
   while [ -z "$output" ] ; do
-      iofogctl -n $NS get microservices
+      potctl -n $NS get microservices
       # Allow for 400 sec so that the agent can pull the image
       if [ $ITER -gt 20 ]; then
           echo "Timed out. Waited for $MS to be $STATE"
@@ -43,7 +43,7 @@ function waitForFailedMsvc() {
 
   run findMsvcState $NS $MS $STATE
   while [ -z "$output" ] ; do
-      iofogctl -n $NS get microservices
+      potctl -n $NS get microservices
       # Allow for 400 sec so that the agent can pull the image
       if [ $ITER -gt 20 ]; then
           echo "Timed out. Waited for $MS to be $STATE"
@@ -63,7 +63,7 @@ function waitForPullingMsvc() {
 
   run findMsvcState $NS $MS $STATE
   while [ -z "$output" ] ; do
-      iofogctl -n $NS get microservices
+      potctl -n $NS get microservices
       # Allow for 400 sec so that the agent can pull the image
       if [ $ITER -gt 20 ]; then
           echo "Timed out. Waited for $MS to be $STATE"

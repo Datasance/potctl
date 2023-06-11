@@ -10,7 +10,7 @@ NS="$NAMESPACE"
 
 @test "Create namespace" {
   startTest
-  iofogctl create namespace "$NS"
+  potctl create namespace "$NS"
   stopTest
 }
 
@@ -29,14 +29,14 @@ NS="$NAMESPACE"
 @test "Deploy local Controller" {
   startTest
   initLocalControllerFile
-  iofogctl -v -n "$NS" deploy -f test/conf/local.yaml
+  potctl -v -n "$NS" deploy -f test/conf/local.yaml
   checkControllerLocal
   stopTest
 }
 
 @test "Controller legacy commands after deploy" {
   startTest
-  iofogctl -v -n "$NS" legacy controller "$NAME" iofog list
+  potctl -v -n "$NS" legacy controller "$NAME" iofog list
   checkLegacyController
   stopTest
 }
@@ -44,7 +44,7 @@ NS="$NAMESPACE"
 @test "Deploy Agents against local Controller" {
   startTest
   initLocalAgentFile
-  iofogctl -v -n "$NS" deploy -f test/conf/local-agent.yaml
+  potctl -v -n "$NS" deploy -f test/conf/local-agent.yaml
   checkAgent "${NAME}-0"
   stopTest
 }
@@ -52,7 +52,7 @@ NS="$NAMESPACE"
 @test "Deploy Application for docker pull stats" {
   startTest
   initDockerPullStatsApplicationFiles
-  iofogctl -v -n "$NS" deploy -f test/conf/application_pull_stat.yaml
+  potctl -v -n "$NS" deploy -f test/conf/application_pull_stat.yaml
   waitForPullingMsvc "$MSVC5_NAME" "$NS"
   checkPullPercentageOfMicroservice "$MSVC5_NAME" "$NS"
   stopTest
@@ -66,21 +66,21 @@ NS="$NAMESPACE"
 
 @test "Agent legacy commands" {
   startTest
-  iofogctl -v -n "$NS" legacy agent "${NAME}-0" status
+  potctl -v -n "$NS" legacy agent "${NAME}-0" status
   checkLegacyAgent "${NAME}-0"
   stopTest
 }
 
 @test "Agent config dev mode" {
   startTest  
-  [[ ! -z $(iofogctl -v -n "$NS" legacy agent "${NAME}-0" 'config -dev on') ]]
+  [[ ! -z $(potctl -v -n "$NS" legacy agent "${NAME}-0" 'config -dev on') ]]
   stopTest
 }
 
 @test "Deploy local Controller again for indempotence" {
   startTest
   initLocalControllerFile
-  iofogctl -v -n "$NS" deploy -f test/conf/local.yaml
+  potctl -v -n "$NS" deploy -f test/conf/local.yaml
   checkControllerLocal
   stopTest
 }
@@ -88,7 +88,7 @@ NS="$NAMESPACE"
 @test "Deploy Agents against local Controller again for indempotence" {
   startTest
   initLocalAgentFile
-  iofogctl -v -n "$NS" deploy -f test/conf/local-agent.yaml
+  potctl -v -n "$NS" deploy -f test/conf/local-agent.yaml
   checkAgent "${NAME}-0"
   stopTest
 }
@@ -124,7 +124,7 @@ NS="$NAMESPACE"
 @test "Deploy Application" {
   startTest
   initApplicationFiles
-  iofogctl -v -n "$NS" deploy -f test/conf/application.yaml
+  potctl -v -n "$NS" deploy -f test/conf/application.yaml
   checkApplication
   waitForMsvc "$MSVC1_NAME" "$NS"
   waitForMsvc "$MSVC2_NAME" "$NS"
@@ -134,7 +134,7 @@ NS="$NAMESPACE"
 @test "Deploy Microservice" {
   startTest
   initMicroserviceFile
-  iofogctl -v -n "$NS" deploy -f test/conf/microservice.yaml
+  potctl -v -n "$NS" deploy -f test/conf/microservice.yaml
   checkMicroservice
   stopTest
 }
@@ -142,7 +142,7 @@ NS="$NAMESPACE"
 @test "Deploy Route" {
   startTest
   initRouteFile
-  iofogctl -v -n "$NS" deploy -f test/conf/route.yaml
+  potctl -v -n "$NS" deploy -f test/conf/route.yaml
   checkRoute "$ROUTE_NAME" "$MSVC1_NAME" "$MSVC2_NAME"
   stopTest
 }
@@ -150,7 +150,7 @@ NS="$NAMESPACE"
 @test "Update Microservice" {
   startTest
   initMicroserviceUpdateFile
-  iofogctl --debug -n "$NS" deploy -f test/conf/updatedMicroservice.yaml
+  potctl --debug -n "$NS" deploy -f test/conf/updatedMicroservice.yaml
   checkUpdatedMicroservice
   checkRoute "$ROUTE_NAME" "$MSVC1_NAME" "$MSVC2_NAME"
   stopTest
@@ -159,8 +159,8 @@ NS="$NAMESPACE"
 @test "Rename and Delete Route" {
   startTest
   local NEW_ROUTE_NAME="route-2"
-  iofogctl -v -n "$NS" rename route $APPLICATION_NAME/"$ROUTE_NAME" "$NEW_ROUTE_NAME"
-  iofogctl -v -n "$NS" delete route $APPLICATION_NAME/"$NEW_ROUTE_NAME"
+  potctl -v -n "$NS" rename route $APPLICATION_NAME/"$ROUTE_NAME" "$NEW_ROUTE_NAME"
+  potctl -v -n "$NS" delete route $APPLICATION_NAME/"$NEW_ROUTE_NAME"
   checkRouteNegative "$NEW_ROUTE_NAME" "$MSVC1_NAME" "$MSVC2_NAME"
   checkRouteNegative "$ROUTE_NAME" "$MSVC1_NAME" "$MSVC2_NAME"
   stopTest
@@ -168,7 +168,7 @@ NS="$NAMESPACE"
 
 @test "Delete Microservice using file option" {
   startTest
-  iofogctl -v -n "$NS" delete -f test/conf/updatedMicroservice.yaml
+  potctl -v -n "$NS" delete -f test/conf/updatedMicroservice.yaml
   checkMicroserviceNegative
   stopTest
 }
@@ -176,35 +176,35 @@ NS="$NAMESPACE"
 @test "Deploy Microservice in Application" {
   startTest
   initMicroserviceFile
-  iofogctl -v -n "$NS" deploy -f test/conf/microservice.yaml
+  potctl -v -n "$NS" deploy -f test/conf/microservice.yaml
   checkMicroservice
   stopTest
 }
 
 @test "Get local json logs" {
   startTest
-  [[ ! -z $(iofogctl -v -n "$NS" logs controller $NAME) ]]
-  [[ ! -z $(iofogctl -v -n "$NS" logs agent ${NAME}-0) ]]
-  [iofogctl logs ${NAME}-0 -n "$NS" | jq -e . >/dev/null 2>&1  | echo ${PIPESTATUS[1]}  -eq 0 ]
+  [[ ! -z $(potctl -v -n "$NS" logs controller $NAME) ]]
+  [[ ! -z $(potctl -v -n "$NS" logs agent ${NAME}-0) ]]
+  [potctl logs ${NAME}-0 -n "$NS" | jq -e . >/dev/null 2>&1  | echo ${PIPESTATUS[1]}  -eq 0 ]
   stopTest
 }
 
 @test "Deploy Registry" {
   startTest
   initGCRRegistryFile
-  iofogctl -v -n "$NS" deploy -f test/conf/gcr.yaml
+  potctl -v -n "$NS" deploy -f test/conf/gcr.yaml
   checkGCRRegistry
   initUpdatedGCRRegistryFile
-  iofogctl -v -n "$NS" deploy -f test/conf/gcr.yaml
+  potctl -v -n "$NS" deploy -f test/conf/gcr.yaml
   checkUpdatedGCRRegistry
-  iofogctl -v -n "$NS" delete registry 3
+  potctl -v -n "$NS" delete registry 3
   checkGCRRegistryNegative
   stopTest
 }
 
 @test "Detach should fail because of running msvc" {
   startTest
-  run iofogctl -v -n "$NS" detach agent ${NAME}-0
+  run potctl -v -n "$NS" detach agent ${NAME}-0
   [ "$status" -eq 1 ]
   echo "$output" | grep "because it still has microservices running. Remove the microservices first, or use the --force option."
   stopTest
@@ -212,15 +212,15 @@ NS="$NAMESPACE"
 
 @test "Detach/attach Agent" {
   startTest
-  iofogctl -v -n "$NS" detach agent ${NAME}-0 --force
-  iofogctl -v describe agent ${NAME}-0 --detached
-  iofogctl -v -n "$NS" attach agent ${NAME}-0
+  potctl -v -n "$NS" detach agent ${NAME}-0 --force
+  potctl -v describe agent ${NAME}-0 --detached
+  potctl -v -n "$NS" attach agent ${NAME}-0
   stopTest
 }
 
 @test "Deploy Application from file and test Application update" {
   startTest
-  iofogctl -v -n "$NS" deploy -f test/conf/application.yaml
+  potctl -v -n "$NS" deploy -f test/conf/application.yaml
   checkApplication
   stopTest
 }
@@ -228,16 +228,16 @@ NS="$NAMESPACE"
 @test "Deploy Application with volume missing " {
   startTest
   initInvalidApplicationFiles
-  iofogctl -v -n "$NS" deploy -f test/conf/application_volume_missing.yaml
+  potctl -v -n "$NS" deploy -f test/conf/application_volume_missing.yaml
   waitForFailedMsvc "$MSVC4_NAME" "$NS"
-  [[ ! -z $(iofogctl get microservices -n "$NS"  | grep "Volume missing") ]]
-  iofogctl get microservices -n "$NS"
+  [[ ! -z $(potctl get microservices -n "$NS"  | grep "Volume missing") ]]
+  potctl get microservices -n "$NS"
   stopTest
 }
 
 @test "Delete Agent should fail because of running msvc" {
   startTest
-  run iofogctl -v -n "$NS" delete agent ${NAME}-0
+  run potctl -v -n "$NS" delete agent ${NAME}-0
   [ "$status" -eq 1 ]
   echo "$output" | grep "because it still has microservices running. Remove the microservices first, or use the --force option."
   stopTest
@@ -245,14 +245,14 @@ NS="$NAMESPACE"
 
 @test "Delete agent should work with --force option" {
   startTest
-  iofogctl -v -n "$NS" delete agent ${NAME}-0 --force
+  potctl -v -n "$NS" delete agent ${NAME}-0 --force
   stopTest
 }
 
 @test "Delete all using file" {
   startTest
   initAllLocalDeleteFile
-  iofogctl -v -n "$NS" delete -f test/conf/all-local.yaml
+  potctl -v -n "$NS" delete -f test/conf/all-local.yaml
   checkApplicationNegative
   checkControllerNegative
   checkAgentNegative "${NAME}-0"
@@ -261,7 +261,7 @@ NS="$NAMESPACE"
 
 @test "Delete Namespace" {
   startTest
-  iofogctl -v delete namespace "$NS"
-  [[ -z $(iofogctl get namespaces | grep "$NS") ]]
+  potctl -v delete namespace "$NS"
+  [[ -z $(potctl get namespaces | grep "$NS") ]]
   stopTest
 }

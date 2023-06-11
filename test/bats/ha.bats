@@ -42,7 +42,7 @@ NS="$NAMESPACE"
 
 @test "Create namespace" {
   startTest
-  iofogctl create namespace "$NS"
+  potctl create namespace "$NS"
   stopTest
 }
 
@@ -77,7 +77,7 @@ spec:
     router: $ROUTER_IMAGE
     kubelet: $KUBELET_IMAGE" > test/conf/k8s.yaml
 
-  iofogctl -v -n "$NS" deploy -f test/conf/k8s.yaml
+  potctl -v -n "$NS" deploy -f test/conf/k8s.yaml
   checkControllerK8s
   checkControllerK8s
   stopTest
@@ -85,7 +85,7 @@ spec:
 
 @test "Get endpoint" {
   startTest
-  CONTROLLER_ENDPOINT=$(iofogctl -v -n "$NS" describe controlplane | grep endpoint | head -n 1 | sed "s|.*endpoint: ||")
+  CONTROLLER_ENDPOINT=$(potctl -v -n "$NS" describe controlplane | grep endpoint | head -n 1 | sed "s|.*endpoint: ||")
   [[ ! -z "$CONTROLLER_ENDPOINT" ]]
   echo "$CONTROLLER_ENDPOINT" > /tmp/endpoint.txt
   stopTest
@@ -94,7 +94,7 @@ spec:
 @test "Deploy Agents" {
   startTest
   initRemoteAgentsFile
-  iofogctl -v -n "$NS" deploy -f test/conf/agents.yaml
+  potctl -v -n "$NS" deploy -f test/conf/agents.yaml
   checkAgents
   stopTest
 }
@@ -128,7 +128,7 @@ spec:
 @test "Deploy Agents again" {
   startTest
   initRemoteAgentsFile
-  iofogctl -v -n "$NS" deploy -f test/conf/agents.yaml
+  potctl -v -n "$NS" deploy -f test/conf/agents.yaml
   checkAgents
   # Wait for router microservice
   local SSH_KEY_PATH=$KEY_FILE
@@ -149,7 +149,7 @@ spec:
   initAgents
   for IDX in "${!AGENTS[@]}"; do
     local AGENT_NAME="${NAME}-${IDX}"
-    iofogctl -v -n "$NS" delete agent "$AGENT_NAME"
+    potctl -v -n "$NS" delete agent "$AGENT_NAME"
   done
   checkAgentsNegative
   stopTest
@@ -157,7 +157,7 @@ spec:
 
 @test "Delete all" {
   startTest
-  iofogctl -v -n "$NS" delete all
+  potctl -v -n "$NS" delete all
   checkControllerNegativeK8s
   checkControllerNegativeK8s
   checkAgentsNegative
@@ -166,7 +166,7 @@ spec:
 
 @test "Delete namespace" {
   startTest
-  iofogctl delete namespace "$NS"
-  [[ -z $(iofogctl get namespaces | grep "$NS") ]]
+  potctl delete namespace "$NS"
+  [[ -z $(potctl get namespaces | grep "$NS") ]]
   stopTest
 }

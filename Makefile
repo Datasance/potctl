@@ -2,9 +2,9 @@ SHELL = /bin/bash
 OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 # Build variables
-BINARY_NAME = iofogctl
+BINARY_NAME = potctl
 BUILD_DIR ?= bin
-PACKAGE_DIR = cmd/iofogctl
+PACKAGE_DIR = cmd/potctl
 LATEST_TAG = $(shell git for-each-ref refs/tags --sort=-taggerdate --format='%(refname)' | tail -n1 | sed "s|refs/tags/||")
 MAJOR ?= $(shell echo "$(LATEST_TAG)" | tr -d "v" | sed "s|-.*||" | sed -E "s|(.)\..\..|\1|g")
 MINOR ?= $(shell echo "$(LATEST_TAG)" | tr -d "v" | sed "s|-.*||" | sed -E "s|.\.(.)\..|\1|g")
@@ -15,7 +15,7 @@ SUFFIX ?= $(shell [ -z "$(shell git tag --points-at HEAD)" ] && echo "$(DEV_SUFF
 VERSION ?= $(MAJOR).$(MINOR).$(PATCH)$(SUFFIX)
 COMMIT ?= $(shell git rev-parse HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-PREFIX = github.com/eclipse-iofog/iofogctl/v3/pkg/util
+PREFIX = github.com/eclipse-iofog/potctl/v3/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
 LDFLAGS += -X $(PREFIX).portManagerTag=3.0.0
 LDFLAGS += -X $(PREFIX).kubeletTag=3.0.0-beta1
@@ -30,8 +30,8 @@ LDFLAGS += -X $(PREFIX).repo=iofog
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.0.0
 OPERATOR_MODULE = iofog-operator/v3@v3.0.1
 REPORTS_DIR ?= reports
-TEST_RESULTS ?= TEST-iofogctl.txt
-TEST_REPORT ?= TEST-iofogctl.xml
+TEST_RESULTS ?= TEST-potctl.txt
+TEST_REPORT ?= TEST-potctl.xml
 
 .PHONY: all
 all: bootstrap build install ## Bootstrap env, build and install binary
@@ -49,7 +49,7 @@ build: fmt ## Build the binary
 
 .PHONY: install
 install:
-	go install -ldflags "$(LDFLAGS)" ./cmd/iofogctl/
+	go install -ldflags "$(LDFLAGS)" ./cmd/potctl/
 
 .PHONY: lint
 lint: golangci-lint fmt ## Lint the source

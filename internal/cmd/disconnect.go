@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/disconnect"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/disconnect"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ func newDisconnectCommand() *cobra.Command {
 This will remove all client-side information for this Namespace. The Namespace will itself be deleted.
 Use the connect command to reconnect after a disconnect.
 If you would like to uninstall the Control Plane and/or Agents, use the delete command instead.`,
-		Example: `iofogctl disconnect -n NAMESPACE`,
+		Example: `potctl disconnect -n NAMESPACE`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
 			opt.Namespace, err = cmd.Flags().GetString("namespace")

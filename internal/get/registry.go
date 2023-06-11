@@ -17,7 +17,7 @@ import (
 	"strconv"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
 )
 
 type registryExecutor struct {

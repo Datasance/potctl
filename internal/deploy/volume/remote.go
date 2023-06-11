@@ -16,9 +16,9 @@ package deployvolume
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type remoteExecutor struct {
@@ -73,7 +73,7 @@ func (exe *remoteExecutor) execute(agentIdx int, ch chan error) {
 		return
 	}
 	// Create tmp dir
-	tmp := "/tmp/iofogctlssh" + exe.volume.Destination
+	tmp := "/tmp/potctlssh" + exe.volume.Destination
 	if err := ssh.CreateFolder(tmp); err != nil {
 		msg := "failed to create base directory %s on Agent %s.\n%s"
 		ch <- fmt.Errorf(msg, exe.volume.Destination, agent.Name, err.Error())

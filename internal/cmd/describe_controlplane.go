@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/describe"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/describe"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newDescribeControlPlaneCommand() *cobra.Command {
 		Use:     "controlplane",
 		Short:   "Get detailed information about a  Control Plane",
 		Long:    `Get detailed information about the Control Plane in a single Namespace.`,
-		Example: `iofogctl describe controlplane`,
+		Example: `potctl describe controlplane`,
 		Args:    cobra.ExactArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

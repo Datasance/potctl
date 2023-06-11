@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	attach "github.com/eclipse-iofog/iofogctl/v3/internal/attach/edgeresource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/edgeresource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func newAttachEdgeResourceCommand() *cobra.Command {
 		Use:     "edge-resource NAME VERSION AGENT_NAME",
 		Short:   "Attach an Edge Resource to an existing Agent",
 		Long:    `Attach an Edge Resource to an existing Agent.`,
-		Example: `iofogctl attach edge-resource NAME VERSION AGENT_NAME`,
+		Example: `potctl attach edge-resource NAME VERSION AGENT_NAME`,
 		Args:    cobra.ExactArgs(3),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of agent

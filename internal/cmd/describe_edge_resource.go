@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/eclipse-iofog/iofogctl/v3/internal/describe"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/describe"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ func newDescribeEdgeResourceCommand() *cobra.Command {
 		Use:     "edge-resource NAME VERSION",
 		Short:   "Get detailed information about an Edge Resource",
 		Long:    `Get detailed information about an Edge Resource.`,
-		Example: `iofogctl describe edge-resource NAME VERSION`,
+		Example: `potctl describe edge-resource NAME VERSION`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

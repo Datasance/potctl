@@ -66,7 +66,7 @@ var state = testState{
 	agentName: "albert",
 	agentUUID: "ashdifafhsdiofd",
 	srcDir:    "../../../assets/agent",
-	dir:       "/tmp/iofogctl-test-go",
+	dir:       "/tmp/potctl-test-go",
 }
 
 func runTest(t *testing.T, state testState) {

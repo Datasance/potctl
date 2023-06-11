@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/route"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/route"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func newDeleteRouteCommand() *cobra.Command {
 		Long: `Delete a Route.
 
 The corresponding Microservices will no longer be able to reach each other using ioMessages.`,
-		Example: `iofogctl delete route NAME`,
+		Example: `potctl delete route NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of route

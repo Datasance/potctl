@@ -1,4 +1,4 @@
-## iofogctl view
+## potctl view
 
 Open ECN Viewer
 
@@ -7,7 +7,7 @@ Open ECN Viewer
 Open ECN Viewer
 
 ```
-iofogctl view [flags]
+potctl view [flags]
 ```
 
 ### Options
@@ -21,11 +21,11 @@ iofogctl view [flags]
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

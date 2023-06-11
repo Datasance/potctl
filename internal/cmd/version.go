@@ -16,7 +16,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +27,7 @@ func newVersionCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			ecnFlag, err := cmd.Flags().GetBool("ecn")
 			util.Check(err)
-			util.PrintInfo("iofogctl - Copyright (C) 2019-2023, Edgeworx, Inc.\n")
+			util.PrintInfo("potctl - Copyright (C) 2019-2023, Edgeworx, Inc.\n")
 			_ = util.Print(util.GetVersion())
 			if ecnFlag {
 				fmt.Println("")

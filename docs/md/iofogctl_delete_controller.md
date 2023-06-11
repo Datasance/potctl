@@ -1,4 +1,4 @@
-## iofogctl delete controller
+## potctl delete controller
 
 Delete a Controller
 
@@ -7,13 +7,13 @@ Delete a Controller
 Delete a Controller.
 
 ```
-iofogctl delete controller NAME [flags]
+potctl delete controller NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl delete controller NAME
+potctl delete controller NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl delete controller NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl delete](iofogctl_delete.md)	 - Delete an existing ioFog resource
+* [potctl delete](potctl_delete.md)	 - Delete an existing ioFog resource
 
 

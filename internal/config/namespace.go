@@ -19,8 +19,8 @@ import (
 	"os"
 	"sort"
 
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 func SetDefaultNamespace(name string) (err error) {
@@ -63,7 +63,7 @@ func getNamespace(name string) (*rsc.Namespace, error) {
 	namespace, ok := namespaces[name]
 	if !ok {
 		// Namespace has not been loaded from file, do so now
-		namespaceHeader := iofogctlNamespace{}
+		namespaceHeader := potctlNamespace{}
 		if err := util.UnmarshalYAML(getNamespaceFile(name), &namespaceHeader); err != nil {
 			if os.IsNotExist(err) {
 				return nil, util.NewNotFoundError(name)

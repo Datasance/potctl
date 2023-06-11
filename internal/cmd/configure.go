@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/configure"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/configure"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -27,18 +27,18 @@ func newConfigureCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "configure RESOURCE NAME",
-		Short: "Configure iofogctl or ioFog resources",
-		Long: `Configure iofogctl or ioFog resources
+		Short: "Configure potctl or ioFog resources",
+		Long: `Configure potctl or ioFog resources
 
 If you would like to replace the host value of Remote Controllers or Agents, you should delete and redeploy those resources.`,
-		Example: `iofogctl configure current-namespace NAME
+		Example: `potctl configure current-namespace NAME
 
-iofogctl configure controller  NAME --user USER --key KEYFILE --port PORTNUM
+potctl configure controller  NAME --user USER --key KEYFILE --port PORTNUM
                    controllers
                    agent
                    agents
 
-iofogctl configure controlplane --kube FILE`,
+potctl configure controlplane --kube FILE`,
 		Args: cobra.RangeArgs(1, 2),
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) == 0 {
@@ -74,7 +74,7 @@ iofogctl configure controlplane --kube FILE`,
 	cmd.Flags().StringVar(&opt.User, "user", "", "Username of remote host")
 	cmd.Flags().StringVar(&opt.KeyFile, "key", "", "Path to private SSH key")
 	cmd.Flags().StringVar(&opt.KubeConfig, "kube", "", "Path to Kubernetes configuration file")
-	cmd.Flags().IntVar(&opt.Port, "port", 0, "Port number that iofogctl uses to SSH into remote hosts")
+	cmd.Flags().IntVar(&opt.Port, "port", 0, "Port number that potctl uses to SSH into remote hosts")
 	cmd.Flags().Bool("detached", false, pkg.flagDescDetached)
 
 	return cmd

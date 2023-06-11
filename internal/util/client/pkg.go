@@ -18,7 +18,7 @@ import (
 )
 
 var pkg struct {
-	// Caches of resources commonly required by iofogctl commands
+	// Caches of resources commonly required by potctl commands
 	clientCache map[string]*client.Client
 	agentCache  map[string][]client.AgentInfo
 	// Channels for requesting and receiving cached resources

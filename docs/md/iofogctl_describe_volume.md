@@ -1,4 +1,4 @@
-## iofogctl describe volume
+## potctl describe volume
 
 Get detailed information about a  Volume
 
@@ -7,13 +7,13 @@ Get detailed information about a  Volume
 Get detailed information about a Volume.
 
 ```
-iofogctl describe volume NAME [flags]
+potctl describe volume NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe volume NAME
+potctl describe volume NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe volume NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

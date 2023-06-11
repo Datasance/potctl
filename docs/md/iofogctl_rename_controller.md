@@ -1,4 +1,4 @@
-## iofogctl rename controller
+## potctl rename controller
 
 Rename a Controller
 
@@ -7,13 +7,13 @@ Rename a Controller
 Rename a Controller
 
 ```
-iofogctl rename controller NAME NEW_NAME [flags]
+potctl rename controller NAME NEW_NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl rename controller NAME NEW_NAME
+potctl rename controller NAME NEW_NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl rename controller NAME NEW_NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl rename](iofogctl_rename.md)	 - Rename the iofog resources that are currently deployed
+* [potctl rename](potctl_rename.md)	 - Rename the iofog resources that are currently deployed
 
 

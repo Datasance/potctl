@@ -1,4 +1,4 @@
-module github.com/eclipse-iofog/iofogctl/v3
+module github.com/eclipse-iofog/potctl/v3
 
 go 1.18
 

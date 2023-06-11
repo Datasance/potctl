@@ -1,4 +1,4 @@
-## iofogctl move microservice
+## potctl move microservice
 
 Move a Microservice to another Agent in the same Namespace
 
@@ -7,13 +7,13 @@ Move a Microservice to another Agent in the same Namespace
 Move a Microservice to another Agent in the same Namespace
 
 ```
-iofogctl move microservice NAME AGENT_NAME [flags]
+potctl move microservice NAME AGENT_NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl move microservice NAME AGENT_NAME
+potctl move microservice NAME AGENT_NAME
 ```
 
 ### Options
@@ -27,11 +27,11 @@ iofogctl move microservice NAME AGENT_NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl move](iofogctl_move.md)	 - Move an existing resources inside the current Namespace
+* [potctl move](potctl_move.md)	 - Move an existing resources inside the current Namespace
 
 

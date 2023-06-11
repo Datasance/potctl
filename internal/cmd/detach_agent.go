@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	detach "github.com/eclipse-iofog/iofogctl/v3/internal/detach/agent"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	detach "github.com/eclipse-iofog/potctl/v3/internal/detach/agent"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +32,7 @@ The Agent will be removed from Controller.
 You cannot detach unprovisioned Agents.
 
 The Agent stack will not be uninstalled from the host.`,
-		Example: `iofogctl detach agent NAME`,
+		Example: `potctl detach agent NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of agent

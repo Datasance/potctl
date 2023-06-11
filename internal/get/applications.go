@@ -17,9 +17,9 @@ import (
 	"fmt"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/iofogctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 )
 
 type applicationExecutor struct {

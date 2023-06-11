@@ -1,4 +1,4 @@
-## iofogctl legacy
+## potctl legacy
 
 Execute commands using legacy CLI
 
@@ -11,14 +11,14 @@ Legacy commands require SSH access to the corresponding Agent or Controller.
 Use the configure command to add SSH details to Agents and Controllers if necessary.
 
 ```
-iofogctl legacy resource NAME COMMAND ARGS... [flags]
+potctl legacy resource NAME COMMAND ARGS... [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl legacy controller NAME COMMAND
-iofogctl legacy agent      NAME COMMAND
+potctl legacy controller NAME COMMAND
+potctl legacy agent      NAME COMMAND
 ```
 
 ### Options
@@ -33,11 +33,11 @@ iofogctl legacy agent      NAME COMMAND
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

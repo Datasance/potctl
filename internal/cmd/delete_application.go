@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/application"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/application"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newDeleteApplicationCommand() *cobra.Command {
 		Use:     "application NAME",
 		Short:   "Delete an application",
 		Long:    `Delete an application and all its components`,
-		Example: `iofogctl delete application NAME`,
+		Example: `potctl delete application NAME`,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get microservice name

@@ -1,4 +1,4 @@
-## iofogctl deploy
+## potctl deploy
 
 Deploy Edge Compute Network components on existing infrastructure
 
@@ -8,7 +8,7 @@ Deploy Edge Compute Network components on existing infrastructure.
 Visit iofog.org to view all YAML specifications usable with this command.
 
 ```
-iofogctl deploy [flags]
+potctl deploy [flags]
 ```
 
 ### Examples
@@ -36,11 +36,11 @@ deploy -f ecn.yaml
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

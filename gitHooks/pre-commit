@@ -13,7 +13,7 @@ echo "Building..."
 make lint
 make build
 echo "Generating docs..."
-./bin/iofogctl documentation md -o ./docs/
+./bin/potctl documentation md -o ./docs/
 echo "Patching docs..."
 find ./docs/md -type f | xargs sed -i '' 's/.*Auto generated.*//g'
 find ./docs/md -type f | xargs sed -E -i '' 's/(command within \(default).*/\1 "default")/g'

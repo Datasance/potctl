@@ -1,4 +1,4 @@
-## iofogctl attach agent
+## potctl attach agent
 
 Attach an Agent to an existing Namespace
 
@@ -9,13 +9,13 @@ Attach a detached Agent to an existing Namespace.
 The Agent will be provisioned with the Controller within the Namespace.
 
 ```
-iofogctl attach agent NAME [flags]
+potctl attach agent NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl attach agent NAME
+potctl attach agent NAME
 ```
 
 ### Options
@@ -29,11 +29,11 @@ iofogctl attach agent NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl attach](iofogctl_attach.md)	 - Attach one ioFog resource to another
+* [potctl attach](potctl_attach.md)	 - Attach one ioFog resource to another
 
 

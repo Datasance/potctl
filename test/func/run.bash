@@ -16,12 +16,12 @@ function findMsvcState(){
     NS="$1"
     MS="$2"
     STATE="$3"
-    iofogctl -n $NS get microservices | grep $MS | grep $STATE
+    potctl -n $NS get microservices | grep $MS | grep $STATE
 }
 
 function runNoExecutors(){
   echo '' > test/conf/nothing.yaml
-  iofogctl deploy -f test/conf/nothing.yaml -n "$NS"
+  potctl deploy -f test/conf/nothing.yaml -n "$NS"
 }
 
 function runWrongNamespace(){
@@ -38,5 +38,5 @@ spec:
     password: S5gYVgLEZV
   controller:
     name: func-test" > test/conf/wrong-ns.yaml
-  iofogctl deploy -f test/conf/wrong-ns.yaml -n "$NS"
+  potctl deploy -f test/conf/wrong-ns.yaml -n "$NS"
 }

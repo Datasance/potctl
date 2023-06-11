@@ -1,4 +1,4 @@
-## iofogctl disconnect
+## potctl disconnect
 
 Disconnect from an ioFog cluster
 
@@ -11,13 +11,13 @@ Use the connect command to reconnect after a disconnect.
 If you would like to uninstall the Control Plane and/or Agents, use the delete command instead.
 
 ```
-iofogctl disconnect [flags]
+potctl disconnect [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl disconnect -n NAMESPACE
+potctl disconnect -n NAMESPACE
 ```
 
 ### Options
@@ -31,11 +31,11 @@ iofogctl disconnect -n NAMESPACE
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
+* [potctl](potctl.md)	 - 
 
 

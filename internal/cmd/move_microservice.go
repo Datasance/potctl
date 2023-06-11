@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	move "github.com/eclipse-iofog/iofogctl/v3/internal/move/microservice"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	move "github.com/eclipse-iofog/potctl/v3/internal/move/microservice"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newMoveMicroserviceCommand() *cobra.Command {
 		Use:     "microservice NAME AGENT_NAME",
 		Short:   "Move a Microservice to another Agent in the same Namespace",
 		Long:    `Move a Microservice to another Agent in the same Namespace`,
-		Example: `iofogctl move microservice NAME AGENT_NAME`,
+		Example: `potctl move microservice NAME AGENT_NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace

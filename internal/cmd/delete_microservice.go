@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/microservice"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/microservice"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ func newDeleteMicroserviceCommand() *cobra.Command {
 		Use:     "microservice NAME",
 		Short:   "Delete a Microservice",
 		Long:    `Delete a Microservice`,
-		Example: `iofogctl delete microservice NAME`,
+		Example: `potctl delete microservice NAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace

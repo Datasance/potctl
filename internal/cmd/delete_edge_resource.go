@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	delete "github.com/eclipse-iofog/iofogctl/v3/internal/delete/edgeresource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/edgeresource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +29,7 @@ func newDeleteEdgeResourceCommand() *cobra.Command {
 
 Only the specified version will be deleted.
 Agents that this Edge Resource are attached to will be notified of the deletion.`,
-		Example: `iofogctl delete edge-resource NAME VERSION`,
+		Example: `potctl delete edge-resource NAME VERSION`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get name and namespace of edge resource

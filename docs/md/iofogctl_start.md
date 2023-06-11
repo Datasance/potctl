@@ -1,4 +1,4 @@
-## iofogctl start
+## potctl start
 
 Starts a resource
 
@@ -17,12 +17,12 @@ Starts a resource
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl start application](iofogctl_start_application.md)	 - Starts an application
+* [potctl](potctl.md)	 - 
+* [potctl start application](potctl_start_application.md)	 - Starts an application
 
 

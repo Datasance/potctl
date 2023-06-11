@@ -1,4 +1,4 @@
-## iofogctl describe agent-config
+## potctl describe agent-config
 
 Get detailed information about an Agent's configuration
 
@@ -7,13 +7,13 @@ Get detailed information about an Agent's configuration
 Get detailed information about an Agent's configuration.
 
 ```
-iofogctl describe agent-config NAME [flags]
+potctl describe agent-config NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe agent-config NAME
+potctl describe agent-config NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe agent-config NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

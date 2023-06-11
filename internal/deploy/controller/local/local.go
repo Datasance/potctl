@@ -17,12 +17,12 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/config"
-	"github.com/eclipse-iofog/iofogctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/iofogctl/v3/internal/resource"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/eclipse-iofog/potctl/v3/internal/execute"
+	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/iofog/install"
+	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
 )
 
 type localExecutor struct {

@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eclipse-iofog/iofogctl/v3/internal/upgrade"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	"github.com/eclipse-iofog/potctl/v3/internal/upgrade"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func newUpgradeCommand() *cobra.Command {
 		Use:     "upgrade RESOURCE NAME",
 		Short:   "Upgrade ioFog resources",
 		Long:    `Upgrade ioFog resources to latest versions available.`,
-		Example: `iofogctl upgrade agent NAME`,
+		Example: `potctl upgrade agent NAME`,
 		Args:    cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type and name

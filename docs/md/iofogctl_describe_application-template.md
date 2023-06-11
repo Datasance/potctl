@@ -1,4 +1,4 @@
-## iofogctl describe application-template
+## potctl describe application-template
 
 Get detailed information about an Application Template
 
@@ -7,13 +7,13 @@ Get detailed information about an Application Template
 Get detailed information about an Application Template.
 
 ```
-iofogctl describe application-template NAME [flags]
+potctl describe application-template NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl describe application-template NAME
+potctl describe application-template NAME
 ```
 
 ### Options
@@ -28,11 +28,11 @@ iofogctl describe application-template NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl describe](iofogctl_describe.md)	 - Get detailed information of an existing resources
+* [potctl describe](potctl_describe.md)	 - Get detailed information of an existing resources
 
 

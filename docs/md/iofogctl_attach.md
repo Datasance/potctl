@@ -1,4 +1,4 @@
-## iofogctl attach
+## potctl attach
 
 Attach one ioFog resource to another
 
@@ -23,13 +23,13 @@ attach
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl](iofogctl.md)	 - 
-* [iofogctl attach agent](iofogctl_attach_agent.md)	 - Attach an Agent to an existing Namespace
-* [iofogctl attach edge-resource](iofogctl_attach_edge-resource.md)	 - Attach an Edge Resource to an existing Agent
+* [potctl](potctl.md)	 - 
+* [potctl attach agent](potctl_attach_agent.md)	 - Attach an Agent to an existing Namespace
+* [potctl attach edge-resource](potctl_attach_edge-resource.md)	 - Attach an Edge Resource to an existing Agent
 
 

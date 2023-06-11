@@ -1,4 +1,4 @@
-## iofogctl create namespace
+## potctl create namespace
 
 Create a Namespace
 
@@ -8,16 +8,16 @@ Create a Namespace.
 
 A Namespace contains all components of an Edge Compute Network.
 
-A single instance of iofogctl can be used to manage any number of Edge Compute Networks.
+A single instance of potctl can be used to manage any number of Edge Compute Networks.
 
 ```
-iofogctl create namespace NAME [flags]
+potctl create namespace NAME [flags]
 ```
 
 ### Examples
 
 ```
-iofogctl create namespace NAME
+potctl create namespace NAME
 ```
 
 ### Options
@@ -31,11 +31,11 @@ iofogctl create namespace NAME
 ```
       --debug              Toggle for displaying verbose output of API clients (HTTP and SSH)
   -n, --namespace string   Namespace to execute respective command within (default "default")
-  -v, --verbose            Toggle for displaying verbose output of iofogctl
+  -v, --verbose            Toggle for displaying verbose output of potctl
 ```
 
 ### SEE ALSO
 
-* [iofogctl create](iofogctl_create.md)	 - Create a resource
+* [potctl create](potctl_create.md)	 - Create a resource
 
 

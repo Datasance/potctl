@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	stopapplication "github.com/eclipse-iofog/iofogctl/v3/internal/stop"
-	"github.com/eclipse-iofog/iofogctl/v3/pkg/util"
+	stopapplication "github.com/eclipse-iofog/potctl/v3/internal/stop"
+	"github.com/eclipse-iofog/potctl/v3/pkg/util"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func newStopApplicationCommand() *cobra.Command {
 		Use:     "application NAME",
 		Short:   "Stop an application",
 		Long:    "Stop an application",
-		Example: `iofogctl stop application NAME`,
+		Example: `potctl stop application NAME`,
 		Args:    cobra.ExactValidArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
