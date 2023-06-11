@@ -14,10 +14,10 @@
 package cmd
 
 import (
-	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/agent"
-	detach "github.com/eclipse-iofog/potctl/v3/internal/detach/agent"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	attach "github.com/datasance/potctl/internal/attach/agent"
+	detach "github.com/datasance/potctl/internal/detach/agent"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

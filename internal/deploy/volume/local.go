@@ -16,9 +16,9 @@ package deployvolume
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type localExecutor struct {

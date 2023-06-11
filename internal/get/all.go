@@ -14,8 +14,8 @@
 package get
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/datasance/potctl/internal/config"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 )
 
 type tableFunc = func(string, tableChannel)

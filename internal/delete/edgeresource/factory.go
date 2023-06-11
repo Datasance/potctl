@@ -16,9 +16,9 @@ package deleteedgeresource
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 )
 
 type executor struct {

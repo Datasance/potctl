@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/agent"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	delete "github.com/datasance/potctl/internal/delete/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-module github.com/eclipse-iofog/potctl/v3
+module github.com/datasance/potctl
 
 go 1.18
 

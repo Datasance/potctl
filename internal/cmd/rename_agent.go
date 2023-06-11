@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	rename "github.com/eclipse-iofog/potctl/v3/internal/rename/agent"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	rename "github.com/datasance/potctl/internal/rename/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

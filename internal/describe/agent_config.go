@@ -14,10 +14,10 @@
 package describe
 
 import (
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type agentConfigExecutor struct {

@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type LocalControlPlane struct {

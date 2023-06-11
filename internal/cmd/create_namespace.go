@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	create "github.com/eclipse-iofog/potctl/v3/internal/create/namespace"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	create "github.com/datasance/potctl/internal/create/namespace"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

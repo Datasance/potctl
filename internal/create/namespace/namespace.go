@@ -14,8 +14,8 @@
 package createnamespace
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func Execute(name string) error {

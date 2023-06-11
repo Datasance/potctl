@@ -17,14 +17,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 
-	deploy "github.com/eclipse-iofog/potctl/v3/internal/deploy/agent"
-	deployagentconfig "github.com/eclipse-iofog/potctl/v3/internal/deploy/agentconfig"
+	deploy "github.com/datasance/potctl/internal/deploy/agent"
+	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 )
 
 type Options struct {

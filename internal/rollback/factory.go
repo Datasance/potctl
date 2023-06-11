@@ -14,8 +14,8 @@
 package rollback
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/execute"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {

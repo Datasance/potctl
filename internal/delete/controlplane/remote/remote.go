@@ -14,11 +14,11 @@
 package deleteremotecontrolplane
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deletecontroller "github.com/eclipse-iofog/potctl/v3/internal/delete/controller"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deletecontroller "github.com/datasance/potctl/internal/delete/controller"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Executor struct {

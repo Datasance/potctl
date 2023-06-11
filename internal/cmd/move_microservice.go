@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	move "github.com/eclipse-iofog/potctl/v3/internal/move/microservice"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	move "github.com/datasance/potctl/internal/move/microservice"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -16,19 +16,19 @@ package delete
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deleteagent "github.com/eclipse-iofog/potctl/v3/internal/delete/agent"
-	deleteapplication "github.com/eclipse-iofog/potctl/v3/internal/delete/application"
-	deletecatalogitem "github.com/eclipse-iofog/potctl/v3/internal/delete/catalogitem"
-	deletecontroller "github.com/eclipse-iofog/potctl/v3/internal/delete/controller"
-	deletek8scontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/k8s"
-	deletelocalcontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/local"
-	deleteremotecontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/remote"
-	deletemicroservice "github.com/eclipse-iofog/potctl/v3/internal/delete/microservice"
-	deleteregistry "github.com/eclipse-iofog/potctl/v3/internal/delete/registry"
-	deletevolume "github.com/eclipse-iofog/potctl/v3/internal/delete/volume"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deleteagent "github.com/datasance/potctl/internal/delete/agent"
+	deleteapplication "github.com/datasance/potctl/internal/delete/application"
+	deletecatalogitem "github.com/datasance/potctl/internal/delete/catalogitem"
+	deletecontroller "github.com/datasance/potctl/internal/delete/controller"
+	deletek8scontrolplane "github.com/datasance/potctl/internal/delete/controlplane/k8s"
+	deletelocalcontrolplane "github.com/datasance/potctl/internal/delete/controlplane/local"
+	deleteremotecontrolplane "github.com/datasance/potctl/internal/delete/controlplane/remote"
+	deletemicroservice "github.com/datasance/potctl/internal/delete/microservice"
+	deleteregistry "github.com/datasance/potctl/internal/delete/registry"
+	deletevolume "github.com/datasance/potctl/internal/delete/volume"
+	"github.com/datasance/potctl/internal/execute"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {

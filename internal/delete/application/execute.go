@@ -14,7 +14,7 @@
 package deleteapplication
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/datasance/potctl/internal/config"
 )
 
 func Execute(namespace, name string) error {

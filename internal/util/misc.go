@@ -14,7 +14,7 @@
 package util
 
 import (
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	rsc "github.com/datasance/potctl/internal/resource"
 )
 
 func IsSystemAgent(agentConfig *rsc.AgentConfiguration) bool {

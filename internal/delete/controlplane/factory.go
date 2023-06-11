@@ -1,13 +1,13 @@
 package deletecontrolplane
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deletek8scontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/k8s"
-	deletelocalcontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/local"
-	deleteremotecontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane/remote"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deletek8scontrolplane "github.com/datasance/potctl/internal/delete/controlplane/k8s"
+	deletelocalcontrolplane "github.com/datasance/potctl/internal/delete/controlplane/local"
+	deleteremotecontrolplane "github.com/datasance/potctl/internal/delete/controlplane/remote"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func NewExecutor(namespace string) (execute.Executor, error) {

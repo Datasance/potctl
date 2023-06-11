@@ -34,8 +34,8 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 // LocalContainer struct to encapsulate utilities around docker

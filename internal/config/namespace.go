@@ -19,8 +19,8 @@ import (
 	"os"
 	"sort"
 
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func SetDefaultNamespace(name string) (err error) {

@@ -16,9 +16,9 @@ package cmd
 import (
 	"errors"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/internal/get"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/get"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

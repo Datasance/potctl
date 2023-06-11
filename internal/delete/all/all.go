@@ -14,13 +14,13 @@
 package deleteall
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deleteagent "github.com/eclipse-iofog/potctl/v3/internal/delete/agent"
-	deletecontrolplane "github.com/eclipse-iofog/potctl/v3/internal/delete/controlplane"
-	deletevolume "github.com/eclipse-iofog/potctl/v3/internal/delete/volume"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deleteagent "github.com/datasance/potctl/internal/delete/agent"
+	deletecontrolplane "github.com/datasance/potctl/internal/delete/controlplane"
+	deletevolume "github.com/datasance/potctl/internal/delete/volume"
+	"github.com/datasance/potctl/internal/execute"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func Execute(namespace string, useDetached, force bool) error {

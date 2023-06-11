@@ -14,8 +14,8 @@
 package deletevolume
 
 import (
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func deleteRemote(agent *rsc.RemoteAgent, volume *rsc.Volume) error {

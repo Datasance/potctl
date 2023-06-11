@@ -14,7 +14,7 @@
 package get
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
+	"github.com/datasance/potctl/internal/config"
 )
 
 type volumeExecutor struct {

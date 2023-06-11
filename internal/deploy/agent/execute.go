@@ -14,8 +14,8 @@
 package deployagent
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
 )
 
 type Options struct {

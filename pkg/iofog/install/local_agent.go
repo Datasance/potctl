@@ -16,7 +16,7 @@ package install
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 // LocalAgent uses Container exec commands

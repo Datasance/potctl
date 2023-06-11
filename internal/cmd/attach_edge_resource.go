@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/edgeresource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	attach "github.com/datasance/potctl/internal/attach/edgeresource"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

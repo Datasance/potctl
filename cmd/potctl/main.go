@@ -14,9 +14,9 @@
 package main
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/cmd"
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/cmd"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func main() {

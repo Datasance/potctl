@@ -16,7 +16,7 @@ package get
 import (
 	"regexp"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func getAddressAndPort(endpoint, defaultPort string) (addr, port string) {

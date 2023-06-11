@@ -18,16 +18,16 @@ import (
 	"strings"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deployagent "github.com/eclipse-iofog/potctl/v3/internal/deploy/agent"
-	deployagentconfig "github.com/eclipse-iofog/potctl/v3/internal/deploy/agentconfig"
-	deployremotecontroller "github.com/eclipse-iofog/potctl/v3/internal/deploy/controller/remote"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	iutil "github.com/eclipse-iofog/potctl/v3/internal/util"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deployagent "github.com/datasance/potctl/internal/deploy/agent"
+	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
+	deployremotecontroller "github.com/datasance/potctl/internal/deploy/controller/remote"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	iutil "github.com/datasance/potctl/internal/util"
+	"github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {

@@ -17,9 +17,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/iofog/install"
 )
 
 func (exe executor) deleteLocalContainer() error {

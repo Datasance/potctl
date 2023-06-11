@@ -17,12 +17,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/iofog/install"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	rsc "github.com/datasance/potctl/internal/resource"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

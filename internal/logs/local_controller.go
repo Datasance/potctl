@@ -14,8 +14,8 @@
 package logs
 
 import (
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/iofog/install"
 )
 
 type localControllerExecutor struct {

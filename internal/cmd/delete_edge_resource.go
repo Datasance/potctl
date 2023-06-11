@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	delete "github.com/eclipse-iofog/potctl/v3/internal/delete/edgeresource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	delete "github.com/datasance/potctl/internal/delete/edgeresource"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -19,7 +19,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )

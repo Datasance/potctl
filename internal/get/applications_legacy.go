@@ -13,7 +13,7 @@
 
 package get
 
-import "github.com/eclipse-iofog/potctl/v3/pkg/util"
+import "github.com/datasance/potctl/pkg/util"
 
 func (exe *applicationExecutor) initLegacy() (err error) {
 	flows, err := exe.client.GetAllFlows()

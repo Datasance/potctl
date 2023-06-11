@@ -18,15 +18,15 @@ import (
 	"strings"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	deployagentconfig "github.com/eclipse-iofog/potctl/v3/internal/deploy/agentconfig"
-	deploylocalcontroller "github.com/eclipse-iofog/potctl/v3/internal/deploy/controller/local"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	iutil "github.com/eclipse-iofog/potctl/v3/internal/util"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
+	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	iutil "github.com/datasance/potctl/internal/util"
+	"github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {

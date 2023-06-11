@@ -16,12 +16,12 @@ package deployagent
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	agentconfig "github.com/eclipse-iofog/potctl/v3/internal/deploy/agentconfig"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	agentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type AgentDeployExecutor interface {

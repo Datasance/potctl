@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	stopapplication "github.com/eclipse-iofog/potctl/v3/internal/stop"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	stopapplication "github.com/datasance/potctl/internal/stop"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

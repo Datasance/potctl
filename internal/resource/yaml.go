@@ -1,7 +1,7 @@
 package resource
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 	"gopkg.in/yaml.v2"
 )
 

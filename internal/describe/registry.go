@@ -17,11 +17,11 @@ import (
 	"fmt"
 	"strconv"
 
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	rsc "github.com/datasance/potctl/internal/resource"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type registryExecutor struct {

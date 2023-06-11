@@ -14,13 +14,13 @@
 package connectk8scontrolplane
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	connectcontrolplane "github.com/eclipse-iofog/potctl/v3/internal/connect/controlplane"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	connectcontrolplane "github.com/datasance/potctl/internal/connect/controlplane"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type kubernetesExecutor struct {

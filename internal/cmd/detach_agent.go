@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	detach "github.com/eclipse-iofog/potctl/v3/internal/detach/agent"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	detach "github.com/datasance/potctl/internal/detach/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -17,10 +17,10 @@ import (
 	"fmt"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	rsc "github.com/datasance/potctl/internal/resource"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type applicationExecutor struct {

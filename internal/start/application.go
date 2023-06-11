@@ -14,8 +14,8 @@
 package startapplication
 
 import (
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	"github.com/datasance/potctl/internal/execute"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 )
 
 type Options struct {

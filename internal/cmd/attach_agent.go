@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	attach "github.com/eclipse-iofog/potctl/v3/internal/attach/agent"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	attach "github.com/datasance/potctl/internal/attach/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

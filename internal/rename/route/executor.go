@@ -16,8 +16,8 @@ package route
 import (
 	"fmt"
 
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func Execute(namespace, name, newName string) error {

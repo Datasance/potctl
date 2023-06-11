@@ -18,16 +18,16 @@ import (
 	"net/url"
 	"strings"
 
-	rsc "github.com/eclipse-iofog/potctl/v3/internal/resource"
-	iutil "github.com/eclipse-iofog/potctl/v3/internal/util"
-	clientutil "github.com/eclipse-iofog/potctl/v3/internal/util/client"
+	rsc "github.com/datasance/potctl/internal/resource"
+	iutil "github.com/datasance/potctl/internal/util"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 	"gopkg.in/yaml.v2"
 
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
-	"github.com/eclipse-iofog/potctl/v3/internal/config"
-	"github.com/eclipse-iofog/potctl/v3/internal/execute"
-	"github.com/eclipse-iofog/potctl/v3/pkg/iofog/install"
-	"github.com/eclipse-iofog/potctl/v3/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {
