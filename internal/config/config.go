@@ -1,6 +1,6 @@
 /*
  *  *******************************************************************************
- *  * Copyright (c) 2020 Edgeworx, Inc.
+ *  * Copyright (c) 2023 Datasance Teknoloji A.S.
  *  *
  *  * This program and the accompanying materials are made available under the
  *  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,16 +35,14 @@ var (
 )
 
 const (
-	apiVersionGroup      = "iofog.org"
-	latestVersion        = "v3"
+	apiVersionGroup      = "datasance.com"
+	latestVersion        = "v1"
 	LatestAPIVersion     = apiVersionGroup + "/" + latestVersion
 	defaultDirname       = ".iofog/" + latestVersion
 	namespaceDirname     = "namespaces/"
 	defaultFilename      = "config.yaml"
-	configV2             = "potctl/v2"
-	configV3             = "potctl/v3"
-	configV1             = "potctl/v1"
-	CurrentConfigVersion = configV0
+	configV1             = "datasance.com/v1"
+	CurrentConfigVersion = configV1
 	detachedNamespace    = "_detached"
 )
 
@@ -120,26 +118,16 @@ func getNamespaceFile(name string) string {
 	return path.Join(namespaceDirectory, name+".yaml")
 }
 
-func updateConfigToV2(header *potctlConfig) {
-	if header != nil {
-		header.APIVersion = configV2
-	}
-}
-
 func getConfigFromHeader(header *potctlConfig) (conf configuration, err error) {
 	switch header.APIVersion {
 	case CurrentConfigVersion:
 		// All good
 		break
-	// Example for further maintenance
-	// case PreviousConfigVersion
-	// 	updateFromPreviousVersion()
-	// 	break
-	case configV1:
-		updateConfigToV2(header)
-		return getConfigFromHeader(header)
-	default:
-		return conf, util.NewInputError("Invalid potctl config version")
+		// Example for further maintenance
+		// case PreviousConfigVersion
+		// 	updateFromPreviousVersion()
+		// 	break
+
 	}
 	bytes, err := yaml.Marshal(header.Spec)
 	if err != nil {
@@ -157,12 +145,7 @@ func getNamespaceFromHeader(header *potctlNamespace) (ns *rsc.Namespace, err err
 	case CurrentConfigVersion:
 		// All good
 		break
-	case configV1:
-		err = util.NewError("Namespace file is out of date.")
-		return
-	default:
-		err = util.NewInputError("Invalid potctl config version")
-		return
+
 	}
 	// Unmarshal Namespace spec
 	bytes, err := yaml.Marshal(header.Spec)

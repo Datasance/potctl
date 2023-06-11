@@ -1,6 +1,6 @@
 /*
  *  *******************************************************************************
- *  * Copyright (c) 2020 Edgeworx, Inc.
+ *  * Copyright (c) 2023 Datasance Teknoloji A.S.
  *  *
  *  * This program and the accompanying materials are made available under the
  *  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,12 +21,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const TitleHeader = "     _       ____                 __  __    \n" +
-	"    (_)___  / __/___  ____  _____/ /_/ / 	 \n" +
-	"   / / __ \\/ /_/ __ \\/ __ `/ ___/ __/ /   \n" +
-	"  / / /_/ / __/ /_/ / /_/ / /__/ /_/ /   	 \n" +
-	" /_/\\____/_/  \\____/\\__, /\\___/\\__/_/  \n" +
-	"                   /____/                   \n"
+const TitleHeader = " ██████╗  ██████╗ ████████╗ ██████╗████████╗██╗  \n" +
+	" ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝╚══██╔══╝██║  \n" +
+	" ██████╔╝██║   ██║   ██║   ██║        ██║   ██║ \n" +
+	" ██╔═══╝ ██║   ██║   ██║   ██║        ██║   ██║  \n" +
+	" ██║     ╚██████╔╝   ██║   ╚██████╗   ██║   ███████╗\n" +
+	" ╚═╝      ╚═════╝    ╚═╝    ╚═════╝   ╚═╝   ╚══════╝\n"
 
 const TitleMessage = "potctl is the CLI for ioFog. Think of it as a mix between terraform and kubectl.\n" +
 	"\n" +

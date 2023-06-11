@@ -1,6 +1,6 @@
 /*
  *  *******************************************************************************
- *  * Copyright (c) 2020 Edgeworx, Inc.
+ *  * Copyright (c) 2023 Datasance Teknoloji A.S.
  *  *
  *  * This program and the accompanying materials are made available under the
  *  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -27,7 +27,7 @@ func newVersionCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			ecnFlag, err := cmd.Flags().GetBool("ecn")
 			util.Check(err)
-			util.PrintInfo("potctl - Copyright (C) 2019-2023, Edgeworx, Inc.\n")
+			util.PrintInfo("potctl - Copyright (C) 2023 Datasance Teknoloji A.S.\n")
 			_ = util.Print(util.GetVersion())
 			if ecnFlag {
 				fmt.Println("")
