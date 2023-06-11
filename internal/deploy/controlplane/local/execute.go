@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
@@ -27,6 +26,7 @@ import (
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
+	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 
 type Options struct {

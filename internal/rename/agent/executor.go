@@ -16,8 +16,8 @@ package agent
 import (
 	"fmt"
 
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/pkg/util"

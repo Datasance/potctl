@@ -16,9 +16,9 @@ package get
 import (
 	"strconv"
 
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 
 type applicationTemplateExecutor struct {

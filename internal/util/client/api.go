@@ -17,10 +17,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/util"
+	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 
 // InvalidateCache will clear the cache

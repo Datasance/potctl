@@ -23,11 +23,11 @@ import (
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"gopkg.in/yaml.v2"
 
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
+	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 
 type Options struct {
