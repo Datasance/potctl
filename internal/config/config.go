@@ -44,7 +44,7 @@ const (
 	configV2             = "potctl/v2"
 	configV3             = "potctl/v3"
 	configV1             = "potctl/v1"
-	CurrentConfigVersion = configV3
+	CurrentConfigVersion = configV0
 	detachedNamespace    = "_detached"
 )
 
