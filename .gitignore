@@ -1,0 +1,13 @@
+bin/*
+reports/*
+
+.idea/
+
+test.txt
+test-report.xml
+
+.vscode/*
+dist/
+vendor/
+bats-core/
+.DS_Store
