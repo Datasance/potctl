@@ -9,11 +9,11 @@ steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Build Artifacts'
   inputs:
-    artifactName: potctl
+    artifactName: iofogctl
     downloadPath: $(System.DefaultWorkingDirectory)
 - script: |
-    sudo cp potctl/build_linux_linux_amd64/potctl /usr/local/bin/
-    sudo chmod 0755 /usr/local/bin/potctl
+    sudo cp iofogctl/build_linux_linux_amd64/iofogctl /usr/local/bin/
+    sudo chmod 0755 /usr/local/bin/iofogctl
 - template: postinstall.yaml
 - template: init-ssh.yaml
 - template: init-vms.yaml

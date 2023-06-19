@@ -10,12 +10,12 @@ steps:
     controller_count=${{ parameters.controller_count }}
     jobs=0
     for idx in $(seq 1 $agent_count); do
-      gcloud compute --project=$(gcp.project.name) instances delete potctl-ci-$id-$idx --zone=$(gcp.vm.zone) --delete-disks=all -q &
+      gcloud compute --project=$(gcp.project.name) instances delete iofogctl-ci-$id-$idx --zone=$(gcp.vm.zone) --delete-disks=all -q &
       ((jobs++))
     done
     if [ $controller_count -gt 0 ]; then
       idx=$((agent_count+1))
-      gcloud compute --project=$(gcp.project.name) instances delete potctl-ci-$id-$idx --zone=$(gcp.vm.zone) --delete-disks=all -q &
+      gcloud compute --project=$(gcp.project.name) instances delete iofogctl-ci-$id-$idx --zone=$(gcp.vm.zone) --delete-disks=all -q &
       ((jobs++))
     fi
     for job in $(seq 1 $jobs); do
