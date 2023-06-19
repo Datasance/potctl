@@ -201,6 +201,9 @@ jobs:
         with:
           go-version: '1.18'
           cache: false
+      - name: Get image tag
+        run: |
+          echo ${{ needs.Build.outputs.VERSION }}
       - name: potctl build packages GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
@@ -208,6 +211,7 @@ jobs:
           args: --rm-dist --debug --config ./.goreleaser-potctl.yml
         env:
           VERSION: ${{ needs.Build.outputs.VERSION }}
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Install Packagecloud cli
         run: go install github.com/edgeworx/packagecloud@v0.1.1
       - run: ./.packagecloud-publish.sh
@@ -216,3 +220,8 @@ jobs:
           PACKAGECLOUD_TOKEN: ${{ secrets.packagecloud_token }}
           PACKAGECLOUD_REPO: "datasance/potctl"
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: potctl_prod
+          path: ${{ github.workspace }}/dist
