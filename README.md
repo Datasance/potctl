@@ -13,7 +13,7 @@ infrastructure-as-code.
 Mac users can use Homebrew:
 
 ```bash
-brew tap eclipse-iofog/potctl
+brew tap datasance/potctl
 brew install potctl
 ```
 
@@ -21,13 +21,13 @@ brew install potctl
 
 The Debian package can be installed like so:
 ```bash
-https://packagecloud.io/install/repositories/iofog/potctl/script.deb.sh | sudo bash
+https://packagecloud.io/install/repositories/datasance/potctl/script.deb.sh | sudo bash
 sudo apt install potctl
 ```
 
 And similarly, the RPM package can be installed like so:
 ```
-https://packagecloud.io/install/repositories/iofog/potctl/script.rpm.sh | sudo bash
+https://packagecloud.io/install/repositories/datasance/potctl/script.rpm.sh | sudo bash
 sudo apt install potctl
 ```
 
