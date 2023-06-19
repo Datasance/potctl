@@ -9,7 +9,7 @@ function testDeployLocalVolume(){
     SRC=$(wslpath $YAML_SRC)
   fi
   echo "---
-apiVersion: iofog.org/v3
+apiVersion: datasance.com/v1
 kind: Volume
 spec:
   name: $VOL_NAME
@@ -85,7 +85,7 @@ function testDeployVolume(){
   fi
   initAgents
   echo "---
-apiVersion: iofog.org/v3
+apiVersion: datasance.com/v1
 kind: Volume
 spec:
   name: $VOL_NAME
