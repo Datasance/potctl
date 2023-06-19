@@ -143,7 +143,7 @@ changelog:
 
 release:
   github:
-    owner: eclipse-iofog
+    owner: datasance
     name: potctl
 
   # If set to true, will not auto-publish the release. Default is false.
@@ -162,7 +162,7 @@ brews:
     description: "CLI for iofog"
 
     tap:
-      owner: eclipse-iofog
+      owner: datasance
       name: homebrew-potctl
 
     url_template: "https://github.com/datasance/potctl/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
