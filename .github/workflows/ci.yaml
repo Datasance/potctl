@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - [ "main" ]
       - release*
     tags: [v*]
     paths-ignore:
@@ -12,7 +12,7 @@ on:
   pull_request:
     # Sequence of patterns matched against refs/heads
     branches:
-      - main
+      - [ "main" ]
       - release*
     paths-ignore:
       - README.md
