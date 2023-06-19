@@ -21,7 +21,7 @@ on:
 env:
   PROJECT: 'focal-freedom-236620'
   IMAGE_NAME: 'operator'
-  GKE_CLUSTER: 'iofogctl-ci'
+  GKE_CLUSTER: 'potctl-ci'
   GKE_ZONE: 'us-central1-a'
   controller_image: 'gcr.io/focal-freedom-236620/controller:3.0.4'
   enterprise_image: 'gcr.io/focal-freedom-236620/enterprise-controller:master'
