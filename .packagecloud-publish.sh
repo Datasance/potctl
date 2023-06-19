@@ -15,7 +15,7 @@ if [[ -z "$PACKAGECLOUD_TOKEN" ]]; then
     exit 1
 fi
 
-repo="${PACKAGECLOUD_REPO:-iofog/potctl-snapshots}"
+repo="${PACKAGECLOUD_REPO:-datasance/potctl-snapshots}"
 echo "Using packagecloud repo: $repo"
 
 pushd ./dist > /dev/null

@@ -176,7 +176,7 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.packagecloud_token }}
-          PACKAGECLOUD_REPO: "iofog/potctl-snapshots"
+          PACKAGECLOUD_REPO: "datasance/potctl-snapshots"
           GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
@@ -214,5 +214,5 @@ jobs:
         continue-on-error: true
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.packagecloud_token }}
-          PACKAGECLOUD_REPO: "iofog/potctl"
+          PACKAGECLOUD_REPO: "datasance/potctl"
           GITHUB_TOKEN: ${{ github.token }}
