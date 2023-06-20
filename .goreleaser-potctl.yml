@@ -166,7 +166,7 @@ brews:
     tap:
       owner: datasance
       name: homebrew-potctl
-      token: ${{ .ENV.GITHUB_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
 
     url_template: "https://github.com/datasance/potctl/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 
