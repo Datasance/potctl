@@ -3,7 +3,7 @@ package resource
 import (
 	"sync"
 
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 // Namespace is the fundamental type for managing an ECN's resources.

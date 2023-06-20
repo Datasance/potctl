@@ -16,8 +16,8 @@ package cmd
 import (
 	"errors"
 
-	"github.com/datasance/potctl/internal/delete"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/delete"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

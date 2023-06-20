@@ -16,7 +16,7 @@ package get
 import (
 	"regexp"
 
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func getAddressAndPort(endpoint, defaultPort string) (addr, port string) {

@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	rename "github.com/datasance/potctl/internal/rename/namespace"
-	"github.com/datasance/potctl/pkg/util"
+	rename "github.com/datasance/potctl/v1/internal/rename/namespace"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -16,9 +16,9 @@ package deployagentconfig
 import (
 	"fmt"
 
-	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/v1/pkg/iofog"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 

@@ -14,8 +14,8 @@
 package upgrade
 
 import (
-	"github.com/datasance/potctl/internal/config"
-	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/v1/internal/config"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
 )
 
 type agentExecutor struct {

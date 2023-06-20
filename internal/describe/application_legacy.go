@@ -14,7 +14,7 @@
 package describe
 
 import (
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 

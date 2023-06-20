@@ -14,8 +14,8 @@
 package deletevolume
 
 import (
-	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/util"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func deleteRemote(agent *rsc.RemoteAgent, volume *rsc.Volume) error {

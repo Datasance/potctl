@@ -14,8 +14,8 @@
 package get
 
 import (
-	"github.com/datasance/potctl/internal/execute"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/execute"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Executor, error) {

@@ -17,12 +17,12 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/datasance/potctl/internal/config"
-	connectk8scontrolplane "github.com/datasance/potctl/internal/connect/controlplane/k8s"
-	connectremotecontrolplane "github.com/datasance/potctl/internal/connect/controlplane/remote"
-	"github.com/datasance/potctl/internal/execute"
-	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	connectk8scontrolplane "github.com/datasance/potctl/v1/internal/connect/controlplane/k8s"
+	connectremotecontrolplane "github.com/datasance/potctl/v1/internal/connect/controlplane/remote"
+	"github.com/datasance/potctl/v1/internal/execute"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type Options struct {

@@ -16,19 +16,19 @@ package delete
 import (
 	"fmt"
 
-	"github.com/datasance/potctl/internal/config"
-	deleteagent "github.com/datasance/potctl/internal/delete/agent"
-	deleteapplication "github.com/datasance/potctl/internal/delete/application"
-	deletecatalogitem "github.com/datasance/potctl/internal/delete/catalogitem"
-	deletecontroller "github.com/datasance/potctl/internal/delete/controller"
-	deletek8scontrolplane "github.com/datasance/potctl/internal/delete/controlplane/k8s"
-	deletelocalcontrolplane "github.com/datasance/potctl/internal/delete/controlplane/local"
-	deleteremotecontrolplane "github.com/datasance/potctl/internal/delete/controlplane/remote"
-	deletemicroservice "github.com/datasance/potctl/internal/delete/microservice"
-	deleteregistry "github.com/datasance/potctl/internal/delete/registry"
-	deletevolume "github.com/datasance/potctl/internal/delete/volume"
-	"github.com/datasance/potctl/internal/execute"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	deleteagent "github.com/datasance/potctl/v1/internal/delete/agent"
+	deleteapplication "github.com/datasance/potctl/v1/internal/delete/application"
+	deletecatalogitem "github.com/datasance/potctl/v1/internal/delete/catalogitem"
+	deletecontroller "github.com/datasance/potctl/v1/internal/delete/controller"
+	deletek8scontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/k8s"
+	deletelocalcontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/local"
+	deleteremotecontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/remote"
+	deletemicroservice "github.com/datasance/potctl/v1/internal/delete/microservice"
+	deleteregistry "github.com/datasance/potctl/v1/internal/delete/registry"
+	deletevolume "github.com/datasance/potctl/v1/internal/delete/volume"
+	"github.com/datasance/potctl/v1/internal/execute"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type Options struct {

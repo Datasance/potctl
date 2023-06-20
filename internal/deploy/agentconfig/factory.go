@@ -18,15 +18,15 @@ import (
 	"net/url"
 	"strings"
 
-	rsc "github.com/datasance/potctl/internal/resource"
-	iutil "github.com/datasance/potctl/internal/util"
-	clientutil "github.com/datasance/potctl/internal/util/client"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	iutil "github.com/datasance/potctl/v1/internal/util"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
 	"gopkg.in/yaml.v2"
 
-	"github.com/datasance/potctl/internal/config"
-	"github.com/datasance/potctl/internal/execute"
-	"github.com/datasance/potctl/pkg/iofog/install"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/v1/internal/execute"
+	"github.com/datasance/potctl/v1/pkg/iofog/install"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 

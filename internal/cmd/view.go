@@ -20,9 +20,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/datasance/potctl/internal/config"
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/v1/pkg/iofog"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/pkg/browser"
 	"github.com/spf13/cobra"
 )

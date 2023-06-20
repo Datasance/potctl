@@ -16,7 +16,7 @@ package install
 import (
 	"fmt"
 
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 // LocalAgent uses Container exec commands

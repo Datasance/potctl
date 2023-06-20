@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	detach "github.com/datasance/potctl/internal/detach/edgeresource"
-	"github.com/datasance/potctl/pkg/util"
+	detach "github.com/datasance/potctl/v1/internal/detach/edgeresource"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

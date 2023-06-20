@@ -29,8 +29,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/iofog"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/docker/docker/api/types"
 	dockerContainer "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"

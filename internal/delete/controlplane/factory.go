@@ -1,13 +1,13 @@
 package deletecontrolplane
 
 import (
-	"github.com/datasance/potctl/internal/config"
-	deletek8scontrolplane "github.com/datasance/potctl/internal/delete/controlplane/k8s"
-	deletelocalcontrolplane "github.com/datasance/potctl/internal/delete/controlplane/local"
-	deleteremotecontrolplane "github.com/datasance/potctl/internal/delete/controlplane/remote"
-	"github.com/datasance/potctl/internal/execute"
-	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	deletek8scontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/k8s"
+	deletelocalcontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/local"
+	deleteremotecontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane/remote"
+	"github.com/datasance/potctl/v1/internal/execute"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func NewExecutor(namespace string) (execute.Executor, error) {

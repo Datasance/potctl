@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type LocalControlPlane struct {

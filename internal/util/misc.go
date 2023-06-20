@@ -14,7 +14,7 @@
 package util
 
 import (
-	rsc "github.com/datasance/potctl/internal/resource"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
 )
 
 func IsSystemAgent(agentConfig *rsc.AgentConfiguration) bool {

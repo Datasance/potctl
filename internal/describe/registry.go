@@ -17,11 +17,11 @@ import (
 	"fmt"
 	"strconv"
 
-	rsc "github.com/datasance/potctl/internal/resource"
-	clientutil "github.com/datasance/potctl/internal/util/client"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
 
-	"github.com/datasance/potctl/internal/config"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type registryExecutor struct {

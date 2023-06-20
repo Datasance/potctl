@@ -16,8 +16,8 @@ package route
 import (
 	"fmt"
 
-	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func Execute(namespace, name, newName string) error {

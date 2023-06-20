@@ -14,10 +14,10 @@
 package describe
 
 import (
-	"github.com/datasance/potctl/internal/config"
-	rsc "github.com/datasance/potctl/internal/resource"
-	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type routeExecutor struct {

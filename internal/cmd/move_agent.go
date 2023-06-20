@@ -14,10 +14,10 @@
 package cmd
 
 import (
-	attach "github.com/datasance/potctl/internal/attach/agent"
-	detach "github.com/datasance/potctl/internal/detach/agent"
-	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
+	attach "github.com/datasance/potctl/v1/internal/attach/agent"
+	detach "github.com/datasance/potctl/v1/internal/detach/agent"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

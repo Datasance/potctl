@@ -14,7 +14,7 @@
 package deleteapplication
 
 import (
-	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/v1/internal/config"
 )
 
 func Execute(namespace, name string) error {

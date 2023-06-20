@@ -16,11 +16,11 @@ package agent
 import (
 	"fmt"
 
-	clientutil "github.com/datasance/potctl/internal/util/client"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 
-	"github.com/datasance/potctl/internal/config"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func Execute(namespace, name, newName string, useDetached bool) error {

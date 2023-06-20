@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	delete "github.com/datasance/potctl/internal/delete/edgeresource"
-	"github.com/datasance/potctl/pkg/util"
+	delete "github.com/datasance/potctl/v1/internal/delete/edgeresource"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

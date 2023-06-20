@@ -17,10 +17,10 @@ import (
 	"fmt"
 	"strings"
 
-	rsc "github.com/datasance/potctl/internal/resource"
-	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/iofog/install"
-	"github.com/datasance/potctl/pkg/util"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	"github.com/datasance/potctl/v1/pkg/iofog/install"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 func (exe executor) remoteAgentPrune(agent rsc.Agent) error {

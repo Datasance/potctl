@@ -16,9 +16,9 @@ package deleteregistry
 import (
 	"strconv"
 
-	"github.com/datasance/potctl/internal/execute"
-	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/execute"
+	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type Executor struct {

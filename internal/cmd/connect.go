@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	"github.com/datasance/potctl/internal/connect"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/connect"
+	"github.com/datasance/potctl/v1/pkg/util"
 	"github.com/spf13/cobra"
 )
 

@@ -14,7 +14,7 @@
 package deletevolume
 
 import (
-	rsc "github.com/datasance/potctl/internal/resource"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
 )
 
 func deleteLocal(agent *rsc.LocalAgent, volume *rsc.Volume) error {

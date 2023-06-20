@@ -14,11 +14,11 @@
 package deleteremotecontrolplane
 
 import (
-	"github.com/datasance/potctl/internal/config"
-	deletecontroller "github.com/datasance/potctl/internal/delete/controller"
-	"github.com/datasance/potctl/internal/execute"
-	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	deletecontroller "github.com/datasance/potctl/v1/internal/delete/controller"
+	"github.com/datasance/potctl/v1/internal/execute"
+	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type Executor struct {

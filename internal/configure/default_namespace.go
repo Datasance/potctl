@@ -14,8 +14,8 @@
 package configure
 
 import (
-	"github.com/datasance/potctl/internal/config"
-	"github.com/datasance/potctl/pkg/util"
+	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/v1/pkg/util"
 )
 
 type defaultNamespaceExecutor struct {
