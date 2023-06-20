@@ -14,13 +14,13 @@
 package deleteall
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
-	deleteagent "github.com/datasance/potctl/v1/internal/delete/agent"
-	deletecontrolplane "github.com/datasance/potctl/v1/internal/delete/controlplane"
-	deletevolume "github.com/datasance/potctl/v1/internal/delete/volume"
-	"github.com/datasance/potctl/v1/internal/execute"
-	clientutil "github.com/datasance/potctl/v1/internal/util/client"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	deleteagent "github.com/datasance/potctl/internal/delete/agent"
+	deletecontrolplane "github.com/datasance/potctl/internal/delete/controlplane"
+	deletevolume "github.com/datasance/potctl/internal/delete/volume"
+	"github.com/datasance/potctl/internal/execute"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func Execute(namespace string, useDetached, force bool) error {

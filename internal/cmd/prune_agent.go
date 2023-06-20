@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	prune "github.com/datasance/potctl/v1/internal/prune/agent"
-	"github.com/datasance/potctl/v1/pkg/util"
+	prune "github.com/datasance/potctl/internal/prune/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

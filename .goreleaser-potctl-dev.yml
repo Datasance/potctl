@@ -29,20 +29,20 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.versionNumber=v{{.Version}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.commit={{ .ShortCommit }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.date={{.Date}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.platform={{.Os}}/{{.Arch }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.portManagerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.kubeletTag=3.0.0-beta1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.operatorTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.proxyTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.routerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerTag=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerVersion=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentVersion=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.repo=iofog"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.date={{.Date}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.platform={{.Os}}/{{.Arch }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.portManagerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.kubeletTag=3.0.0-beta1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.operatorTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.proxyTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.repo=iofog"
 
   - id: build_linux
     binary: potctl
@@ -58,20 +58,20 @@ builds:
       - 7
     ldflags:
       - -extldflags -static
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.versionNumber=v{{.Version}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.commit={{ .ShortCommit }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.date={{.Date}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.platform={{.Os}}/{{.Arch }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.portManagerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.kubeletTag=3.0.0-beta1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.operatorTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.proxyTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.routerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerTag=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerVersion=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentVersion=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.repo=iofog"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.date={{.Date}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.platform={{.Os}}/{{.Arch }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.portManagerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.kubeletTag=3.0.0-beta1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.operatorTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.proxyTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.repo=iofog"
     flags:
       - -v
 
@@ -84,20 +84,20 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.versionNumber=v{{.Version}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.commit={{ .ShortCommit }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.date={{.Date}}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.platform={{.Os}}/{{.Arch }}"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.portManagerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.kubeletTag=3.0.0-beta1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.operatorTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.proxyTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.routerTag=3.0.0"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerTag=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentTag=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.controllerVersion=3.0.4"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.agentVersion=3.0.1"
-      - -s -w -X "github.com/datasance/potctl/v1/pkg/util.repo=iofog"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.date={{.Date}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.platform={{.Os}}/{{.Arch }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.portManagerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.kubeletTag=3.0.0-beta1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.operatorTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.proxyTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.0.0"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.0.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.repo=iofog"
 
 
 archives:
@@ -165,7 +165,7 @@ brews:
       owner: datasance
       name: homebrew-potctl
 
-    url_template: "https://github.com/datasance/potctl/v1/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "https://github.com/datasance/potctl/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 
     commit_author:
       name: emirhandurmus

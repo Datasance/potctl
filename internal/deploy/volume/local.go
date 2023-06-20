@@ -16,9 +16,9 @@ package deployvolume
 import (
 	"fmt"
 
-	"github.com/datasance/potctl/v1/internal/config"
-	rsc "github.com/datasance/potctl/v1/internal/resource"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type localExecutor struct {

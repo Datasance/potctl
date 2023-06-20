@@ -14,9 +14,9 @@
 package cmd
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	"github.com/spf13/cobra"
 )

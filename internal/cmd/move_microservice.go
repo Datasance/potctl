@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	move "github.com/datasance/potctl/v1/internal/move/microservice"
-	"github.com/datasance/potctl/v1/pkg/util"
+	move "github.com/datasance/potctl/internal/move/microservice"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

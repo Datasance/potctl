@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	detach "github.com/datasance/potctl/v1/internal/detach/agent"
-	"github.com/datasance/potctl/v1/pkg/util"
+	detach "github.com/datasance/potctl/internal/detach/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

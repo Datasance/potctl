@@ -16,7 +16,7 @@ package get
 import (
 	"strconv"
 
-	clientutil "github.com/datasance/potctl/v1/internal/util/client"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 

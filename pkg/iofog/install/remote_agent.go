@@ -19,7 +19,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 // Remote agent uses SSH

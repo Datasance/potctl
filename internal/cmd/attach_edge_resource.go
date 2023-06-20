@@ -16,8 +16,8 @@ package cmd
 import (
 	"fmt"
 
-	attach "github.com/datasance/potctl/v1/internal/attach/edgeresource"
-	"github.com/datasance/potctl/v1/pkg/util"
+	attach "github.com/datasance/potctl/internal/attach/edgeresource"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

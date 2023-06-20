@@ -14,8 +14,8 @@
 package deployagent
 
 import (
-	"github.com/datasance/potctl/v1/internal/execute"
-	rsc "github.com/datasance/potctl/v1/internal/resource"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
 )
 
 type Options struct {

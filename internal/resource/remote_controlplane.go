@@ -14,8 +14,8 @@
 package resource
 
 import (
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type RemoteSystemMicroservices = install.RemoteSystemMicroservices

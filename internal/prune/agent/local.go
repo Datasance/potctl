@@ -16,8 +16,8 @@ package pruneagent
 import (
 	"fmt"
 
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func (exe executor) localAgentPrune() error {

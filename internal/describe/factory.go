@@ -16,8 +16,8 @@ package describe
 import (
 	"fmt"
 
-	"github.com/datasance/potctl/v1/internal/execute"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/execute"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Options struct {

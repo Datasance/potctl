@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/datasance/potctl/v1/internal/rollback"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/rollback"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

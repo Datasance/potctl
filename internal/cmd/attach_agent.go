@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	attach "github.com/datasance/potctl/v1/internal/attach/agent"
-	"github.com/datasance/potctl/v1/pkg/util"
+	attach "github.com/datasance/potctl/internal/attach/agent"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

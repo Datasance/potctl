@@ -14,7 +14,7 @@
 package get
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
+	"github.com/datasance/potctl/internal/config"
 )
 
 type volumeExecutor struct {

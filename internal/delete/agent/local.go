@@ -17,9 +17,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/iofog/install"
 )
 
 func (exe executor) deleteLocalContainer() error {

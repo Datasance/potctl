@@ -14,9 +14,9 @@
 package deletemicroservice
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
-	delete "github.com/datasance/potctl/v1/internal/delete/all"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	delete "github.com/datasance/potctl/internal/delete/all"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func Execute(name string, force bool) error {

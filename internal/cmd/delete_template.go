@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	delete "github.com/datasance/potctl/v1/internal/delete/template"
-	"github.com/datasance/potctl/v1/pkg/util"
+	delete "github.com/datasance/potctl/internal/delete/template"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

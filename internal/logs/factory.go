@@ -14,10 +14,10 @@
 package logs
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
-	"github.com/datasance/potctl/v1/internal/execute"
-	rsc "github.com/datasance/potctl/v1/internal/resource"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func NewExecutor(resourceType, namespace, name string) (execute.Executor, error) {

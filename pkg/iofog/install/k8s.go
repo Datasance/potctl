@@ -20,7 +20,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 	ioclient "github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 	iofogv3 "github.com/eclipse-iofog/iofog-operator/v3/apis"
 	cpv3 "github.com/eclipse-iofog/iofog-operator/v3/apis/controlplanes/v3"

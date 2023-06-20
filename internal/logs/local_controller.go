@@ -14,8 +14,8 @@
 package logs
 
 import (
-	rsc "github.com/datasance/potctl/v1/internal/resource"
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/iofog/install"
 )
 
 type localControllerExecutor struct {

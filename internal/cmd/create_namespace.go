@@ -14,8 +14,8 @@
 package cmd
 
 import (
-	create "github.com/datasance/potctl/v1/internal/create/namespace"
-	"github.com/datasance/potctl/v1/pkg/util"
+	create "github.com/datasance/potctl/internal/create/namespace"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
 

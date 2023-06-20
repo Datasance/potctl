@@ -14,11 +14,11 @@
 package deletek8scontrolplane
 
 import (
-	"github.com/datasance/potctl/v1/internal/config"
-	"github.com/datasance/potctl/v1/internal/execute"
-	rsc "github.com/datasance/potctl/v1/internal/resource"
-	"github.com/datasance/potctl/v1/pkg/iofog/install"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Executor struct {

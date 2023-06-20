@@ -14,7 +14,7 @@
 package resource
 
 import (
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/pkg/util"
 	"testing"
 )
 

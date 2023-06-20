@@ -14,9 +14,9 @@
 package main
 
 import (
-	"github.com/datasance/potctl/v1/internal/cmd"
-	"github.com/datasance/potctl/v1/internal/config"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/cmd"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func main() {

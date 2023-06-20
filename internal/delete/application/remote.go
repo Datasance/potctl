@@ -14,9 +14,9 @@
 package deleteapplication
 
 import (
-	"github.com/datasance/potctl/v1/internal/execute"
-	clientutil "github.com/datasance/potctl/v1/internal/util/client"
-	"github.com/datasance/potctl/v1/pkg/util"
+	"github.com/datasance/potctl/internal/execute"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
 )
 

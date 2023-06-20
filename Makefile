@@ -15,7 +15,7 @@ SUFFIX ?= $(shell [ -z "$(shell git tag --points-at HEAD)" ] && echo "$(DEV_SUFF
 VERSION ?= $(MAJOR).$(MINOR).$(PATCH)$(SUFFIX)
 COMMIT ?= $(shell git rev-parse HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-PREFIX = github.com/datasance/potctl/v1/pkg/util
+PREFIX = github.com/datasance/potctl/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
 LDFLAGS += -X $(PREFIX).portManagerTag=3.0.0
 LDFLAGS += -X $(PREFIX).kubeletTag=3.0.0-beta1
