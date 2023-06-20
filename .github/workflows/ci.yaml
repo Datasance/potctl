@@ -224,6 +224,7 @@ jobs:
           VERSION: ${{ needs.Build.outputs.VERSION }}
           GITHUB_TOKEN: ${{ github.token }}
           TOKEN: ${{ secrets.PAT }}
+          TAP_TOKEN: ${{ secrets.TOKEN }}
       - name: Install Packagecloud cli
         run: go install github.com/edgeworx/packagecloud@v0.1.1
       - run: ./.packagecloud-publish.sh

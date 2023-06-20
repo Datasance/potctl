@@ -161,10 +161,12 @@ brews:
     name: potctl
     homepage: "https://github.com/datasance/potctl"
     description: "CLI for iofog"
+    goarm: 6
 
     tap:
       owner: datasance
       name: homebrew-potctl
+      token: "{{ .Env.TAP_TOKEN}}"
 
     url_template: "https://github.com/datasance/potctl/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
 
