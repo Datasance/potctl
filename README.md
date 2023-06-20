@@ -1,7 +1,7 @@
 ![potctl-logo](potctl-logo.png?raw=true "potctl logo")
 
 `potctl` is a CLI for the installation, configuration, and operation of ioFog 
-[Edge Compute Networks](https://iofog.org/docs/2/getting-started/core-concepts.html) (ECNs).
+[Edge Compute Networks](https://docs.datasance.com/#/./ioFog_3.0/getting-started/core-concepts) (ECNs).
 It can be used to remotely manage multiple ECNs from a single host. It is built for ioFog users and DevOps engineers 
 wanting to manage ECNs. It is modelled on existing tools such as Terraform or kubectl that can be used to automate
 infrastructure-as-code.
@@ -35,7 +35,7 @@ sudo apt install potctl
 
 ### Documentation
 
-The best way to learn how to use `potctl` is through the [iofog.org](https://iofog.org/docs/2/getting-started/quick-start-local.html) learning resources.
+The best way to learn how to use `potctl` is through the [iofog.org](https://docs.datasance.com/#/./ioFog_3.0/getting-started/quick-start-local) learning resources.
 
 #### Quick Start
 

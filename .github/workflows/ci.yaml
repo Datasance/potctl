@@ -189,10 +189,7 @@ jobs:
     needs: [Build, Test]
   
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'write'
-      id-token: 'write'
-      packages: 'write'
+    permissions: read-all|write-all
     name: Publish potctl Prod
     steps:
       - uses: actions/checkout@v3
