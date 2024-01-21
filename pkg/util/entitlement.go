@@ -11,7 +11,7 @@
  *
  */
 
-package client
+package util
 
 import (
 	"encoding/json"

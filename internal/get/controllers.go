@@ -112,7 +112,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
-		expiryDate, agentSeats, err:= clientutil.getEntitlementDatasance()
+		expiryDate, agentSeats, err:= util.getEntitlementDatasance()
 		row := []string{
 			ctrlConfig.GetName(),
 			status,
