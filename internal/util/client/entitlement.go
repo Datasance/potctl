@@ -11,7 +11,7 @@
  *
  */
 
- package get
+package client
 
 import (
 	"encoding/json"

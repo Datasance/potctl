@@ -19,7 +19,6 @@ import (
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	entitlementutil "github.com/datasance/potctl/internal/get/entitlement.go"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
@@ -113,7 +112,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
-		expiryDate, agentSeats, err:= entitlementutil.getEntitlementDatasance()
+		expiryDate, agentSeats, err:= clientutil.getEntitlementDatasance()
 		row := []string{
 			ctrlConfig.GetName(),
 			status,
