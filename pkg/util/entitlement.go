@@ -194,12 +194,12 @@ func GetEntitlementDatasance() (string, string, error) {
 		fmt.Println("Error activating license:", err)
 		return "", "", err
 	}
-	fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
+	//fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
 	var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
 	for _, activationAttributeObject := range activationResponse.Attributes {
 		if activationAttributeObject.Key == "Agent Seats" {
-			fmt.Println("Number of agents:", activationAttributeObject.Value)
+			//fmt.Println("Number of agents:", activationAttributeObject.Value)
 			agentSeats = activationAttributeObject.Value
 		}
 	}
