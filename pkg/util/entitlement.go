@@ -169,7 +169,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	return &activationResponse, nil
 }
 
-func getEntitlementDatasance() (string, string, error){
+func GetEntitlementDatasance() (string, string, error) {
 	productID := "prod_vKqv2P1OiUKBNZqa76a7iw"
 	activationCode := "3HE1-7832-CJ3S-JP89"
 	seatID := "burak.vural@datasance.com"
@@ -177,31 +177,30 @@ func getEntitlementDatasance() (string, string, error){
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
-		fmt.Sprintf("Error activating:", err)
-		return "","",err
+		fmt.Println("Error activating:", err)
+		return "", "", err
 	}
 
 	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
 	if err != nil {
-		fmt.Sprintf("Error getting entitlement details:", err)
-		return "","",err
+		fmt.Println("Error getting entitlement details:", err)
+		return "", "", err
 	}
 
 	_ = entitlementDetails
 
 	activationResponse, err := ActivateLicense(accessToken, nonceEntitlement)
 	if err != nil {
-		fmt.Sprintf("Error activating license:", err)
-		return "","",err
+		fmt.Println("Error activating license:", err)
+		return "", "", err
 	}
-	fmt.Sprintf("Expiry Date: ", activationResponse.EntitlementExpiryDate)
-	var expiryDate := activationResponse.EntitlementExpiryDate
+	fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
+	var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
-	for activationAttributeIndex,activationAttributeObject:= range activationResponse.Attributes {
-		_= activationAttributeIndex
-		if activationAttributeObject.Key == "Agent Seats"{
-			fmt.Sprintf("Number of agents: ", activationAttributeObject.Value)
-			agentSeats := activationAttributeObject.Value
+	for _, activationAttributeObject := range activationResponse.Attributes {
+		if activationAttributeObject.Key == "Agent Seats" {
+			fmt.Println("Number of agents:", activationAttributeObject.Value)
+			agentSeats = activationAttributeObject.Value
 		}
 	}
 	return expiryDate, agentSeats, nil
