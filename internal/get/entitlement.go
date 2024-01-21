@@ -215,4 +215,5 @@ func (exe *entitlementExecutor) Execute() error{
 			fmt.Sprintf("Number of agents: ", activationAttributeObject.Value)
 		}
 	}
+	return nil
 }
