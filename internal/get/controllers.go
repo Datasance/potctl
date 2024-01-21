@@ -113,6 +113,11 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
 		expiryDate, agentSeats, err := util.getEntitlementDatasance()
+
+		if err != nil {
+			return nil, err
+		}
+		
 		row := []string{
 			ctrlConfig.GetName(),
 			status,
@@ -123,9 +128,6 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			port,
 			expiryDate,
 			agentSeats,
-		}
-		if err != nil {
-			return nil, err
 		}
 		table[idx+1] = append(table[idx+1], row...)
 	}
