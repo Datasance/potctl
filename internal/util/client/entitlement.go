@@ -66,6 +66,12 @@ type ActivationResponse struct {
 	Features              []string              `json:"features"`
 }
 
+type ActivationAttribute struct {
+	Key   string `json:"key"`
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
+
 func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName string) (string, string, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activate"
 	method := "POST"
