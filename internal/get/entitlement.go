@@ -192,13 +192,13 @@ func (exe *entitlementExecutor) Execute() error{
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
 		fmt.Sprintf("Error activating:", err)
-		return
+		return err
 	}
 
 	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
 	if err != nil {
 		fmt.Sprintf("Error getting entitlement details:", err)
-		return
+		return err
 	}
 
 	_ = entitlementDetails
@@ -206,7 +206,7 @@ func (exe *entitlementExecutor) Execute() error{
 	activationResponse, err := ActivateLicense(accessToken, nonceEntitlement)
 	if err != nil {
 		fmt.Sprintf("Error activating license:", err)
-		return
+		return err
 	}
 	fmt.Sprintf("Expiry Date: ", activationResponse.EntitlementExpiryDate)
 	for activationAttributeIndex,activationAttributeObject:= range activationResponse.Attributes {
