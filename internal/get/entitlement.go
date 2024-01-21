@@ -66,26 +66,6 @@ type ActivationResponse struct {
 	Features              []string              `json:"features"`
 }
 
-type ActivationAttribute struct {
-	Key   string `json:"key"`
-	Type  string `json:"type"`
-	Value string `json:"value"`
-}
-
-type entitlementExecutor struct {
-	namespace string
-}
-
-func newEntitlementExecutor(namespace string) *entitlementExecutor {
-	exe := &entitlementExecutor{}
-	exe.namespace = namespace
-	return exe
-}
-
-func (exe *entitlementExecutor) GetName() string {
-	return ""
-}
-
 func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName string) (string, string, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activate"
 	method := "POST"
@@ -183,7 +163,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	return &activationResponse, nil
 }
 
-func (exe *entitlementExecutor) Execute() error{
+func getEntitlementDatasance() (string, string, error){
 	productID := "prod_vKqv2P1OiUKBNZqa76a7iw"
 	activationCode := "3HE1-7832-CJ3S-JP89"
 	seatID := "burak.vural@datasance.com"
@@ -192,13 +172,13 @@ func (exe *entitlementExecutor) Execute() error{
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
 		fmt.Sprintf("Error activating:", err)
-		return err
+		return "","",err
 	}
 
 	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
 	if err != nil {
 		fmt.Sprintf("Error getting entitlement details:", err)
-		return err
+		return "","",err
 	}
 
 	_ = entitlementDetails
@@ -206,14 +186,17 @@ func (exe *entitlementExecutor) Execute() error{
 	activationResponse, err := ActivateLicense(accessToken, nonceEntitlement)
 	if err != nil {
 		fmt.Sprintf("Error activating license:", err)
-		return err
+		return "","",err
 	}
 	fmt.Sprintf("Expiry Date: ", activationResponse.EntitlementExpiryDate)
+	var expiryDate=activationResponse.EntitlementExpiryDate
+	var agentSeats=""
 	for activationAttributeIndex,activationAttributeObject:= range activationResponse.Attributes {
 		_= activationAttributeIndex
 		if activationAttributeObject.Key == "Agent Seats"{
 			fmt.Sprintf("Number of agents: ", activationAttributeObject.Value)
+			agentSeats=activationAttributeObject.Value
 		}
 	}
-	return nil
+	return expiryDate,agentSeats,nil
 }

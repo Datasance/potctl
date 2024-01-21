@@ -19,6 +19,7 @@ import (
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
+	entitlementutil "github.com/datasance/potctl/internal/get/entitlement.go"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
@@ -82,7 +83,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENT EXPIRY DATE", "MAX NUMBER OF SEATS"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
@@ -112,6 +113,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
+		expiryDate, agentSeats, err:= entitlementutil.getEntitlementDatasance()
 		row := []string{
 			ctrlConfig.GetName(),
 			status,
@@ -120,6 +122,8 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			ctrlStatus.Versions.Controller,
 			addr,
 			port,
+			expiryDate,
+			agentSeats,
 		}
 		table[idx+1] = append(table[idx+1], row...)
 	}
