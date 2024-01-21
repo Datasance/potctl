@@ -195,13 +195,13 @@ func getEntitlementDatasance() (string, string, error){
 		return "","",err
 	}
 	fmt.Sprintf("Expiry Date: ", activationResponse.EntitlementExpiryDate)
-	expiryDate:=activationResponse.EntitlementExpiryDate
-	agentSeats:=""
+	var expiryDate := activationResponse.EntitlementExpiryDate
+	var agentSeats = ""
 	for activationAttributeIndex,activationAttributeObject:= range activationResponse.Attributes {
 		_= activationAttributeIndex
 		if activationAttributeObject.Key == "Agent Seats"{
 			fmt.Sprintf("Number of agents: ", activationAttributeObject.Value)
-			agentSeats:=activationAttributeObject.Value
+			agentSeats := activationAttributeObject.Value
 		}
 	}
 	return expiryDate, agentSeats, nil
