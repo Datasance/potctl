@@ -82,7 +82,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENT EXPIRY DATE", "MAX NUMBER OF SEATS"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENTEXPIRYDATE", "MAXNUMBEROFSEATS"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
@@ -111,8 +111,10 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		if ctrlConfig.GetCreatedTime() != "" {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
+		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
 		expiryDate, agentSeats, err := util.GetEntitlementDatasance()
+
 
 		if err != nil {
 			return nil, err
