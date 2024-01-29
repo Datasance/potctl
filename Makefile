@@ -27,7 +27,7 @@ LDFLAGS += -X $(PREFIX).agentTag=3.0.1
 LDFLAGS += -X $(PREFIX).controllerVersion=3.0.2
 LDFLAGS += -X $(PREFIX).agentVersion=3.0.1
 LDFLAGS += -X $(PREFIX).repo=iofog
-GO_SDK_MODULE = iofog-go-sdk/v3@v3.0.0
+GO_SDK_MODULE = iofog-go-sdk/v3@v3.3.1
 OPERATOR_MODULE = iofog-operator/v3@v3.0.1
 REPORTS_DIR ?= reports
 TEST_RESULTS ?= TEST-potctl.txt
