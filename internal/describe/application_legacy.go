@@ -15,7 +15,7 @@ package describe
 
 import (
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 func (exe *applicationExecutor) initLegacy() (err error) {

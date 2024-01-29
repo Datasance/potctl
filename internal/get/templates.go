@@ -18,7 +18,7 @@ import (
 
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/iofog-go-sdk/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type applicationTemplateExecutor struct {

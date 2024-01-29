@@ -14,8 +14,8 @@
 package resource
 
 import (
-	"github.com/datasance/iofog-go-sdk/pkg/apps"
-	"github.com/datasance/iofog-go-sdk/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/apps"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type Route = apps.Route

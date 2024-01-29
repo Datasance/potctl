@@ -17,7 +17,7 @@ import (
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/spf13/cobra"
 )
 

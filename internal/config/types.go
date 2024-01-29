@@ -1,7 +1,7 @@
 package config
 
 import (
-	apps "github.com/datasance/iofog-go-sdk/pkg/apps"
+	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 )
 
 type Kind string

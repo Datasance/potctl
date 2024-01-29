@@ -13,7 +13,7 @@
 
 package iofog
 
-import "github.com/datasance/iofog-go-sdk/pkg/client"
+import "github.com/datasance/iofog-go-sdk/v3/pkg/client"
 
 // String and numeric values of TCP ports used accross ioFog
 const (

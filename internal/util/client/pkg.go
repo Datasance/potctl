@@ -14,7 +14,7 @@
 package client
 
 import (
-	"github.com/datasance/iofog-go-sdk/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 var pkg struct {
