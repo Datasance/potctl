@@ -169,11 +169,11 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	return &activationResponse, nil
 }
 
-func GetEntitlementDatasance() (string, string, error) {
+func GetEntitlementDatasance(activationCode string, seatID string, seatName string) (string, string, error) {
 	productID := "prod_vKqv2P1OiUKBNZqa76a7iw"
-	activationCode := "3HE1-7832-CJ3S-JP89"
-	seatID := "burak.vural@datasance.com"
-	seatName := "Burak Vural"
+	//activationCode := "3HE1-7832-CJ3S-JP89"
+	//seatID := "burak.vural@datasance.com"
+	//seatName := "Burak Vural"
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {

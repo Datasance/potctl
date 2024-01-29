@@ -17,7 +17,7 @@ import (
 	"fmt"
 
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/pkg/client"
 
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/pkg/util"

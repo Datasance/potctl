@@ -21,7 +21,7 @@ import (
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/pkg/client"
 )
 
 type controllerExecutor struct {
@@ -80,9 +80,17 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 	// Handle remote and local
 	controllers := ns.GetControllers()
 
+
+	endpoint, err := controlPlane.GetEndpoint()
+	if err != nil {
+		return nil, err
+	}
+
+	user := controlPlane.GetUser()
+
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENTEXPIRYDATE", "MAXNUMBEROFSEATS"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENT-EXPIRY-DATE", "MAX-NUMBER-OF-AGENT-SEATS"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
@@ -113,7 +121,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
-		expiryDate, agentSeats, err := util.GetEntitlementDatasance()
+		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.subscriptionKey, namespace, user.Email)
 
 
 		if err != nil {
