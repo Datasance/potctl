@@ -112,7 +112,7 @@ do_start_iofog(){
 }
 
 agent_version="$1"
-repo=$([ -z "$2" ] && echo "iofog/iofog-agent" || echo "$2")
+repo=$([ -z "$2" ] && echo "datasance/iofog-agent" || echo "$2")
 token="$3"
 echo "Using variables"
 echo "version: $agent_version"

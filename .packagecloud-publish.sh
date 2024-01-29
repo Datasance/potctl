@@ -39,8 +39,8 @@ function deb() {
   echo "$packages"
   echo ""
   declare -a distro_versions=(
-    "ubuntu/focal" "ubuntu/xenial" "ubuntu/bionic" "ubuntu/trusty" "ubuntu/jammy"
-    "debian/stretch" "debian/buster" "debian/bullseye"
+    "ubuntu/focal" "ubuntu/xenial" "ubuntu/bionic" "ubuntu/trusty" "ubuntu/jammy" "ubuntu/lunar" "ubuntu/kinetic" "ubuntu/impish" "ubuntu/bionic" "ubuntu/focal" 
+    "debian/stretch" "debian/buster" "debian/bullseye" "debian/bookworm"
     "raspbian/stretch" "raspbian/buster" "raspbian/bullseye"
     "any/any"
   )
@@ -70,8 +70,8 @@ function rpm() {
 
 
   declare -a distro_versions=(
-    "fedora/23" "fedora/24" "fedora/30" "fedora/31"
-    "el/6" "el/7" "el/8"
+    "fedora/31" "fedora/35" "fedora/36"
+    "el/6" "el/7" "el/8" "el/9"
     "rpm_any/rpm_any"
   )
 
