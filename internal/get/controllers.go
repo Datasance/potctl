@@ -121,7 +121,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
-		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.subscriptionKey, namespace, user.Email)
+		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
 
 
 		if err != nil {
