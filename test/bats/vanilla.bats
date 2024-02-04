@@ -86,7 +86,7 @@ spec:
   SSH_COMMAND="ssh -oStrictHostKeyChecking=no -i $SSH_KEY_PATH $VANILLA_USER@$VANILLA_HOST"
   [[ "ok" == $($SSH_COMMAND -- sudo iofog-agent status | grep 'Controller' | awk '{print $5}') ]]
   [[ "RUNNING" == $($SSH_COMMAND --  sudo iofog-agent status | grep 'daemon' | awk '{print $4}') ]]
-  [[ "http://${VANILLA_HOST}:51121/api/v3/" == $($SSH_COMMAND -- sudo iofog-agent info | grep 'Controller' | awk '{print $4}') ]]
+  [[ "http://${VANILLA_HOST}:51121/api/v1/" == $($SSH_COMMAND -- sudo iofog-agent info | grep 'Controller' | awk '{print $4}') ]]
   [[ $($SSH_COMMAND -- sudo cat /etc/iofog-agent/microservices.json | grep "router") ]]
   stopTest
 }

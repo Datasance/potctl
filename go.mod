@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.18.1
-	github.com/datasance/iofog-go-sdk/v3 v3.3.1
+	github.com/datasance/iofog-go-sdk/v3 v3.3.5
 	github.com/docker/docker v20.10.14+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/eclipse-iofog/iofog-operator/v3 v3.1.1
+	github.com/datasance/iofog-operator/v3 v3.2.3
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
@@ -31,7 +31,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/eclipse-iofog/iofog-go-sdk/v3 v3.0.0-beta2.0.20220405032908-feceb5c7b126 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -96,4 +95,3 @@ exclude github.com/Sirupsen/logrus v1.1.1
 
 exclude github.com/Sirupsen/logrus v1.1.0
 
-replace github.com/eclipse/iofog-go-sdk/v3 => github.com/datasance/iofog-go-sdk/v3 v3.3.1

@@ -35,7 +35,7 @@ func GetBaseURL(controllerEndpoint string) (*url.URL, error) {
 
 	// Default path
 	if u.Path == "" {
-		u.Path = "api/v3"
+		u.Path = "api/v1"
 	}
 	u.RawQuery = ""
 	u.Fragment = ""

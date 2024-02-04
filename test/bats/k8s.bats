@@ -85,7 +85,7 @@ spec:
 
 @test "Get Controller logs on K8s after deploy" {
   startTest
-  potctl -v -n "$NS" logs controller "$NAME" | grep "api/v3"
+  potctl -v -n "$NS" logs controller "$NAME" | grep "api/v1"
   stopTest
 }
 
