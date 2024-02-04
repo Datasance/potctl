@@ -85,11 +85,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	endpoint, err := controlPlaneForUser.GetEndpoint()
-	if err != nil {
-		return nil, err
-	}
-
+	
 	user := controlPlaneForUser.GetUser()
 
 	// Generate table and headers
