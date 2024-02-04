@@ -81,12 +81,16 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 	controllers := ns.GetControllers()
 
 
-	endpoint, err := controlPlane.GetEndpoint()
+	controlPlaneForUser, err := ns.GetControlPlane()
+	if err != nil {
+		return nil, err
+	}
+	endpoint, err := controlPlaneForUser.GetEndpoint()
 	if err != nil {
 		return nil, err
 	}
 
-	user := controlPlane.GetUser()
+	user := controlPlaneForUser.GetUser()
 
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
