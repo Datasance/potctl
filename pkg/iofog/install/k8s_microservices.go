@@ -64,7 +64,7 @@ func newOperatorMicroservice() *microservice {
 			},
 			{
 				APIGroups: []string{
-					"iofog.org",
+					"datasance.com",
 				},
 				Resources: []string{
 					"apps",
