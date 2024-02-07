@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type EntitlementResponse struct {
@@ -171,9 +172,10 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 
 func GetEntitlementDatasance(activationCode string, seatID string, seatName string) (string, string, error) {
 	productID := "prod_vKqv2P1OiUKBNZqa76a7iw"
-	//activationCode := "3HE1-7832-CJ3S-JP89"
-	//seatID := "burak.vural@datasance.com"
-	//seatName := "Burak Vural"
+	// Sample variables for activation
+	//activationCode := "XXXX-XXXX-XXXX-XXXX"
+	//seatID := "foo.bar@datasance.com"
+	//seatName := "Foo Bar"
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
@@ -204,4 +206,40 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		}
 	}
 	return expiryDate, agentSeats, nil
+}
+
+func checkExpiryDate(dateString string) bool {
+
+	time, err:= time.parse(time.RFC3339Nano, dateString)
+
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false
+	}
+
+	currentTime := time.Now()
+
+	if currentTime.After(time) {
+		fmt.Println("Your subscription has been expired, please contact with Datasance Sales Team or Datasance Partner")
+	}
+
+	return currentTime.After(time)
+}
+
+func checkNumOfAgentSeats(currentAgentNum, maxAgentNum string) bool {
+
+	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
+
+    if err != nil {
+        fmt.Println("Error converting maximum agent number to integer:", err)
+        return false
+    }
+
+	if currentAgentNum >= maxAgentNum {
+		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
+		fmt.Println("Your active subscription includes maximum agent seats as ", agentSeats)
+		fmt.Println("Please contact with Datasance Sales Team or Datasance Partner")
+	}
+
+	return currentAgentNum <= maxAgentNum
 }

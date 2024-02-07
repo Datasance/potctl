@@ -22,6 +22,7 @@ import (
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
+	"strconv"
 )
 
 type AgentDeployExecutor interface {
@@ -61,6 +62,25 @@ func (facade *facadeExecutor) Execute() (err error) {
 	if len(controlPlane.GetControllers()) == 0 {
 		return rsc.NewNoControlPlaneError(facade.namespace)
 	}
+
+	agents := ns.getAgents()
+	numOfAgents := len(agents)
+	fmt.Println("Current number of agents are ",numOfAgents)
+
+	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if util.checkExpiryDate(expiryDate){
+		return
+	}
+
+	if util.checkNumOfAgentSeats(numOfAgents,agentSeats){
+		return
+	}
+
 
 	if !facade.isSystem || install.IsVerbose() {
 		util.SpinStart(fmt.Sprintf("Deploying agent %s", facade.GetName()))
