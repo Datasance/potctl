@@ -129,6 +129,8 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	fmt.Println("Status code for activation is ", resp.StatusCode)
+
 	if resp.StatusCode == 402 {
 		return nil, fmt.Errorf("Entitlement has expired")
 	}
