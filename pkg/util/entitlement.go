@@ -195,7 +195,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		return "", "", err
 	}
 
-	if string.contains(nonceEntitlement,"Entitlement has expired") {
+	if strings.Contains(nonceEntitlement,"Entitlement has expired") {
 		return "Entitlement has expired", "0", nil
 	}
 
