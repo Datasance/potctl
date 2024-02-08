@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strings"
 	"strconv"
+	"errors"
 )
 
 type EntitlementResponse struct {
@@ -72,6 +73,8 @@ type ActivationAttribute struct {
 	Type  string `json:"type"`
 	Value string `json:"value"`
 }
+
+var ErrLicenseExpired = errors.New("Entitlement has expired")
 
 func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName string) (string, string, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activate"
@@ -132,9 +135,6 @@ func GetEntitlementDetails(accessToken, nonce string) (*EntitlementResponse, str
 	fmt.Println("Phase2")
 	defer resp.Body.Close()
 	fmt.Println("Phase3")
-	if resp.StatusCode == 402 {
-		return nil, "Entitlement has expired", nil
-	}
 
 	fmt.Println("Phase4")
 	if resp.StatusCode != http.StatusOK {
@@ -169,6 +169,10 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == 402 {
+		return nil, ErrLicenseExpired
+	}
+
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
 		return nil, fmt.Errorf("error decoding JSON response: %v", err)
@@ -190,23 +194,17 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		return "", "", err
 	}
 
-	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
+	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
-		fmt.Println("Error getting entitlement details:", err)
-		return "", "", err
+        switch {
+			case errors.Is(err, ErrLicenseExpired):
+				return "Entitlement has expired", "0", nil
+			default:
+				fmt.Println("Error activating license:", err)
+        }
+        return "", "", err
 	}
 
-	if strings.Contains(nonceEntitlement,"Entitlement has expired") {
-		return "Entitlement has expired", "0", nil
-	}
-
-	_ = entitlementDetails
-
-	activationResponse, err := ActivateLicense(accessToken, nonceEntitlement)
-	if err != nil {
-		fmt.Println("Error activating license:", err)
-		return "", "", err
-	}
 	//fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
     var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
