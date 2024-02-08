@@ -101,6 +101,14 @@ func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName strin
 	}
 	defer res.Body.Close()
 
+	if resp.StatusCode == 402 {
+		return nil, fmt.Errorf("Entitlement has expired")
+	}
+
+	if resp.StatusCode == 404 {
+		return nil, fmt.Errorf("Entitlement not found")
+	}
+
 	var activateResponse ActivationResponse
 	if err := json.NewDecoder(res.Body).Decode(&activateResponse); err != nil {
 		return "", "", fmt.Errorf("error decoding JSON response: %v", err)
@@ -131,10 +139,6 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 
 	fmt.Println("Status code for activation is ", resp.StatusCode)
 
-	if resp.StatusCode == 402 {
-		return nil, fmt.Errorf("Entitlement has expired")
-	}
-
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
 		return nil, fmt.Errorf("error decoding JSON response: %v", err)
@@ -152,19 +156,20 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
-		fmt.Println("Error activating:", err)
+        switch {
+		case strings.Contains(err.Error(), "Entitlement has expired"):
+			return "Entitlement has expired", "0", nil
+		case strings.Contains(err.Error(), "Entitlement not found"):
+			return "Entitlement not found", "0", nil
+		default:
+			fmt.Println("Error activating license:", err)
+		}
 		return "", "", err
 	}
 
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
-		fmt.Println("Error is ", err.Error())
-        switch {
-			case strings.Contains(err.Error(), "Entitlement has expired"):
-				return "Entitlement has expired", "0", nil
-			default:
-				fmt.Println("Error activating license:", err)
-        }
+		fmt.Println("Error activating license:", err)
         return "", "", err
 	}
 
@@ -184,6 +189,11 @@ func CheckExpiryDate(dateString string) (bool) {
 
 	fmt.Println("Checking license expiry date from subscription")
 	if strings.Contains(dateString,"Entitlement has expired") {
+		fmt.Println("Entitlement has expired")
+		return false
+	}
+	if strings.Contains(dateString,"Entitlement not found") {
+		fmt.Println("Entitlement not found")
 		return false
 	}
 	return true
