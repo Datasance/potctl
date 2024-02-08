@@ -236,11 +236,11 @@ func checkNumOfAgentSeats(currentAgentNum, maxAgentNum string) bool {
         return false
     }
 
-	if currentAgentNum >= maxAgentNum {
+	if currentAgentNum >= maxAgentNumAsInt {
 		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
 		fmt.Println("Your active subscription includes maximum agent seats as ", maxAgentNum)
 		fmt.Println("Please contact with Datasance Sales Team or Datasance Partner")
 	}
 
-	return currentAgentNum <= maxAgentNum
+	return currentAgentNum <= maxAgentNumAsInt
 }
