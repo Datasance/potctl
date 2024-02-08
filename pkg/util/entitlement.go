@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"strings"
 	"strconv"
-	"errors"
 )
 
 type EntitlementResponse struct {
@@ -74,8 +73,6 @@ type ActivationAttribute struct {
 	Value string `json:"value"`
 }
 
-var ErrLicenseExpired = errors.New("Entitlement has expired")
-
 func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName string) (string, string, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activate"
 	method := "POST"
@@ -112,43 +109,6 @@ func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName strin
 	return activateResponse.AccessToken, res.Header.Get("N-Nonce"), nil
 }
 
-func GetEntitlementDetails(accessToken, nonce string) (*EntitlementResponse, string, error) {
-	url := "https://datasance.license.zentitle.io/api/v1/activation/entitlement"
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, "", fmt.Errorf("error creating request: %v", err)
-	}
-
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("N-Nonce", nonce)
-	req.Header.Set("N-TenantId", "t_h42rcI0Lq0_yIAGfLUf3Xg")
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	fmt.Println("Phase1")
-	if err != nil {
-		return nil, "", fmt.Errorf("error sending request: %v", err)
-	}
-	fmt.Println("Phase2")
-	defer resp.Body.Close()
-	fmt.Println("Phase3")
-
-	fmt.Println("Phase4")
-	if resp.StatusCode != http.StatusOK {
-		return nil, "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-	fmt.Println("Phase5")
-	var entitlementResponse EntitlementResponse
-	if err := json.NewDecoder(resp.Body).Decode(&entitlementResponse); err != nil {
-		return nil, "", fmt.Errorf("error decoding JSON response: %v", err)
-	}
-	fmt.Println("Phase6")
-	return &entitlementResponse, resp.Header.Get("N-Nonce"), nil
-}
-
 func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activation"
 
@@ -170,7 +130,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 402 {
-		return nil, ErrLicenseExpired
+		return nil, fmt.Errorf("ErrLicenseExpired")
 	}
 
 	var activationResponse ActivationResponse
@@ -197,7 +157,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
         switch {
-			case errors.Is(err, ErrLicenseExpired):
+			case strings.Contains(err.Error(), "Entitlement has expired"):
 				return "Entitlement has expired", "0", nil
 			default:
 				fmt.Println("Error activating license:", err)
