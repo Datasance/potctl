@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
 	"strconv"
 )
 
@@ -187,7 +186,6 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		fmt.Println("Error activating:", err)
 		return "", "", err
 	}
-	var expiryDate = ""
 
 	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
 	if err != nil {
@@ -207,7 +205,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		return "", "", err
 	}
 	//fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
-    expiryDate := activationResponse.EntitlementExpiryDate
+    var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
 	for _, activationAttributeObject := range activationResponse.Attributes {
 		if activationAttributeObject.Key == "Agent Seats" {
