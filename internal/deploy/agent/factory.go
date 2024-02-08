@@ -22,7 +22,6 @@ import (
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"strconv"
 )
 
 type AgentDeployExecutor interface {
@@ -63,7 +62,7 @@ func (facade *facadeExecutor) Execute() (err error) {
 		return rsc.NewNoControlPlaneError(facade.namespace)
 	}
 
-	agents := ns.getAgents()
+	agents := ns.GetAgents()
 	numOfAgents := len(agents)
 	fmt.Println("Current number of agents are ",numOfAgents)
 
