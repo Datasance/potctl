@@ -156,8 +156,8 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
+		fmt.Println("Error is ", err.Error())
         switch {
-			fmt.Println("Error is ", err.Error())
 			case strings.Contains(err.Error(), "Entitlement has expired"):
 				return "Entitlement has expired", "0", nil
 			default:
