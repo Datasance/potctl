@@ -246,5 +246,5 @@ func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
 		fmt.Println("Please contact with Datasance Sales Team or Datasance Partner")
 	}
 
-	return currentAgentNum <= maxAgentNumAsInt
+	return currentAgentNum < maxAgentNumAsInt
 }
