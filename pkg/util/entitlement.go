@@ -131,6 +131,10 @@ func GetEntitlementDetails(accessToken, nonce string) (*EntitlementResponse, str
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == 402 {
+		return nil, "Entitlement has expired", nil
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
@@ -183,11 +187,16 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		fmt.Println("Error activating:", err)
 		return "", "", err
 	}
+	var expiryDate = ""
 
 	entitlementDetails, nonceEntitlement, err := GetEntitlementDetails(accessToken, nonceActivation)
 	if err != nil {
 		fmt.Println("Error getting entitlement details:", err)
 		return "", "", err
+	}
+
+	if string.contains(nonceEntitlement,"Entitlement has expired") {
+		return "Entitlement has expired", "0", nil
 	}
 
 	_ = entitlementDetails
@@ -198,7 +207,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 		return "", "", err
 	}
 	//fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
-	var expiryDate = activationResponse.EntitlementExpiryDate
+    expiryDate := activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
 	for _, activationAttributeObject := range activationResponse.Attributes {
 		if activationAttributeObject.Key == "Agent Seats" {
@@ -212,21 +221,10 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 func CheckExpiryDate(dateString string) (bool) {
 
 	fmt.Println("Checking license expiry date from subscription")
-
-	dateExpirytime, err:= time.Parse(time.RFC3339Nano, dateString)
-
-	if err != nil {
-		fmt.Println("Error:", err)
+	if strings.Contains(dateString,"Entitlement has expired") {
 		return false
 	}
-
-	currentTime := time.Now()
-
-	if currentTime.After(dateExpirytime) {
-		fmt.Println("Your subscription has been expired, please contact with Datasance Sales Team or Datasance Partner")
-	}
-
-	return currentTime.Before(dateExpirytime)
+	return true
 }
 
 func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
