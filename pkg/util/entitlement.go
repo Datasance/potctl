@@ -226,7 +226,7 @@ func CheckExpiryDate(dateString string) (bool) {
 		fmt.Println("Your subscription has been expired, please contact with Datasance Sales Team or Datasance Partner")
 	}
 
-	return currentTime.After(dateExpirytime)
+	return currentTime.Before(dateExpirytime)
 }
 
 func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
