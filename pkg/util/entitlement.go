@@ -125,24 +125,27 @@ func GetEntitlementDetails(accessToken, nonce string) (*EntitlementResponse, str
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	fmt.Println("Phase1")
 	if err != nil {
 		return nil, "", fmt.Errorf("error sending request: %v", err)
 	}
+	fmt.Println("Phase2")
 	defer resp.Body.Close()
-
+	fmt.Println("Phase3")
 	if resp.StatusCode == 402 {
 		return nil, "Entitlement has expired", nil
 	}
 
+	fmt.Println("Phase4")
 	if resp.StatusCode != http.StatusOK {
 		return nil, "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
-
+	fmt.Println("Phase5")
 	var entitlementResponse EntitlementResponse
 	if err := json.NewDecoder(resp.Body).Decode(&entitlementResponse); err != nil {
 		return nil, "", fmt.Errorf("error decoding JSON response: %v", err)
 	}
-
+	fmt.Println("Phase6")
 	return &entitlementResponse, resp.Header.Get("N-Nonce"), nil
 }
 
