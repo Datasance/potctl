@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"strconv"
 )
 
 type EntitlementResponse struct {
@@ -210,7 +211,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 func checkExpiryDate(dateString string) bool {
 
-	time, err:= time.parse(time.RFC3339Nano, dateString)
+	dateExpirytime, err:= time.Parse(time.RFC3339Nano, dateString)
 
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -219,11 +220,11 @@ func checkExpiryDate(dateString string) bool {
 
 	currentTime := time.Now()
 
-	if currentTime.After(time) {
+	if currentTime.After(dateExpirytime) {
 		fmt.Println("Your subscription has been expired, please contact with Datasance Sales Team or Datasance Partner")
 	}
 
-	return currentTime.After(time)
+	return currentTime.After(dateExpirytime)
 }
 
 func checkNumOfAgentSeats(currentAgentNum, maxAgentNum string) bool {
@@ -237,7 +238,7 @@ func checkNumOfAgentSeats(currentAgentNum, maxAgentNum string) bool {
 
 	if currentAgentNum >= maxAgentNum {
 		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
-		fmt.Println("Your active subscription includes maximum agent seats as ", agentSeats)
+		fmt.Println("Your active subscription includes maximum agent seats as ", maxAgentNum)
 		fmt.Println("Please contact with Datasance Sales Team or Datasance Partner")
 	}
 
