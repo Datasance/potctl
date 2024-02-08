@@ -101,12 +101,12 @@ func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName strin
 	}
 	defer res.Body.Close()
 
-	if resp.StatusCode == 402 {
-		return nil, fmt.Errorf("Entitlement has expired")
+	if res.StatusCode == 402 {
+		return "", "", fmt.Errorf("Entitlement has expired")
 	}
 
-	if resp.StatusCode == 404 {
-		return nil, fmt.Errorf("Entitlement not found")
+	if res.StatusCode == 404 {
+		return "", "", fmt.Errorf("Entitlement not found")
 	}
 
 	var activateResponse ActivationResponse
