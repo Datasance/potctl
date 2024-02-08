@@ -144,7 +144,7 @@ func (exe *RemoteExecutor) Execute() error {
 	numOfAgents := len(agents)
 	fmt.Println("Current number of agents are ", numOfAgents)
 
-	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, facade.namespace, user.Email)
+	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
 
 	if err != nil {
 		return err
