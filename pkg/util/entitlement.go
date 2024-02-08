@@ -211,6 +211,8 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 func CheckExpiryDate(dateString string) (bool) {
 
+	fmt.Println("Checking license expiry date from subscription")
+
 	dateExpirytime, err:= time.Parse(time.RFC3339Nano, dateString)
 
 	if err != nil {
@@ -230,6 +232,8 @@ func CheckExpiryDate(dateString string) (bool) {
 func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
+
+	fmt.Println("Checking number of agents from subscription")
 
     if err != nil {
         fmt.Println("Error converting maximum agent number to integer:", err)
