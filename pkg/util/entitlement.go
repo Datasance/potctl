@@ -227,7 +227,7 @@ func checkExpiryDate(dateString string) bool {
 	return currentTime.After(dateExpirytime)
 }
 
-func checkNumOfAgentSeats(currentAgentNum, maxAgentNum string) bool {
+func checkNumOfAgentSeats(currentAgentNum int, maxAgentNum string) bool {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 
