@@ -61,15 +61,17 @@ func (facade *facadeExecutor) Execute() (err error) {
 	if len(controlPlane.GetControllers()) == 0 {
 		return rsc.NewNoControlPlaneError(facade.namespace)
 	}
+	
+	user := controlPlane.GetUser()
 
 	agents := ns.GetAgents()
 	numOfAgents := len(agents)
-	fmt.Println("Current number of agents are ",numOfAgents)
+	fmt.Println("Current number of agents are ", numOfAgents)
 
-	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
+	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, facade.namespace, user.Email)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if util.checkExpiryDate(expiryDate){
