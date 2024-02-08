@@ -15,7 +15,7 @@ package deployagent
 
 import (
 	"fmt"
-
+	"errors"
 	"github.com/datasance/potctl/internal/config"
 	agentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	"github.com/datasance/potctl/internal/execute"
@@ -75,11 +75,11 @@ func (facade *facadeExecutor) Execute() (err error) {
 	}
 
 	if util.CheckExpiryDate(expiryDate) == false {
-		return
+		return errors.New("Checking expiry date from subscription is unsuccessful")
 	}
 
 	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
-		return
+		return errors.New("Checking number of current agent numbers from subscription is unsuccessful")
 	}
 
 
