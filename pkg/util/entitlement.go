@@ -209,7 +209,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 	return expiryDate, agentSeats, nil
 }
 
-func checkExpiryDate(dateString string) bool {
+func CheckExpiryDate(dateString string) (bool) {
 
 	dateExpirytime, err:= time.Parse(time.RFC3339Nano, dateString)
 
@@ -227,7 +227,7 @@ func checkExpiryDate(dateString string) bool {
 	return currentTime.After(dateExpirytime)
 }
 
-func checkNumOfAgentSeats(currentAgentNum int, maxAgentNum string) bool {
+func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 

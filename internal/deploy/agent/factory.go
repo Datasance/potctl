@@ -74,11 +74,11 @@ func (facade *facadeExecutor) Execute() (err error) {
 		return err
 	}
 
-	if util.checkExpiryDate(expiryDate){
+	if util.CheckExpiryDate(expiryDate){
 		return
 	}
 
-	if util.checkNumOfAgentSeats(numOfAgents,agentSeats){
+	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats){
 		return
 	}
 
