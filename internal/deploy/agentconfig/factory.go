@@ -15,6 +15,7 @@ package deployagentconfig
 
 import (
 	"fmt"
+	"errors"
 	"net/url"
 	"strings"
 
@@ -119,9 +120,6 @@ func isOverridingSystemAgent(controllerHost, agentHost string, isSystem bool) (e
 
 func (exe *RemoteExecutor) Execute() error {
 	isSystem := iutil.IsSystemAgent(exe.agentConfig)
-	if !isSystem || install.IsVerbose() {
-		util.SpinStart(fmt.Sprintf("Deploying agent %s configuration", exe.GetName()))
-	}
 
 	// Check controller is reachable
 	clt, err := clientutil.NewControllerClient(exe.namespace)
@@ -139,6 +137,31 @@ func (exe *RemoteExecutor) Execute() error {
 		util.PrintError("You must deploy a Controller to a namespace before deploying any Agents")
 		return err
 	}
+
+	user := controlPlane.GetUser()
+
+	agents := ns.GetAgents()
+	numOfAgents := len(agents)
+	fmt.Println("Current number of agents are ", numOfAgents)
+
+	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, facade.namespace, user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	if util.CheckExpiryDate(expiryDate) == false {
+		return errors.New("Checking subscription/expiry date is unsuccessful")
+	}
+
+	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
+		return errors.New("Checking number of current agent numbers from subscription is unsuccessful")
+	}
+
+	if !isSystem || install.IsVerbose() {
+		util.SpinStart(fmt.Sprintf("Deploying agent %s configuration", exe.GetName()))
+	}
+
 	host := ""
 	if exe.agentConfig.Host != nil {
 		host = *exe.agentConfig.Host

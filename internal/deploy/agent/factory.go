@@ -15,7 +15,6 @@ package deployagent
 
 import (
 	"fmt"
-	"errors"
 	"github.com/datasance/potctl/internal/config"
 	agentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	"github.com/datasance/potctl/internal/execute"
@@ -62,26 +61,6 @@ func (facade *facadeExecutor) Execute() (err error) {
 		return rsc.NewNoControlPlaneError(facade.namespace)
 	}
 	
-	user := controlPlane.GetUser()
-
-	agents := ns.GetAgents()
-	numOfAgents := len(agents)
-	fmt.Println("Current number of agents are ", numOfAgents)
-
-	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, facade.namespace, user.Email)
-
-	if err != nil {
-		return err
-	}
-
-	if util.CheckExpiryDate(expiryDate) == false {
-		return errors.New("Checking subscription/expiry date is unsuccessful")
-	}
-
-	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
-		return errors.New("Checking number of current agent numbers from subscription is unsuccessful")
-	}
-
 
 	if !facade.isSystem || install.IsVerbose() {
 		util.SpinStart(fmt.Sprintf("Deploying agent %s", facade.GetName()))
