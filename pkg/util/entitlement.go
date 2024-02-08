@@ -163,8 +163,8 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 			return "Entitlement not found", "0", nil
 		default:
 			fmt.Println("Error activating license:", err)
+			return "", "", err
 		}
-		return "", "", err
 	}
 
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)

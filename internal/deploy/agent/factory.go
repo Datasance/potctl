@@ -75,7 +75,7 @@ func (facade *facadeExecutor) Execute() (err error) {
 	}
 
 	if util.CheckExpiryDate(expiryDate) == false {
-		return errors.New("Checking expiry date from subscription is unsuccessful")
+		return errors.New("Checking subscription/expiry date is unsuccessful")
 	}
 
 	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
