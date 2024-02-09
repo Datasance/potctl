@@ -73,6 +73,8 @@ type ActivationAttribute struct {
 	Value string `json:"value"`
 }
 
+var productID = "prod_vKqv2P1OiUKBNZqa76a7iw"
+
 func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName string) (string, string, error) {
 	url := "https://datasance.license.zentitle.io/api/v1/activate"
 	method := "POST"
@@ -122,7 +124,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("error creating activation request: %v", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -133,7 +135,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error sending request: %v", err)
+		return nil, fmt.Errorf("error sending activation request: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -141,18 +143,38 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
-		return nil, fmt.Errorf("error decoding JSON response: %v", err)
+		return nil, fmt.Errorf("error decoding JSON response from activation event is: %v", err)
 	}
 
 	return &activationResponse, nil
 }
 
+func DeactivateLicense(accessToken, nonce string) {
+
+	url := "https://datasance.license.zentitle.io/api/v1/activation"
+
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		fmt.Println("error creating deactivation request: %v", err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("N-TenantId", "t_h42rcI0Lq0_yIAGfLUf3Xg")
+	req.Header.Set("N-Nonce", nonce)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println("error sending deactivation request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println("Status code for deactivation is ", resp.StatusCode)
+}
+
 func GetEntitlementDatasance(activationCode string, seatID string, seatName string) (string, string, error) {
-	productID := "prod_vKqv2P1OiUKBNZqa76a7iw"
-	// Sample variables for activation
-	//activationCode := "XXXX-XXXX-XXXX-XXXX"
-	//seatID := "foo.bar@datasance.com"
-	//seatName := "Foo Bar"
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
@@ -173,17 +195,33 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
         return "", "", err
 	}
 
-	//fmt.Println("Expiry Date:", activationResponse.EntitlementExpiryDate)
     var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
 	for _, activationAttributeObject := range activationResponse.Attributes {
 		if activationAttributeObject.Key == "Agent Seats" {
-			//fmt.Println("Number of agents:", activationAttributeObject.Value)
 			agentSeats = activationAttributeObject.Value
 		}
 	}
 	return expiryDate, agentSeats, nil
 }
+
+func DeactivateEntitlementDatasance(activationCode string, seatID string, seatName string) {
+	accessToken, nonceDeactivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
+	if err != nil {
+        switch {
+		case strings.Contains(err.Error(), "Entitlement has expired"):
+			fmt.Println("Entitlement has expired")
+		case strings.Contains(err.Error(), "Entitlement not found"):
+			fmt.Println("Entitlement not found")
+		default:
+			fmt.Println("Error deactivating license:", err)
+		}
+	}
+
+	DeactivateLicense(accessToken, nonceDeactivation)
+}
+
+
 
 func CheckExpiryDate(dateString string) (bool) {
 
