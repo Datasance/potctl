@@ -184,11 +184,11 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 	if err != nil {
         switch {
 		case strings.Contains(err.Error(), "Subscription has expired"):
-			return "Subscription has expired, Please contact with Datasance Support Team : support@datasance.com", "0", nil
+			return "Subscription has expired", "0", nil
 		case strings.Contains(err.Error(), "Subscription not found"):
-			return "Subscription not found, Please contact with Datasance Support Team : support@datasance.com", "0", nil
+			return "Subscription not found", "0", nil
 		case strings.Contains(err.Error(), "Subscription Engine is not responding"):
-			return "Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com", "0", nil
+			return "Subscription Engine is not responding", "0", nil
 		default:
 			fmt.Println("Error activating license:", err)
 			return "", "", err
@@ -216,11 +216,11 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 	if err != nil {
         switch {
 		case strings.Contains(err.Error(), "Subscription has expired"):
-			fmt.Println("Subscription has expired, Please contact with Datasance Support Team : support@datasance.com")
+			fmt.Println("Subscription has expired")
 		case strings.Contains(err.Error(), "Subscription not found"):
-			fmt.Println("Subscription not found, Please contact with Datasance Support Team : support@datasance.com")
+			fmt.Println("Subscription not found")
 		case strings.Contains(err.Error(), "Subscription Engine is not responding"):
-			fmt.Println("Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com",)
+			fmt.Println("Subscription Engine is not responding")
 		default:
 			fmt.Println("Error deactivating license:", err)
 		}
@@ -235,15 +235,15 @@ func CheckExpiryDate(dateString string) (bool) {
 
 	fmt.Println("Checking License Expiry Date from Subscription")
 	if strings.Contains(dateString,"Subscription has expired") {
-		fmt.Println("Subscription has expired")
+		fmt.Println("Subscription has expired, Please contact with Datasance Support Team : support@datasance.com")
 		return false
 	}
 	if strings.Contains(dateString,"Subscription not found") {
-		fmt.Println("Subscription not found")
+		fmt.Println("Subscription not found, Please contact with Datasance Support Team : support@datasance.com")
 		return false
 	}
 	if strings.Contains(dateString,"Subscription Engine is not responding") {
-		fmt.Println("Subscription Engine is not responding")
+		fmt.Println("Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com")
 		return false
 	}
 
