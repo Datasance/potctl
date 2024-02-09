@@ -235,11 +235,11 @@ func CheckExpiryDate(dateString string) (bool) {
 
 	fmt.Println("Checking License Expiry Date from Subscription")
 	if strings.Contains(dateString,"Subscription has expired") {
-		fmt.Println("Subscription has expired, Please contact with Datasance Support Team : support@datasance.com")
+		fmt.Println("Subscription has expired, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
 	}
 	if strings.Contains(dateString,"Subscription not found") {
-		fmt.Println("Subscription not found, Please contact with Datasance Support Team : support@datasance.com")
+		fmt.Println("Subscription not found, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
 	}
 	if strings.Contains(dateString,"Subscription Engine is not responding") {
