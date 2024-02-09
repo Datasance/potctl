@@ -104,16 +104,20 @@ func ActivateAndGetAccessToken(productID, activationCode, seatID, seatName strin
 	defer res.Body.Close()
 
 	if res.StatusCode == 402 {
-		return "", "", fmt.Errorf("Entitlement has expired")
+		return "", "", fmt.Errorf("Subscription has expired")
 	}
 
 	if res.StatusCode == 404 {
-		return "", "", fmt.Errorf("Entitlement not found")
+		return "", "", fmt.Errorf("Subscription not found")
+	}
+
+	if res.StatusCode == 500 {
+		return "", "", fmt.Errorf("Subscription Engine is not responding")
 	}
 
 	var activateResponse ActivationResponse
 	if err := json.NewDecoder(res.Body).Decode(&activateResponse); err != nil {
-		return "", "", fmt.Errorf("error decoding JSON response: %v", err)
+		return "", "", fmt.Errorf("Error while decoding JSON response from get access token event: %v", err)
 	}
 
 	return activateResponse.AccessToken, res.Header.Get("N-Nonce"), nil
@@ -124,7 +128,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating activation request: %v", err)
+		return nil, fmt.Errorf("Error while creating activation request: %v", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -135,15 +139,15 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error sending activation request: %v", err)
+		return nil, fmt.Errorf("Error while sending activation request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Status code for activation is ", resp.StatusCode)
+	fmt.Println("Status Code for Activation is ", resp.StatusCode)
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
-		return nil, fmt.Errorf("error decoding JSON response from activation event is: %v", err)
+		return nil, fmt.Errorf("Error while decoding JSON response from activation event is: %v", err)
 	}
 
 	return &activationResponse, nil
@@ -155,7 +159,7 @@ func DeactivateLicense(accessToken, nonce string) {
 
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
-		fmt.Println("error creating deactivation request: %v", err)
+		fmt.Println("Error while creating deactivation request: %v", err)
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -167,7 +171,7 @@ func DeactivateLicense(accessToken, nonce string) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		fmt.Println("error sending deactivation request: %v", err)
+		fmt.Println("Error while sending deactivation request: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -179,10 +183,12 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
         switch {
-		case strings.Contains(err.Error(), "Entitlement has expired"):
-			return "Entitlement has expired", "0", nil
-		case strings.Contains(err.Error(), "Entitlement not found"):
-			return "Entitlement not found", "0", nil
+		case strings.Contains(err.Error(), "Subscription has expired"):
+			return "Subscription has expired, Please contact with Datasance Support Team : support@datasance.com", "0", nil
+		case strings.Contains(err.Error(), "Subscription not found"):
+			return "Subscription not found, Please contact with Datasance Support Team : support@datasance.com", "0", nil
+		case strings.Contains(err.Error(), "Subscription Engine is not responding"):
+			return "Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com", "0", nil
 		default:
 			fmt.Println("Error activating license:", err)
 			return "", "", err
@@ -191,7 +197,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
-		fmt.Println("Error activating license:", err)
+		fmt.Println("Error while activating license:", err)
         return "", "", err
 	}
 
@@ -209,10 +215,12 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 	accessToken, nonceDeactivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
         switch {
-		case strings.Contains(err.Error(), "Entitlement has expired"):
-			fmt.Println("Entitlement has expired")
-		case strings.Contains(err.Error(), "Entitlement not found"):
-			fmt.Println("Entitlement not found")
+		case strings.Contains(err.Error(), "Subscription has expired"):
+			fmt.Println("Subscription has expired, Please contact with Datasance Support Team : support@datasance.com")
+		case strings.Contains(err.Error(), "Subscription not found"):
+			fmt.Println("Subscription not found, Please contact with Datasance Support Team : support@datasance.com")
+		case strings.Contains(err.Error(), "Subscription Engine is not responding"):
+			fmt.Println("Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com",)
 		default:
 			fmt.Println("Error deactivating license:", err)
 		}
@@ -225,15 +233,20 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 
 func CheckExpiryDate(dateString string) (bool) {
 
-	fmt.Println("Checking license expiry date from subscription")
-	if strings.Contains(dateString,"Entitlement has expired") {
-		fmt.Println("Entitlement has expired")
+	fmt.Println("Checking License Expiry Date from Subscription")
+	if strings.Contains(dateString,"Subscription has expired") {
+		fmt.Println("Subscription has expired")
 		return false
 	}
-	if strings.Contains(dateString,"Entitlement not found") {
-		fmt.Println("Entitlement not found")
+	if strings.Contains(dateString,"Subscription not found") {
+		fmt.Println("Subscription not found")
 		return false
 	}
+	if strings.Contains(dateString,"Subscription Engine is not responding") {
+		fmt.Println("Subscription Engine is not responding")
+		return false
+	}
+
 	return true
 }
 
@@ -241,17 +254,17 @@ func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 
-	fmt.Println("Checking number of agents from subscription")
+	fmt.Println("Checking number of agents from subscription details")
 
     if err != nil {
-        fmt.Println("Error converting maximum agent number to integer:", err)
+        fmt.Println("Error while converting maximum agent number to integer:", err)
         return false
     }
 
 	if currentAgentNum >= maxAgentNumAsInt {
 		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
 		fmt.Println("Your active subscription includes maximum agent seats as ", maxAgentNum)
-		fmt.Println("Please contact with Datasance Sales Team or Datasance Partner")
+		fmt.Println("Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 	}
 
 	return currentAgentNum < maxAgentNumAsInt

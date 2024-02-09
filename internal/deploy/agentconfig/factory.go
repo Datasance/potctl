@@ -142,7 +142,7 @@ func (exe *RemoteExecutor) Execute() error {
 
 	agents := ns.GetAgents()
 	numOfAgents := len(agents)
-	fmt.Println("Current number of agents are ", numOfAgents)
+	fmt.Println("Current Number of Agents are ", numOfAgents)
 
 	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
 
@@ -155,7 +155,7 @@ func (exe *RemoteExecutor) Execute() error {
 	}
 
 	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
-		return errors.New("Checking number of current agent numbers from subscription is unsuccessful")
+		return errors.New("Checking number of agents from subscription details is unsuccessful")
 	}
 
 	if !isSystem || install.IsVerbose() {

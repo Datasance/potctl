@@ -90,7 +90,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "ENTITLEMENT-EXPIRY-DATE", "MAX-NUMBER-OF-AGENT-SEATS"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "SUBSCRIPTION EXPIRY DATE", "MAX AGENT SEATS"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
