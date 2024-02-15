@@ -122,7 +122,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
 
-		endpoint, err := controlPlane.GetEndpoint()
+		endpoint, err := controlPlaneForUser.GetEndpoint()
 		if err != nil {
 			return nil, err
 		}
@@ -132,12 +132,16 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			return nil, err
 		}
 
-		client, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+		ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
 		if err != nil {
-			subscriptionKey := nil
+			subscriptionKey := ""
 		}
 
-		if subscriptionKey != nil {
+		if ctrl == nil {
+			fmt.Println("")
+		}
+
+		if subscriptionKey != "" {
 			user.SubscriptionKey = subscriptionKey
 		}
 
