@@ -134,15 +134,15 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 		ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
 		if err != nil {
-			fmt.Println("")
+			fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
 		}
 
 		if ctrl == nil {
-			fmt.Println("")
+			fmt.Println("Client came empty while fetching subscription key from controlplane")
 		}
 
 		if subscriptionKey != "" {
-			fmt.Println("Subscription Key will be updated from controller")
+			fmt.Println("Subscription Key will be updated from controller: ",subscriptionKey)
 			user.SubscriptionKey = subscriptionKey
 		}
 
