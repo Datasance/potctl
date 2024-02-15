@@ -121,6 +121,26 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
+
+		endpoint, err := controlPlane.GetEndpoint()
+		if err != nil {
+			return nil, err
+		}
+
+		baseURL, err := util.GetBaseURL(endpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		client, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+		if err != nil {
+			subscriptionKey := nil
+		}
+
+		if subscriptionKey != nil {
+			user.SubscriptionKey = subscriptionKey
+		}
+
 		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
 
 
