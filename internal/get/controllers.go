@@ -15,7 +15,7 @@ package get
 
 import (
 	"time"
-
+	"fmt"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
@@ -134,7 +134,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 		ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
 		if err != nil {
-			subscriptionKey := ""
+			fmt.Println("")
 		}
 
 		if ctrl == nil {
@@ -142,6 +142,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 
 		if subscriptionKey != "" {
+			fmt.Println("Subscription Key will be updated from controller")
 			user.SubscriptionKey = subscriptionKey
 		}
 
