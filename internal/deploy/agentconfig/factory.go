@@ -142,7 +142,36 @@ func (exe *RemoteExecutor) Execute() error {
 
 	agents := ns.GetAgents()
 	numOfAgents := len(agents)
+
 	fmt.Println("Current Number of Agents are ", numOfAgents)
+
+	endpoint, err := controlPlane.GetEndpoint()
+	if err != nil {
+		return nil, err
+	}
+
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+
+	if err != nil {
+		fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
+	}
+
+	if ctrl == nil {
+		fmt.Println("Client came empty while fetching subscription key from controlplane")
+	}
+
+	if subscriptionKey != "" {
+		if user.SubscriptionKey != subscriptionKey {
+			fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+			user.SubscriptionKey = subscriptionKey
+		}
+	}
+
 
 	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
 

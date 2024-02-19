@@ -142,10 +142,11 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		}
 
 		if subscriptionKey != "" {
-			fmt.Println("Subscription Key will be updated from controller: ",subscriptionKey)
-			user.SubscriptionKey = subscriptionKey
+			if user.SubscriptionKey != subscriptionKey {
+				fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+				user.SubscriptionKey = subscriptionKey
+			}
 		}
-
 		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
 
 
