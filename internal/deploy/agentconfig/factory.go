@@ -147,22 +147,26 @@ func (exe *RemoteExecutor) Execute() error {
 
 	endpoint, err := controlPlane.GetEndpoint()
 	if err != nil {
-		return nil, err
+		fmt.Println("Error occurred while fetching endpoint from controlplane", err)
+		return err
 	}
 
 	baseURL, err := util.GetBaseURL(endpoint)
 	if err != nil {
-		return nil, err
+		fmt.Println("Error occurred while fetching base url from controlplane", err)
+		return err
 	}
 
 	ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
 
 	if err != nil {
 		fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
+		return err
 	}
 
 	if ctrl == nil {
 		fmt.Println("Client came empty while fetching subscription key from controlplane")
+		return errors.New("Client came empty while fetching subscription key from controlplane")
 	}
 
 	if subscriptionKey != "" {
