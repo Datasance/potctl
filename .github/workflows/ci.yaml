@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - feature/entitlement-creation
+      - main
       
     tags: [v*]
     paths-ignore:
@@ -13,29 +13,25 @@ on:
   pull_request:
     # Sequence of patterns matched against refs/heads
     branches:
-      - feature/entitlement-creation
+      - main
       
     paths-ignore:
       - README.md
       - CHANGELOG.md
       - LICENSE
 env:
-  PROJECT: 'focal-freedom-236620'
-  IMAGE_NAME: 'operator'
-  GKE_CLUSTER: 'potctl-ci'
-  GKE_ZONE: 'us-central1-a'
-  controller_image: 'gcr.io/focal-freedom-236620/controller:3.0.4'
-  enterprise_image: 'gcr.io/focal-freedom-236620/enterprise-controller:master'
-  agent_image: 'gcr.io/focal-freedom-236620/agent:3.0.1'
-  operator_image: 'gcr.io/focal-freedom-236620/operator:develop'
-  kubelet_image: 'gcr.io/focal-freedom-236620/kubelet:develop'
-  port_manager_image: 'gcr.io/focal-freedom-236620/port-manager:develop'
-  router_image: 'gcr.io/focal-freedom-236620/router:develop'
-  router_arm_image: 'gcr.io/focal-freedom-236620/router-arm:develop'
-  proxy_image: 'gcr.io/focal-freedom-236620/proxy:3.0.0-beta1'
-  proxy_arm_image: 'gcr.io/focal-freedom-236620/proxy-arm:develop'
-  iofog_agent_version: '0.0.0-dev'
-  controller_version: '0.0.0-dev'
+  PROJECT: 'datasance'
+  controller_image: 'ghcr.io/datasance/controller:latest'
+  agent_image: 'ghcr.io/datasance/agent:latest'
+  operator_image: 'ghcr.io/datasance/operator:latest'
+  kubelet_image: 'ghcr.io/datasance/iofog-kubelet:latest'
+  port_manager_image: 'ghcr.io/datasance/port-manager:latest'
+  router_image: 'ghcr.io/datasance/router:latest'
+  router_arm_image: 'ghcr.io/datasance/router:latest'
+  proxy_image: 'ghcr.io/datasance/proxy:latest'
+  proxy_arm_image: 'ghcr.io/datasance/proxy:latest'
+  iofog_agent_version: '3.1.0'
+  controller_version: '3.0.6'
   version:
   agent_vm_list:
   controller_vm:

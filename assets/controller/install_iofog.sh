@@ -51,7 +51,15 @@ install_deps() {
 	fi
 
 	if [ -z "$(command -v python2)" ]; then
-        install_package "python"
+        install_package "python2"
+	fi
+
+	if [ -z "$(command -v python3)" ]; then
+        install_package "python3"
+	fi
+
+	if [ -z "$(command -v python-is-python3)" ]; then
+        install_package "python-is-python3"
 	fi
 }
 
@@ -74,18 +82,18 @@ deploy_controller() {
 		npmrc default
 	fi
 	# Save DB
-	if [ -f "$INSTALL_DIR/controller/lib/node_modules/@iofog/iofogcontroller/package.json" ]; then
+	if [ -f "$INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/package.json" ]; then
 		# If iofog-controller is not running, it will fail to stop - ignore that failure.
-		node $INSTALL_DIR/controller/lib/node_modules/@iofog/iofogcontroller/scripts/scripts-api.js preuninstall > /dev/null 2>&1 || true
+		node $INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/scripts/scripts-api.js preuninstall > /dev/null 2>&1 || true
 	fi
 
 	# Install in temporary location
 	mkdir -p "$TMP_DIR/controller"
 	chmod 0777 "$TMP_DIR/controller"
 	if [ -z $version ]; then
-		npm install -g -f iofogcontroller --unsafe-perm --prefix "$TMP_DIR/controller"
+		npm install -g -f @datasance/iofogcontroller --unsafe-perm --prefix "$TMP_DIR/controller"
 	else
-		npm install -g -f iofogcontroller --unsafe-perm --prefix "$TMP_DIR/controller"
+		npm install -g -f @datasance/iofogcontroller --unsafe-perm --prefix "$TMP_DIR/controller"
 	fi
 	# Move files into $INSTALL_DIR/controller
 	mkdir -p "$INSTALL_DIR/"
@@ -93,8 +101,8 @@ deploy_controller() {
 	mv "$TMP_DIR/controller/" "$INSTALL_DIR/"
 
 	# Restore DB
-	if [ -f "$INSTALL_DIR/controller/lib/node_modules/@iofog/iofogcontroller/package.json" ]; then
-		node $INSTALL_DIR/controller/lib/node_modules/@iofog/iofogcontroller/scripts/scripts-api.js postinstall > /dev/null 2>&1 || true
+	if [ -f "$INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/package.json" ]; then
+		node $INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/scripts/scripts-api.js postinstall > /dev/null 2>&1 || true
 	fi
 
 	# Symbolic links

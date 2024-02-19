@@ -268,7 +268,7 @@ func (ctrl *Controller) Install() (err error) {
 	Verbose("Waiting for Controller " + ctrl.Host)
 	if err = ctrl.ssh.RunUntil(
 		regexp.MustCompile("\"status\":\"online\""),
-		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
+		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v1/status", iofog.ControllerPortString),
 		ignoredErrors,
 	); err != nil {
 		return

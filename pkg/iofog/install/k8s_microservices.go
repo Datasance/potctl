@@ -73,6 +73,9 @@ func newOperatorMicroservice() *microservice {
 					"controlplanes",
 					"apps/status",
 					"controlplanes/status",
+					"apps/finalizers",
+					"applications/finalizers",
+					"controlplanes/finalizers",
 				},
 				Verbs: []string{
 					"list",
