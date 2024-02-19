@@ -199,10 +199,7 @@ func (exe *RemoteExecutor) Execute() error {
 	if exe.agentConfig.Host != nil {
 		host = *exe.agentConfig.Host
 	}
-	endpoint, err := controlPlane.GetEndpoint()
-	if err != nil {
-		return err
-	}
+
 	if err := isOverridingSystemAgent(endpoint, host, isSystem); err != nil {
 		return err
 	}
