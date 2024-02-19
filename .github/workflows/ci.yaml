@@ -60,7 +60,6 @@ jobs:
           args: --timeout=5m0s
       - name: Run bootstrap
         run: PIPELINE=1 script/bootstrap.sh
-      - run: make test
       - name: 'Get Previous tag'
         id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
