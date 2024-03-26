@@ -51,4 +51,5 @@ type ControllerConfig struct {
 	Database      Database
 	PidBaseDir    string
 	EcnViewerPort int
+	Auth          Auth
 }

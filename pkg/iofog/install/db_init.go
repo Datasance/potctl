@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
 	_ "github.com/go-sql-driver/mysql"
 )
 
