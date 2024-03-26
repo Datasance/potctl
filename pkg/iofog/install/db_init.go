@@ -11,34 +11,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+func CreateControllerDatabase(host, user, password, provider, dbName, port) {
 
-type database struct {
-	databaseName string
-	provider     string
-	host         string
-	user         string
-	password     string
-	port         int
-}
-
-var ctrl struct {
-	db database
-}
-
-
-func CreateControllerDatabase() {
-	// MySQL connection parameters
-	username := ctrl.db.user
-	password := ctrl.db.password
-	host := ctrl.db.host
-	port := ctrl.db.port
-	dbName := ctrl.db.databaseName
 
 	// Create MySQL DSN (Data Source Name)
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/", username, password, host, port)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/", user, password, host, port) // Fixed port type
+	fmt.Printf(dsn)
 
 	// Connect to MySQL server
-	db, err := sql.Open(ctrl.db.provider , dsn) //db.config
+	db, err := sql.Open(provider, dsn) // Fixed reference to planedb.Provider
 	if err != nil {
 		log.Fatalf("Failed to connect to MySQL server: %v", err)
 	}
@@ -63,6 +44,7 @@ func CreateControllerDatabase() {
 		log.Fatalf("Failed to get current directory: %v", err)
 	}
 
+	// Assuming pkg is defined somewhere in your code
 	// Read migration SQL file
 	migrationSQL, err := ioutil.ReadFile(filepath.Join(dir, pkg.scriptDatabaseMigration))
 	if err != nil {
@@ -114,6 +96,4 @@ func CreateControllerDatabase() {
 	}
 
 	fmt.Println("Seeding SQL executed successfully")
-
-
 }

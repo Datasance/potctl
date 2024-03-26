@@ -84,8 +84,9 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	util.SpinStart(fmt.Sprintf("Creating database"))
 
+	db := exe.controlPlane.Database
 	// Create database
-	install.CreateControllerDatabase()
+	install.CreateControllerDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port)
 
 	// Get Kubernetes deployer
 	installer, err := install.NewKubernetes(exe.controlPlane.KubeConfig, exe.namespace)
