@@ -18,6 +18,7 @@ type IofogUser struct {
 	Surname  string
 	Email    string
 	Password string
+	SubscriptionKey string
 }
 
 type Database struct {

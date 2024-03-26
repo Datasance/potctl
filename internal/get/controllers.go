@@ -15,13 +15,13 @@ package get
 
 import (
 	"time"
-
+	"fmt"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type controllerExecutor struct {
@@ -80,9 +80,17 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 	// Handle remote and local
 	controllers := ns.GetControllers()
 
+
+	controlPlaneForUser, err := ns.GetControlPlane()
+	if err != nil {
+		return nil, err
+	}
+	
+	user := controlPlaneForUser.GetUser()
+
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "SUBSCRIPTION EXPIRY DATE", "MAX AGENT SEATS"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
@@ -111,7 +119,41 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		if ctrlConfig.GetCreatedTime() != "" {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
+		
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
+
+		endpoint, err := controlPlaneForUser.GetEndpoint()
+		if err != nil {
+			return nil, err
+		}
+
+		baseURL, err := util.GetBaseURL(endpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+		if err != nil {
+			fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
+		}
+
+		if ctrl == nil {
+			fmt.Println("Client came empty while fetching subscription key from controlplane")
+		}
+
+		if subscriptionKey != "" {
+			if user.SubscriptionKey != subscriptionKey {
+				fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+				user.SubscriptionKey = subscriptionKey
+			}
+		}
+		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
+
+
+		if err != nil {
+			return nil, err
+		}
+
 		row := []string{
 			ctrlConfig.GetName(),
 			status,
@@ -120,6 +162,8 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 			ctrlStatus.Versions.Controller,
 			addr,
 			port,
+			expiryDate,
+			agentSeats,
 		}
 		table[idx+1] = append(table[idx+1], row...)
 	}

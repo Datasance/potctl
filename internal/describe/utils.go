@@ -20,8 +20,8 @@ import (
 
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/util"
-	apps "github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/apps"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, clt *client.Client) (*apps.Microservice, error) {

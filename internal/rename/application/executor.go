@@ -19,7 +19,7 @@ import (
 	"github.com/datasance/potctl/internal/config"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 func Execute(namespace, name, newName string) error {

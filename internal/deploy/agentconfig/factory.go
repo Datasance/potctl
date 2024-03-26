@@ -15,6 +15,7 @@ package deployagentconfig
 
 import (
 	"fmt"
+	"errors"
 	"net/url"
 	"strings"
 
@@ -27,7 +28,7 @@ import (
 	"github.com/datasance/potctl/internal/execute"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type Options struct {
@@ -119,9 +120,6 @@ func isOverridingSystemAgent(controllerHost, agentHost string, isSystem bool) (e
 
 func (exe *RemoteExecutor) Execute() error {
 	isSystem := iutil.IsSystemAgent(exe.agentConfig)
-	if !isSystem || install.IsVerbose() {
-		util.SpinStart(fmt.Sprintf("Deploying agent %s configuration", exe.GetName()))
-	}
 
 	// Check controller is reachable
 	clt, err := clientutil.NewControllerClient(exe.namespace)
@@ -139,14 +137,69 @@ func (exe *RemoteExecutor) Execute() error {
 		util.PrintError("You must deploy a Controller to a namespace before deploying any Agents")
 		return err
 	}
+
+	user := controlPlane.GetUser()
+
+	agents := ns.GetAgents()
+	numOfAgents := len(agents)
+
+	fmt.Println("Current Number of Agents are ", numOfAgents)
+
+	endpoint, err := controlPlane.GetEndpoint()
+	if err != nil {
+		fmt.Println("Error occurred while fetching endpoint from controlplane", err)
+		return err
+	}
+
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		fmt.Println("Error occurred while fetching base url from controlplane", err)
+		return err
+	}
+
+	ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+
+	if err != nil {
+		fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
+		return err
+	}
+
+	if ctrl == nil {
+		fmt.Println("Client came empty while fetching subscription key from controlplane")
+		return errors.New("Client came empty while fetching subscription key from controlplane")
+	}
+
+	if subscriptionKey != "" {
+		if user.SubscriptionKey != subscriptionKey {
+			fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+			user.SubscriptionKey = subscriptionKey
+		}
+	}
+
+
+	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	if util.CheckExpiryDate(expiryDate) == false {
+		return errors.New("Checking subscription/expiry date is unsuccessful")
+	}
+
+	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
+		return errors.New("Checking number of agents from subscription details is unsuccessful")
+	}
+
+	if !isSystem || install.IsVerbose() {
+		util.SpinStart(fmt.Sprintf("Deploying agent %s configuration", exe.GetName()))
+	}
+
 	host := ""
 	if exe.agentConfig.Host != nil {
 		host = *exe.agentConfig.Host
 	}
-	endpoint, err := controlPlane.GetEndpoint()
-	if err != nil {
-		return err
-	}
+
 	if err := isOverridingSystemAgent(endpoint, host, isSystem); err != nil {
 		return err
 	}

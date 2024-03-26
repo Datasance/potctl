@@ -21,7 +21,7 @@ import (
 
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type RemoteSystemImages struct {
@@ -268,7 +268,7 @@ func (ctrl *Controller) Install() (err error) {
 	Verbose("Waiting for Controller " + ctrl.Host)
 	if err = ctrl.ssh.RunUntil(
 		regexp.MustCompile("\"status\":\"online\""),
-		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
+		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v1/status", iofog.ControllerPortString),
 		ignoredErrors,
 	); err != nil {
 		return

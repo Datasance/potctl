@@ -19,6 +19,12 @@ func NewExecutor(namespace string) (execute.Executor, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//Deactivation for entitlement will be done
+
+	user := baseControlPlane.GetUser()
+	util.DeactivateEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
+
 	switch baseControlPlane.(type) {
 	case *rsc.KubernetesControlPlane:
 		return deletek8scontrolplane.NewExecutor(namespace)

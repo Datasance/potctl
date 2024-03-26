@@ -15,7 +15,6 @@ package deployagent
 
 import (
 	"fmt"
-
 	"github.com/datasance/potctl/internal/config"
 	agentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	"github.com/datasance/potctl/internal/execute"
@@ -61,6 +60,7 @@ func (facade *facadeExecutor) Execute() (err error) {
 	if len(controlPlane.GetControllers()) == 0 {
 		return rsc.NewNoControlPlaneError(facade.namespace)
 	}
+	
 
 	if !facade.isSystem || install.IsVerbose() {
 		util.SpinStart(fmt.Sprintf("Deploying agent %s", facade.GetName()))

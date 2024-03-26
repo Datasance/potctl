@@ -19,10 +19,11 @@ import (
 
 // IofogUser contains information about users registered against a controller
 type IofogUser struct {
-	Name     string `yaml:"name,omitempty"`
-	Surname  string `yaml:"surname,omitempty"`
-	Email    string `yaml:"email,omitempty"`
-	Password string `yaml:"password,omitempty"`
+	Name     		string `yaml:"name,omitempty"`
+	Surname  		string `yaml:"surname,omitempty"`
+	Email    		string `yaml:"email,omitempty"`
+	Password 		string `yaml:"password,omitempty"`
+	SubscriptionKey string `yaml:"subscriptionKey,omitempty"`
 }
 
 func (user *IofogUser) EncodePassword() {

@@ -353,7 +353,7 @@ function checkAgentListFromController() {
   local API_ENDPOINT=$(cat /tmp/api_endpoint.txt)
   local ACCESS_TOKEN=$(cat /tmp/access_token.txt)
   local LIST=$(curl --request GET \
---url $API_ENDPOINT/api/v3/iofog-list \
+--url $API_ENDPOINT/api/v1/iofog-list \
 --header "Authorization: $ACCESS_TOKEN" \
 --header 'Content-Type: application/json')
   for IDX in "${!AGENTS[@]}"; do
@@ -368,7 +368,7 @@ function checkAgentPruneController(){
   local KEY_FILE="$2"
   local AGENT_TOKEN=$(ssh -oStrictHostKeyChecking=no -i $KEY_FILE ${USERS[0]}@${HOSTS[0]} -- cat /etc/iofog-agent/config.xml  | grep 'access_token' | tr -d '<' | tr -d '/' | tr -d '>' | awk -F 'access_token' '{print $2}')
   local CHANGES=$(curl --request GET \
---url $API_ENDPOINT/api/v3/agent/config/changes \
+--url $API_ENDPOINT/api/v1/agent/config/changes \
 --header "Authorization: $AGENT_TOKEN" \
 --header 'Content-Type: application/json')
   local PRUNE=$(echo $CHANGES | jq -r .prune)

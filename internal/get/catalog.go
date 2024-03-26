@@ -17,8 +17,8 @@ import (
 	"strconv"
 
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	apps "github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/apps"
-	"github.com/eclipse-iofog/iofog-go-sdk/v3/pkg/client"
+	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type catalogExecutor struct {

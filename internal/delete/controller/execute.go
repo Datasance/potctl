@@ -19,7 +19,7 @@ import (
 )
 
 func Execute(namespace, name string) error {
-	util.SpinStart("Deleting Controller")
+	util.SpinStart("Deleting Controller ")
 
 	// Get executor
 	exe, err := NewExecutor(namespace, name)
