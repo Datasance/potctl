@@ -21,7 +21,8 @@ type KubernetesControlPlane struct {
 	KubeConfig     string                 `yaml:"config"`
 	IofogUser      IofogUser              `yaml:"iofogUser"`
 	ControllerPods []KubernetesController `yaml:"controllerPods,omitempty"`
-	Database       Database               `yaml:"database,omitempty"`
+	Database       Database               `yaml:"database"`
+	Auth		   Auth                   `yaml:"auth"`
 	Services       Services               `yaml:"services,omitempty"`
 	Replicas       Replicas               `yaml:"replicas,omitempty"`
 	Images         KubeImages             `yaml:"images,omitempty"`
@@ -115,6 +116,7 @@ func (cp *KubernetesControlPlane) Clone() ControlPlane {
 	return &KubernetesControlPlane{
 		KubeConfig:     cp.KubeConfig,
 		IofogUser:      cp.IofogUser,
+		Auth:           cp.Auth,
 		Database:       cp.Database,
 		Services:       cp.Services,
 		Replicas:       cp.Replicas,

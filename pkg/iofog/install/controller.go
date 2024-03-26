@@ -85,10 +85,10 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 
 func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int) {
 	if provider == "" {
-		provider = "postgres"
+		provider = "mysql"
 	}
 	if databaseName == "" {
-		databaseName = "iofogcontroller"
+		databaseName = "potcontroller"
 	}
 	ctrl.db = database{
 		databaseName: databaseName,
