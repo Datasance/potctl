@@ -3,23 +3,20 @@ package install
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"path/filepath"
 	"strings"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/datasance/potctl/pkg/util"
 )
 
-func CreateControllerDatabase(host, user, password, provider, dbName, port) {
-
+func CreateControllerDatabase(host, user, password, provider, dbName string, port int) {
 
 	// Create MySQL DSN (Data Source Name)
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/", user, password, host, port) // Fixed port type
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/", user, password, host, port) 
 	fmt.Printf(dsn)
 
 	// Connect to MySQL server
-	db, err := sql.Open(provider, dsn) // Fixed reference to planedb.Provider
+	db, err := sql.Open(provider, dsn) 
 	if err != nil {
 		log.Fatalf("Failed to connect to MySQL server: %v", err)
 	}
@@ -38,15 +35,8 @@ func CreateControllerDatabase(host, user, password, provider, dbName, port) {
 		log.Fatalf("Failed to switch to database: %v", err)
 	}
 
-	// Get the current directory
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatalf("Failed to get current directory: %v", err)
-	}
-
-	// Assuming pkg is defined somewhere in your code
 	// Read migration SQL file
-	migrationSQL, err := ioutil.ReadFile(filepath.Join(dir, pkg.scriptDatabaseMigration))
+	migrationSQL, err := util.GetStaticFile("database/db_migration_v1.0.0.sql")
 	if err != nil {
 		log.Fatalf("Failed to read migration SQL file: %v", err)
 	}
@@ -72,7 +62,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName, port) {
 	fmt.Println("Migration SQL executed successfully")
 
 	// Read seeding SQL file
-	seedingSQL, err := ioutil.ReadFile(filepath.Join(dir, pkg.scriptDatabaseSeeder))
+	seedingSQL, err := util.GetStaticFile("database/db_seeder_v1.0.0.sql")
 	if err != nil {
 		log.Fatalf("Failed to read seeding SQL file: %v", err)
 	}

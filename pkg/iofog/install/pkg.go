@@ -23,8 +23,6 @@ var pkg struct {
 	scriptUninstallIofog    string
 	iofogDir                string
 	agentDir                string
-	scriptDatabaseMigration string
-	scriptDatabaseSeeder    string
 }
 
 func init() {
@@ -37,6 +35,4 @@ func init() {
 	pkg.scriptUninstallIofog = "uninstall_iofog.sh"
 	pkg.iofogDir = "/etc/iofog"
 	pkg.agentDir = "/etc/iofog/agent"
-	pkg.scriptDatabaseMigration = "db_migration_v1.0.0.sql"
-	pkg.scriptDatabaseSeeder = "db_seeder_v1.0.0.sql"
 }
