@@ -235,8 +235,8 @@ CREATE TABLE IF NOT EXISTS Microservices (
     iofog_uuid VARCHAR(32),
     application_id INT,
     FOREIGN KEY (catalog_item_id) REFERENCES CatalogItems (id) ON DELETE CASCADE,
-    FOREIGN KEY (registry_id) REFERENCES Registries (id) ON DELETE CASCADE,
-    FOREIGN KEY (iofog_uuid) REFERENCES Fogs (uuid),
+    FOREIGN KEY (registry_id) REFERENCES Registries (id) ON DELETE SET NULL,
+    FOREIGN KEY (iofog_uuid) REFERENCES Fogs (uuid) ON DELETE CASCADE,
     FOREIGN KEY (application_id) REFERENCES Flows (id) ON DELETE CASCADE
 );
 
@@ -442,13 +442,13 @@ CREATE TABLE IF NOT EXISTS Routings (
     source_iofog_uuid VARCHAR(32),
     dest_iofog_uuid VARCHAR(32),
     application_id INT,
-    FOREIGN KEY (source_microservice_uuid) REFERENCES Microservices (uuid),
-    FOREIGN KEY (dest_microservice_uuid) REFERENCES Microservices (uuid),
-    FOREIGN KEY (source_network_microservice_uuid) REFERENCES Microservices (uuid),
-    FOREIGN KEY (dest_network_microservice_uuid) REFERENCES Microservices (uuid),
-    FOREIGN KEY (source_iofog_uuid) REFERENCES Fogs (uuid),
-    FOREIGN KEY (dest_iofog_uuid) REFERENCES Fogs (uuid),
-    FOREIGN KEY (application_id) REFERENCES Flows (id)
+    FOREIGN KEY (source_microservice_uuid) REFERENCES Microservices (uuid) ON DELETE CASCADE,
+    FOREIGN KEY (dest_microservice_uuid) REFERENCES Microservices (uuid) ON DELETE CASCADE,
+    FOREIGN KEY (source_network_microservice_uuid) REFERENCES Microservices (uuid) ON DELETE SET NULL,
+    FOREIGN KEY (dest_network_microservice_uuid) REFERENCES Microservices (uuid) ON DELETE SET NULL,
+    FOREIGN KEY (source_iofog_uuid) REFERENCES Fogs (uuid) ON DELETE SET NULL,
+    FOREIGN KEY (dest_iofog_uuid) REFERENCES Fogs (uuid) ON DELETE SET NULL,
+    FOREIGN KEY (application_id) REFERENCES Flows (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_routing_sourceMicroserviceUuid ON Routings (source_microservice_uuid);
@@ -470,7 +470,7 @@ CREATE TABLE IF NOT EXISTS Routers (
     iofog_uuid VARCHAR(32),
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (iofog_uuid) REFERENCES Fogs (uuid)
+    FOREIGN KEY (iofog_uuid) REFERENCES Fogs (uuid) ON DELETE CASCADE
     
 );
 
@@ -512,8 +512,8 @@ CREATE TABLE IF NOT EXISTS IofogTags (
     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     fog_uuid VARCHAR(32),
     tag_id INT,
-    FOREIGN KEY (fog_uuid) REFERENCES Fogs (uuid),
-    FOREIGN KEY (tag_id) REFERENCES Tags (id)
+    FOREIGN KEY (fog_uuid) REFERENCES Fogs (uuid) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES Tags (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_iofogtags_fog_uuid ON IofogTags (fog_uuid);
@@ -537,16 +537,16 @@ CREATE TABLE IF NOT EXISTS AgentEdgeResources (
     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     fog_uuid VARCHAR(32),
     edge_resource_id INT,
-    FOREIGN KEY (fog_uuid) REFERENCES Fogs (uuid),
-    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id)
+    FOREIGN KEY (fog_uuid) REFERENCES Fogs (uuid) ON DELETE CASCADE,
+    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS EdgeResourceOrchestrationTags (
     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     edge_resource_id INT,
     tag_id INT,
-    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id),
-    FOREIGN KEY (tag_id) REFERENCES Tags (id)
+    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES Tags (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_agentedgeresources_fog_id ON AgentEdgeResources (fog_uuid);
@@ -557,7 +557,7 @@ CREATE INDEX idx_edgeresourceorchestrationtags_tag_id ON EdgeResourceOrchestrati
 CREATE TABLE IF NOT EXISTS HTTPBasedResourceInterfaces (
     id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
     edge_resource_id INT,
-    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id)
+    FOREIGN KEY (edge_resource_id) REFERENCES EdgeResources (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS HTTPBasedResourceInterfaceEndpoints (
@@ -571,7 +571,7 @@ CREATE TABLE IF NOT EXISTS HTTPBasedResourceInterfaceEndpoints (
     responseType TEXT,
     requestPayloadExample TEXT,
     responsePayloadExample TEXT,
-    FOREIGN KEY (interface_id) REFERENCES HTTPBasedResourceInterfaces (id)
+    FOREIGN KEY (interface_id) REFERENCES HTTPBasedResourceInterfaces (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_httpbasedresourceinterfaces_edge_resource_id ON HTTPBasedResourceInterfaces (edge_resource_id);
@@ -598,7 +598,7 @@ CREATE TABLE IF NOT EXISTS ApplicationTemplateVariables (
     default_value VARCHAR(255),
     created_at DATETIME,
     updated_at DATETIME,
-    FOREIGN KEY (application_template_id) REFERENCES ApplicationTemplates (id)
+    FOREIGN KEY (application_template_id) REFERENCES ApplicationTemplates (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_applicationtemplatevariables_application_template_id ON ApplicationTemplateVariables (application_template_id);
