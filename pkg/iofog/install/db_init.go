@@ -55,7 +55,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 		// Execute the SQL statement
 		_, err := db.Exec(statement)
 		if err != nil {
-			log.Fatalf("Failed to execute migration SQL statement: %v", err)
+			log.Println("Failed to execute migration SQL statement: %v", err)
 		}
 	}
 
@@ -81,7 +81,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 		// Execute the SQL statement
 		_, err := db.Exec(statement)
 		if err != nil {
-			log.Fatalf("Failed to execute seeding SQL statement: %v", err)
+			log.Println("Failed to execute seeding SQL statement: %v", err)
 		}
 	}
 
