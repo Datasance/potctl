@@ -13,7 +13,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 
 	// Create MySQL DSN (Data Source Name)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/", user, password, host, port) 
-	fmt.Printf(dsn)
+	Verbose(dsn)
 
 	// Connect to MySQL server
 	db, err := sql.Open(provider, dsn) 
@@ -27,7 +27,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 	if err != nil {
 		log.Fatalf("Failed to create database: %v", err)
 	}
-	fmt.Printf("Database %s created successfully\n", dbName)
+	Verbose("Database %s created successfully\n", dbName)
 
 	// Switch to the newly created database
 	_, err = db.Exec("USE `" + dbName + "`")
@@ -59,7 +59,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 		}
 	}
 
-	fmt.Println("Migration SQL executed successfully")
+	Verbose("Migration SQL executed successfully")
 
 	// Read seeding SQL file
 	seedingSQL, err := util.GetStaticFile("database/db_seeder_v1.0.0.sql")
@@ -85,5 +85,5 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 		}
 	}
 
-	fmt.Println("Seeding SQL executed successfully")
+	Verbose("Seeding SQL executed successfully")
 }

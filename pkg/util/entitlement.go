@@ -143,7 +143,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Status Code for Activation is ", resp.StatusCode)
+	Verbose("Status Code for Activation is ", resp.StatusCode)
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
@@ -233,7 +233,7 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 
 func CheckExpiryDate(dateString string) (bool) {
 
-	fmt.Println("Checking License Expiry Date from Subscription")
+	Verbose("Checking License Expiry Date from Subscription")
 	if strings.Contains(dateString,"Subscription has expired") {
 		fmt.Println("Subscription has expired, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
@@ -254,7 +254,7 @@ func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 
-	fmt.Println("Checking number of agents from subscription details")
+	Verbose("Checking number of agents from subscription details")
 
     if err != nil {
         fmt.Println("Error while converting maximum agent number to integer:", err)

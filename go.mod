@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.18.1
-	github.com/datasance/iofog-go-sdk/v3 v3.4.2
+	github.com/datasance/iofog-go-sdk/v3 v3.4.3
 	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/datasance/iofog-operator/v3 v3.3.8
+	github.com/datasance/iofog-operator/v3 v3.3.9
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8

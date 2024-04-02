@@ -114,8 +114,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CLnGVd57E=
 github.com/daaku/go.zipexe v1.0.1 h1:wV4zMsDOI2SZ2m7Tdz1Ps96Zrx+TzaK15VbUaGozw0M=
 github.com/daaku/go.zipexe v1.0.1/go.mod h1:5xWogtqlYnfBXkSB1o9xysukNP9GTvaNkqzUZbt3Bw8=
-github.com/datasance/iofog-go-sdk/v3 v3.4.2 h1:xAkfx3pb4gzrBsornJUUFBepCC3O8+QKkPlcT6aqszE=
-github.com/datasance/iofog-go-sdk/v3 v3.4.2/go.mod h1:kC5f7myrVB0FwwyLT/617uXNRfJWxjoqdolmmy2aD64=
+github.com/datasance/iofog-go-sdk/v3 v3.4.3 h1:qXljAUW2qbfsYTOjj8KdeVrNTb/U7D4ZJ8Yw744zHW0=
+github.com/datasance/iofog-go-sdk/v3 v3.4.3/go.mod h1:kC5f7myrVB0FwwyLT/617uXNRfJWxjoqdolmmy2aD64=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -136,8 +136,8 @@ github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:Htrtb
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/eapache/channels v1.1.0/go.mod h1:jMm2qB5Ubtg9zLd+inMZd2/NUvXgzmWXsDaLyQIGfH0=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=
-github.com/datasance/iofog-operator/v3 v3.3.8 h1:WTZCCIhRE6hVB4qmDRYqm51rxwKyH+CLCivQ3Ei+i7E=
-github.com/datasance/iofog-operator/v3 v3.3.8/go.mod h1:beZqj2seJ7ki2bf6mKJ0Oq5cWfO7JXcX/PZuR7kYEj0=
+github.com/datasance/iofog-operator/v3 v3.3.9 h1:sKTsXFOFiCabj8AibXct0JO4Z47jRasf2t8kaBwS0rk=
+github.com/datasance/iofog-operator/v3 v3.3.9/go.mod h1:beZqj2seJ7ki2bf6mKJ0Oq5cWfO7JXcX/PZuR7kYEj0=
 github.com/elazarl/goproxy v0.0.0-20180725130230-947c36da3153/go.mod h1:/Zj4wYkgs4iZTTu3o/KG3Itv/qCCa8VVMlb3i9OVuzc=
 github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
 github.com/emicklei/go-restful v2.9.5+incompatible/go.mod h1:otzb+WCGbkyDHkqmQmT5YD2WR4BBwUdeQoFo8l/7tVs=
