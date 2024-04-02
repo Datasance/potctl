@@ -20,7 +20,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/datasance/potctl/pkg/util"
 )
 
 type EntitlementResponse struct {
@@ -145,7 +144,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	Verbose("Status Code for Activation is ", resp.StatusCode)
+	SpinStart(fmt.Println("Status Code for Activation is ", resp.StatusCode))
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
@@ -233,7 +232,7 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 
 func CheckExpiryDate(dateString string) bool {
 
-	Verbose("Checking License Expiry Date from Subscription")
+	SpinStart("Checking License Expiry Date from Subscription")
 	if strings.Contains(dateString, "Subscription has expired") {
 		fmt.Println("Subscription has expired, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
@@ -254,7 +253,7 @@ func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) bool {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 
-	Verbose("Checking number of agents from subscription details")
+	SpinStart("Checking number of agents from subscription details")
 
 	if err != nil {
 		fmt.Println("Error while converting maximum agent number to integer:", err)

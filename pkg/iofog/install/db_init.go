@@ -27,7 +27,7 @@ func CreateControllerDatabase(host, user, password, provider, dbName string, por
 	if err != nil {
 		log.Fatalf("Failed to create database: %v", err)
 	}
-	Verbose("Database %s created successfully\n", dbName)
+	Verbose(fmt.Sprintf("Database %s created successfully\n", dbName))
 
 	// Switch to the newly created database
 	_, err = db.Exec("USE `" + dbName + "`")
