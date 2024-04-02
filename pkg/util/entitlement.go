@@ -144,7 +144,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	SpinStart(fmt.Println("Status Code for Activation is ", resp.StatusCode))
+	SpinStart(fmt.Sprintf("Status Code for Activation is ", resp.StatusCode))
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
