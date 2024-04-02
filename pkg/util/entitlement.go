@@ -20,7 +20,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/datasance/potctl/pkg/iofog/install"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type EntitlementResponse struct {
