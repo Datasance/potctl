@@ -43,9 +43,9 @@ const (
 	kubeletImage     = "kubelet"
 	portManagerImage = "port-manager"
 	proxyImage       = "proxy"
-	proxyARMImage    = "proxy-arm"
+	proxyARMImage    = "proxy"
 	routerImage      = "router"
-	routerARMImage   = "router-arm"
+	routerARMImage   = "router"
 )
 
 type Version struct {

@@ -127,9 +127,9 @@ SET @proxy_id = LAST_INSERT_ID() + 1;
 
 INSERT INTO CatalogItemImages (catalog_item_id, fog_type_id, container_image)
 VALUES 
-    (@router_id, 1, 'ghcr.io/datasance/router:3.1.0'),
-    (@router_id, 2, 'ghcr.io/datasance/router:3.1.0'),
-    (@proxy_id, 1, 'ghcr.io/datasance/router:3.1.0'),
-    (@proxy_id, 2, 'ghcr.io/datasance/router:3.1.0');
+    (@router_id, 1, 'ghcr.io/datasance/router:3.1.1'),
+    (@router_id, 2, 'ghcr.io/datasance/router:3.1.1'),
+    (@proxy_id, 1, 'ghcr.io/datasance/proxy:3.0.1'),
+    (@proxy_id, 2, 'ghcr.io/datasance/proxy:3.0.1');
     
 COMMIT;
