@@ -21,7 +21,7 @@ LDFLAGS += -X $(PREFIX).portManagerTag=3.0.4
 LDFLAGS += -X $(PREFIX).kubeletTag=3.0.6
 LDFLAGS += -X $(PREFIX).operatorTag=3.3.9
 LDFLAGS += -X $(PREFIX).proxyTag=3.0.1
-LDFLAGS += -X $(PREFIX).routertag=3.1.1
+LDFLAGS += -X $(PREFIX).routerTag=3.1.1
 LDFLAGS += -X $(PREFIX).controllerTag=3.1.0
 LDFLAGS += -X $(PREFIX).agentTag=3.1.0
 LDFLAGS += -X $(PREFIX).controllerVersion=3.1.0
