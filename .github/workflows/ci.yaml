@@ -126,14 +126,6 @@ jobs:
         env:
           VERSION: ${{ needs.Build.outputs.VERSION }}
           GITHUB_TOKEN: ${{ secrets.PAT }}
-      - name: Install Packagecloud cli
-        run: go install github.com/edgeworx/packagecloud@v0.1.1
-      - run: ./.packagecloud-publish.sh
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.packagecloud_token }}
-          PACKAGECLOUD_REPO: "datasance/potctl"
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
