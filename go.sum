@@ -114,8 +114,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CLnGVd57E=
 github.com/daaku/go.zipexe v1.0.1 h1:wV4zMsDOI2SZ2m7Tdz1Ps96Zrx+TzaK15VbUaGozw0M=
 github.com/daaku/go.zipexe v1.0.1/go.mod h1:5xWogtqlYnfBXkSB1o9xysukNP9GTvaNkqzUZbt3Bw8=
-github.com/datasance/iofog-go-sdk/v3 v3.4.8-beta.5 h1:h5b/Uy5caaymqk7jCcp4BQve7Qv8baAzA8QkJ0WCmlI=
-github.com/datasance/iofog-go-sdk/v3 v3.4.8-beta.5/go.mod h1:u9siXP7svs6wWcQenCVZtJXMGj9oDTGn6euPAmi8OAU=
+github.com/datasance/iofog-go-sdk/v3 v3.4.9 h1:ZUAvSX/CslMVmOiEmBP3zFZWQtzFq1XXFWfJAcy+kgQ=
+github.com/datasance/iofog-go-sdk/v3 v3.4.9/go.mod h1:6w5RNmVTph9OvPAYnvzFwqAwqylCgmyqTD4xsJnfd1U=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
