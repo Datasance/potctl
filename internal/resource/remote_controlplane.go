@@ -23,7 +23,7 @@ type RemoteSystemMicroservices = install.RemoteSystemMicroservices
 type RemoteControlPlane struct {
 	IofogUser           IofogUser                 `yaml:"iofogUser"`
 	Controllers         []RemoteController        `yaml:"controllers"`
-	Database            Database                  `yaml:"database,omitempty"`
+	Database            Database                  `yaml:"database"`
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemAgent         Package                   `yaml:"systemAgent,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`

@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.18.1
-	github.com/datasance/iofog-go-sdk/v3 v3.4.0
+	github.com/datasance/iofog-go-sdk/v3 v3.4.9
 	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-connections v0.4.0
-	github.com/datasance/iofog-operator/v3 v3.2.6
+	github.com/datasance/iofog-operator/v3 v3.3.9
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
@@ -24,6 +24,8 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/go-sql-driver/mysql v1.8.0 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/daaku/go.zipexe v1.0.1 // indirect

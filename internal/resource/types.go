@@ -70,6 +70,16 @@ type Credentials struct {
 	Password string `yaml:"password,omitempty"`
 }
 
+type Auth struct {
+	URL               string `yaml:"url"`
+	Realm             string `yaml:"realm"`
+	SSL               string `yaml:"ssl"`
+	RealmKey          string `yaml:"realmKey"`
+	ControllerClient  string `yaml:"controllerClient"`
+	ControllerSecret  string `yaml:"controllerSecret"`
+	ViewerClient      string `yaml:"viewerClient"`
+}
+
 type Database struct {
 	Provider     string `yaml:"provider,omitempty"`
 	Host         string `yaml:"host,omitempty"`

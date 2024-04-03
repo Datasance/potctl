@@ -31,7 +31,7 @@ env:
   proxy_image: 'ghcr.io/datasance/proxy:latest'
   proxy_arm_image: 'ghcr.io/datasance/proxy:latest'
   iofog_agent_version: '3.1.0'
-  controller_version: '3.0.6'
+  controller_version: '3.1.0'
   version:
   agent_vm_list:
   controller_vm:
@@ -121,19 +121,11 @@ jobs:
       - name: potctl build packages GoReleaser
         uses: goreleaser/goreleaser-action@v4 
         with:
-          version: v1.1.0
+          version: 1.1.0
           args: --rm-dist --debug --config ./.goreleaser-potctl.yml
         env:
           VERSION: ${{ needs.Build.outputs.VERSION }}
           GITHUB_TOKEN: ${{ secrets.PAT }}
-      - name: Install Packagecloud cli
-        run: go install github.com/edgeworx/packagecloud@v0.1.1
-      - run: ./.packagecloud-publish.sh
-        continue-on-error: true
-        env:
-          PACKAGECLOUD_TOKEN: ${{ secrets.packagecloud_token }}
-          PACKAGECLOUD_REPO: "datasance/potctl"
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:

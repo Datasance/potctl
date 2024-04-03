@@ -21,6 +21,16 @@ type IofogUser struct {
 	SubscriptionKey string
 }
 
+type Auth struct {
+	URL               string
+	Realm             string
+	SSL               string
+	RealmKey          string
+	ControllerClient  string
+	ControllerSecret  string
+	ViewerClient      string
+}
+
 type Database struct {
 	Provider     string
 	Host         string
@@ -41,4 +51,5 @@ type ControllerConfig struct {
 	Database      Database
 	PidBaseDir    string
 	EcnViewerPort int
+	Auth          Auth
 }

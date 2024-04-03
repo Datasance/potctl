@@ -82,6 +82,12 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 }
 
 func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
+	util.SpinStart(fmt.Sprintf("Creating database"))
+
+	db := exe.controlPlane.Database
+	// Create database
+	install.CreateControllerDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port)
+
 	// Get Kubernetes deployer
 	installer, err := install.NewKubernetes(exe.controlPlane.KubeConfig, exe.namespace)
 	if err != nil {
@@ -107,6 +113,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	conf := install.ControllerConfig{
 		User:          user,
 		Replicas:      replicas,
+		Auth:          install.Auth(exe.controlPlane.Auth),
 		Database:      install.Database(exe.controlPlane.Database),
 		PidBaseDir:    exe.controlPlane.Controller.PidBaseDir,
 		EcnViewerPort: exe.controlPlane.Controller.EcnViewerPort,
@@ -144,14 +151,17 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	if user.Email == "" || user.Name == "" || user.Password == "" || user.Surname == "" {
 		return util.NewInputError("Control Plane Iofog User must contain non-empty values in email, name, surname, and password fields")
 	}
+	// Validate auth
+	auth := controlPlane.Auth
+	if auth.URL == "" || auth.Realm == "" || auth.SSL == "" || auth.RealmKey == "" || auth.ControllerClient == "" || auth.ControllerSecret == "" || auth.ViewerClient == ""{
+		return util.NewInputError("Control Plane Auth Config must contain non-empty values in all fields")
+	}
 	// Validate database
 	db := controlPlane.Database
-	if db.Host != "" || db.DatabaseName != "" || db.Password != "" || db.Port != 0 || db.User != "" {
-		if db.Host == "" || db.DatabaseName == "" || db.Password == "" || db.Port == 0 || db.User == "" {
-			msg := `If you are specifying an external database for the Control Plane,
+	if db.Host == "" || db.DatabaseName == "" || db.Password == "" || db.Port == 0 || db.User == "" {
+		msg := `When you are specifying an external database for the Control Plane,
 you must provide non-empty values in host, databasename, user, password, and port fields.`
-			return util.NewInputError(msg)
-		}
+		return util.NewInputError(msg)
 	}
-	return
+return
 }

@@ -143,7 +143,7 @@ func (exe *RemoteExecutor) Execute() error {
 	agents := ns.GetAgents()
 	numOfAgents := len(agents)
 
-	fmt.Println("Current Number of Agents are ", numOfAgents)
+	fmt.Println(": Current Number of Agents are ", numOfAgents)
 
 	endpoint, err := controlPlane.GetEndpoint()
 	if err != nil {
@@ -171,7 +171,7 @@ func (exe *RemoteExecutor) Execute() error {
 
 	if subscriptionKey != "" {
 		if user.SubscriptionKey != subscriptionKey {
-			fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+			fmt.Println("Subscription Key is updated from controlplane endpoints: ",subscriptionKey)
 			user.SubscriptionKey = subscriptionKey
 		}
 	}

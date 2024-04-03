@@ -143,7 +143,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 		if subscriptionKey != "" {
 			if user.SubscriptionKey != subscriptionKey {
-				fmt.Println("Subscription Key will be updated from controlplane endpoints: ",subscriptionKey)
+				fmt.Println("Subscription Key is updated from controlplane endpoints: ",subscriptionKey)
 				user.SubscriptionKey = subscriptionKey
 			}
 		}

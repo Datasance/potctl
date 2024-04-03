@@ -17,18 +17,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
+
 )
 
 type EntitlementResponse struct {
-	CustomerName         string           `json:"customerName"`
-	CustomerAccountRefID string           `json:"customerAccountRefId"`
-	OrderRefID           string           `json:"orderRefId"`
-	OfferingName         string           `json:"offeringName"`
-	SKU                  string           `json:"sku"`
-	ProductName          string           `json:"productName"`
-	Plan                 EntitlementPlan  `json:"plan"`
+	CustomerName         string            `json:"customerName"`
+	CustomerAccountRefID string            `json:"customerAccountRefId"`
+	OrderRefID           string            `json:"orderRefId"`
+	OfferingName         string            `json:"offeringName"`
+	SKU                  string            `json:"sku"`
+	ProductName          string            `json:"productName"`
+	Plan                 EntitlementPlan   `json:"plan"`
 	GracePeriod          EntitlementPeriod `json:"gracePeriod"`
 	LingerPeriod         EntitlementPeriod `json:"lingerPeriod"`
 	LeasePeriod          EntitlementPeriod `json:"leasePeriod"`
@@ -36,10 +37,10 @@ type EntitlementResponse struct {
 }
 
 type EntitlementPlan struct {
-	Name            string              `json:"name"`
-	LicenseType     string              `json:"licenseType"`
+	Name             string              `json:"name"`
+	LicenseType      string              `json:"licenseType"`
 	LicenseStartType string              `json:"licenseStartType"`
-	LicenseDuration EntitlementDuration `json:"licenseDuration"`
+	LicenseDuration  EntitlementDuration `json:"licenseDuration"`
 }
 
 type EntitlementDuration struct {
@@ -143,7 +144,7 @@ func ActivateLicense(accessToken, nonce string) (*ActivationResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("Status Code for Activation is ", resp.StatusCode)
+	//SpinStart(fmt.Sprintf("Status Code for Activation is %s", resp.StatusCode))
 
 	var activationResponse ActivationResponse
 	if err := json.NewDecoder(resp.Body).Decode(&activationResponse); err != nil {
@@ -182,7 +183,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 
 	accessToken, nonceActivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
-        switch {
+		switch {
 		case strings.Contains(err.Error(), "Subscription has expired"):
 			return "Subscription has expired", "0", nil
 		case strings.Contains(err.Error(), "Subscription not found"):
@@ -198,10 +199,10 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 	activationResponse, err := ActivateLicense(accessToken, nonceActivation)
 	if err != nil {
 		fmt.Println("Error while activating license:", err)
-        return "", "", err
+		return "", "", err
 	}
 
-    var expiryDate = activationResponse.EntitlementExpiryDate
+	var expiryDate = activationResponse.EntitlementExpiryDate
 	var agentSeats = ""
 	for _, activationAttributeObject := range activationResponse.Attributes {
 		if activationAttributeObject.Key == "Agent Seats" {
@@ -214,7 +215,7 @@ func GetEntitlementDatasance(activationCode string, seatID string, seatName stri
 func DeactivateEntitlementDatasance(activationCode string, seatID string, seatName string) {
 	accessToken, nonceDeactivation, err := ActivateAndGetAccessToken(productID, activationCode, seatID, seatName)
 	if err != nil {
-        switch {
+		switch {
 		case strings.Contains(err.Error(), "Subscription has expired"):
 			fmt.Println("Subscription has expired")
 		case strings.Contains(err.Error(), "Subscription not found"):
@@ -229,20 +230,18 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 	DeactivateLicense(accessToken, nonceDeactivation)
 }
 
+func CheckExpiryDate(dateString string) bool {
 
-
-func CheckExpiryDate(dateString string) (bool) {
-
-	fmt.Println("Checking License Expiry Date from Subscription")
-	if strings.Contains(dateString,"Subscription has expired") {
+	SpinStart("Checking License Expiry Date from Subscription")
+	if strings.Contains(dateString, "Subscription has expired") {
 		fmt.Println("Subscription has expired, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
 	}
-	if strings.Contains(dateString,"Subscription not found") {
+	if strings.Contains(dateString, "Subscription not found") {
 		fmt.Println("Subscription not found, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
 		return false
 	}
-	if strings.Contains(dateString,"Subscription Engine is not responding") {
+	if strings.Contains(dateString, "Subscription Engine is not responding") {
 		fmt.Println("Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com")
 		return false
 	}
@@ -250,18 +249,18 @@ func CheckExpiryDate(dateString string) (bool) {
 	return true
 }
 
-func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) (bool) {
+func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) bool {
 
 	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
 
-	fmt.Println("Checking number of agents from subscription details")
+	SpinStart("Checking number of agents from subscription details")
 
-    if err != nil {
-        fmt.Println("Error while converting maximum agent number to integer:", err)
-        return false
-    }
+	if err != nil {
+		fmt.Println("Error while converting maximum agent number to integer:", err)
+		return false
+	}
 
-	if currentAgentNum >= maxAgentNumAsInt {
+	if currentAgentNum > maxAgentNumAsInt {
 		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
 		fmt.Println("Your active subscription includes maximum agent seats as ", maxAgentNum)
 		fmt.Println("Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")

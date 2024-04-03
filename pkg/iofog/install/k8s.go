@@ -208,9 +208,10 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 		}
 	}
 
-	// Set specification
+	// Set specification 
 	cp.Spec.Replicas.Controller = conf.Replicas
 	cp.Spec.Database = cpv3.Database(conf.Database)
+	cp.Spec.Auth = cpv3.Auth(conf.Auth)
 	cp.Spec.User = cpv3.User(conf.User)
 	cp.Spec.Services = k8s.services
 	cp.Spec.Images = k8s.images
