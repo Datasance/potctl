@@ -82,11 +82,7 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 }
 
 func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
-	util.SpinStart(fmt.Sprintf("Creating database"))
 
-	db := exe.controlPlane.Database
-	// Create database
-	install.CreateControllerDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port)
 
 	// Get Kubernetes deployer
 	installer, err := install.NewKubernetes(exe.controlPlane.KubeConfig, exe.namespace)
@@ -100,23 +96,24 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetRouterImage(exe.controlPlane.Images.Router)
 	installer.SetProxyImage(exe.controlPlane.Images.Proxy)
 	installer.SetControllerImage(exe.controlPlane.Images.Controller)
-	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.IP)
-	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.IP)
-	installer.SetProxyService(exe.controlPlane.Services.Proxy.Type, exe.controlPlane.Services.Proxy.IP)
+	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.Address, exe.controlPlane.Services.Controller.Annotations)
+	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations)
+	installer.SetProxyService(exe.controlPlane.Services.Proxy.Type, exe.controlPlane.Services.Proxy.Address, exe.controlPlane.Services.Proxy.Annotations)
 
 	replicas := int32(1)
 	if exe.controlPlane.Replicas.Controller != 0 {
 		replicas = exe.controlPlane.Replicas.Controller
 	}
 	// Create controller on cluster
-	user := install.IofogUser(exe.controlPlane.IofogUser)
+	// user := install.IofogUser(exe.controlPlane.IofogUser)
 	conf := install.ControllerConfig{
-		User:          user,
+		// User:          user,
 		Replicas:      replicas,
 		Auth:          install.Auth(exe.controlPlane.Auth),
 		Database:      install.Database(exe.controlPlane.Database),
 		PidBaseDir:    exe.controlPlane.Controller.PidBaseDir,
 		EcnViewerPort: exe.controlPlane.Controller.EcnViewerPort,
+		EcnViewerURL: exe.controlPlane.Controller.EcnViewerURL,
 	}
 	endpoint, err := installer.CreateControlPlane(&conf)
 	if err != nil {

@@ -26,7 +26,7 @@ const (
 
 type microservice struct {
 	name       string
-	IP         string
+	Address    string
 	ports      []int32
 	replicas   int32
 	containers []container

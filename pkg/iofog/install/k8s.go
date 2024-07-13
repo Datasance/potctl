@@ -38,7 +38,7 @@ import (
 )
 
 const (
-	cpInstanceName = "iofog"
+	cpInstanceName = "pot"
 )
 
 // Kubernetes struct to manage state of deployment on Kubernetes cluster
@@ -212,10 +212,11 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	cp.Spec.Replicas.Controller = conf.Replicas
 	cp.Spec.Database = cpv3.Database(conf.Database)
 	cp.Spec.Auth = cpv3.Auth(conf.Auth)
-	cp.Spec.User = cpv3.User(conf.User)
+	// cp.Spec.User = cpv3.User(conf.User)
 	cp.Spec.Services = k8s.services
 	cp.Spec.Images = k8s.images
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
+	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
 
 	// Create or update Control Plane
@@ -601,31 +602,34 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 	return
 }
 
-func (k8s *Kubernetes) SetControllerService(svcType, ip string) {
+func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string) {
 	if svcType != "" {
 		k8s.services.Controller.Type = svcType
 	} else {
 		k8s.services.Controller.Type = string(corev1.ServiceTypeLoadBalancer)
 	}
-	k8s.services.Controller.Address = ip
+	k8s.services.Controller.Address = address
+	k8s.services.Controller.Annotations = annotations
 }
 
-func (k8s *Kubernetes) SetRouterService(svcType, ip string) {
+func (k8s *Kubernetes) SetRouterService(svcType, address string, annotations map[string]string) {
 	if svcType != "" {
 		k8s.services.Router.Type = svcType
 	} else {
 		k8s.services.Router.Type = string(corev1.ServiceTypeLoadBalancer)
 	}
-	k8s.services.Router.Address = ip
+	k8s.services.Router.Address = address
+	k8s.services.Router.Annotations = annotations
 }
 
-func (k8s *Kubernetes) SetProxyService(svcType, ip string) {
+func (k8s *Kubernetes) SetProxyService(svcType, address string, annotations map[string]string) {
 	if svcType != "" {
 		k8s.services.Proxy.Type = svcType
 	} else {
 		k8s.services.Proxy.Type = string(corev1.ServiceTypeLoadBalancer)
 	}
-	k8s.services.Proxy.Address = ip
+	k8s.services.Proxy.Address = address
+	k8s.services.Proxy.Annotations = annotations
 }
 
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {

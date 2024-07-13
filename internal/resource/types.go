@@ -56,8 +56,9 @@ type Services struct {
 }
 
 type Service struct {
-	Type string `json:"type,omitempty"`
-	IP   string `json:"ip,omitempty"`
+	Type        string `json:"type,omitempty"`
+	Address     string `json:"address,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 type Replicas struct {
@@ -152,4 +153,5 @@ var FogTypeIntMap = map[int]string{
 type ControllerConfig struct {
 	PidBaseDir    string `yaml:"pidBaseDir,omitempty"`
 	EcnViewerPort int    `yaml:"ecnViewerPort,omitempty"`
+	EcnViewerURL  string  `yaml:"ecnViewerURL,omitempty"`
 }
