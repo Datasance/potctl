@@ -241,7 +241,7 @@ func (agent *RemoteAgent) Configure(controllerEndpoint string, user IofogUser) (
 	if err != nil {
 		return "", err
 	}
-	// Instantiate commands
+	// Instantiate commands  *initial config parameters need to add
 	cmds := []command{
 		{
 			cmd: "sudo iofog-agent config -a " + controllerBaseURL.String(),

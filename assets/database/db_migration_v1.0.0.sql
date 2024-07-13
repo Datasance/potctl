@@ -115,10 +115,10 @@ CREATE TABLE IF NOT EXISTS Fogs (
     isolated_docker_container BOOLEAN DEFAULT TRUE,
     docker_pruning_freq INT DEFAULT 1,
     available_disk_threshold FLOAT DEFAULT 20,
-    log_level VARCHAR(255) DEFAULT 'INFO',
+    log_level VARCHAR(10) DEFAULT 'INFO',
     is_system BOOLEAN DEFAULT FALSE,
     router_id INT DEFAULT 0,
-    time_zone TEXT,
+    time_zone VARCHAR(32) DEFAULT 'Etc/UTC',
     created_at DATETIME,
     updated_at DATETIME,
     fog_type_id INT DEFAULT 0,
@@ -218,7 +218,7 @@ CREATE INDEX idx_tunnels_iofogUuid ON Tunnels (iofog_uuid);
 
 CREATE TABLE IF NOT EXISTS Microservices (
     uuid VARCHAR(32) PRIMARY KEY NOT NULL,
-    config VARCHAR(255) DEFAULT '{}',
+    config VARCHAR(1000) DEFAULT '{}',
     name VARCHAR(255) DEFAULT 'New Microservice',
     config_last_updated BIGINT,
     is_network BOOLEAN DEFAULT false,
