@@ -126,6 +126,10 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	}
 	msvc.Config = jsonConfig
 	msvc.Container.RootHostAccess = msvcInfo.RootHostAccess
+	msvc.Container.Runtime = msvcInfo.Runtime
+	msvc.Container.Platform = msvcInfo.Platform
+	msvc.Container.RunAsUser = msvcInfo.RunAsUser
+	msvc.Container.CdiDevices = msvcInfo.CdiDevices
 	msvc.Container.Commands = msvcInfo.Commands
 	msvc.Container.Ports = mapPorts(msvcInfo.Ports)
 	msvc.Container.Volumes = &volumes
