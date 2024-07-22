@@ -47,14 +47,36 @@ do_configure_overlay() {
 	fi
 }
 
+do_modify_daemon() {
+	if [ ! -f /etc/docker/daemon.json ]; then
+		echo "Creating /etc/docker/daemon.json..."
+		$sh_c tee /etc/docker/daemon.json > /dev/null <<EOF
+{
+	"features": {
+		"containerd-snapshotter": true,
+		"cdi": true
+	},
+	"cdi-spec-dirs": ["/etc/cdi/", "/var/run/cdi"]
+}
+EOF
+	else
+		echo "/etc/docker/daemon.json already exists"
+	fi
+	echo "Restarting Docker daemon..."
+	$sh_c "systemctl daemon-reload"
+	$sh_c "service docker restart"
+}
+
+
 do_install_docker() {
-	# Check that Docker 18.09.2 or greater is installed
+	# Check that Docker 25.0.0 or greater is installed
 	if command_exists docker; then
 		docker_version=$(docker -v | sed 's/.*version \(.*\),.*/\1/' | tr -d '.')
-		if [ "$docker_version" -ge 18090 ]; then
+		if [ "$docker_version" -ge 25000 ]; then
 			echo "# Docker $docker_version already installed"
 			start_docker
 			do_configure_overlay
+			do_modify_daemon
 			return
 		fi
 	fi
@@ -85,6 +107,7 @@ do_install_docker() {
 	fi
 	start_docker
 	do_configure_overlay
+	do_modify_daemon
 }
 
 . /etc/iofog/agent/init.sh
