@@ -63,10 +63,10 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CLnGVd57E=
 github.com/daaku/go.zipexe v1.0.1 h1:wV4zMsDOI2SZ2m7Tdz1Ps96Zrx+TzaK15VbUaGozw0M=
 github.com/daaku/go.zipexe v1.0.1/go.mod h1:5xWogtqlYnfBXkSB1o9xysukNP9GTvaNkqzUZbt3Bw8=
-github.com/datasance/iofog-go-sdk/v3 v3.4.9 h1:ZUAvSX/CslMVmOiEmBP3zFZWQtzFq1XXFWfJAcy+kgQ=
-github.com/datasance/iofog-go-sdk/v3 v3.4.9/go.mod h1:6w5RNmVTph9OvPAYnvzFwqAwqylCgmyqTD4xsJnfd1U=
-github.com/datasance/iofog-operator/v3 v3.3.13 h1:siR2mJ7qdm2EfU0KVikIL0kxGjaqEmygu85u86TX72A=
-github.com/datasance/iofog-operator/v3 v3.3.13/go.mod h1:+zSVPuXhOIyKqrcpoDWqyWyj53BGltM6K5vEUPEhLVU=
+github.com/datasance/iofog-go-sdk/v3 v3.4.11 h1:k/iQ2O30QP37xi+irHmSp0zBSO73rBifgIlVR3p2ITg=
+github.com/datasance/iofog-go-sdk/v3 v3.4.11/go.mod h1:NxHVscnHULXDK0BJMOP77B6zqqaGdQ2Z1eBoYGwxgIA=
+github.com/datasance/iofog-operator/v3 v3.4.0 h1:EmHPArwyHUuv6trI21ldxuvACuYAB+1I78T2J+NHvVI=
+github.com/datasance/iofog-operator/v3 v3.4.0/go.mod h1:e5Pu8/rjMr/4kSCLBP7ecoK6AFaND4W1LB/e2UgBZBc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
