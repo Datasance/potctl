@@ -72,7 +72,7 @@ do_install_docker() {
 	# Check that Docker 25.0.0 or greater is installed
 	if command_exists docker; then
 		docker_version=$(docker -v | sed 's/.*version \(.*\),.*/\1/' | tr -d '.')
-		if [ "$docker_version" -ge 25000 ]; then
+		if [ "$docker_version" -ge 2500 ]; then
 			echo "# Docker $docker_version already installed"
 			start_docker
 			do_configure_overlay
