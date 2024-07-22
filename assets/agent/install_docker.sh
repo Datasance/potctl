@@ -50,7 +50,7 @@ do_configure_overlay() {
 do_modify_daemon() {
 	if [ ! -f /etc/docker/daemon.json ]; then
 		echo "Creating /etc/docker/daemon.json..."
-		$sh_c tee /etc/docker/daemon.json > /dev/null <<EOF
+		sudo tee /etc/docker/daemon.json > /dev/null <<EOF
 {
 	"features": {
 		"containerd-snapshotter": true,
