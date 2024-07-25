@@ -513,6 +513,9 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			if err != nil {
 				return
 			}
+			if len(svc.Status.LoadBalancer.Ingress) == 0 {
+				continue
+			}
 			addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
 			if addr == "" {
 				continue
