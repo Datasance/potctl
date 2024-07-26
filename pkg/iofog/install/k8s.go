@@ -513,7 +513,13 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			if err != nil {
 				return
 			}
-			nodePort, err = k8s.getPort(svc, name, targetPort)
+			if len(svc.Status.LoadBalancer.Ingress) == 0 {
+				continue
+			}
+			addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
+			if addr == "" {
+				continue
+			}
 			return
 		default:
 			err = util.NewError("Found Service was not of supported type")
