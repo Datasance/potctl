@@ -245,11 +245,14 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	}
 
 	// Get endpoint of deployed Controller
-	if k8s.services.Controller.Type == "ClusterIP" {
-		var host string
-		host = "https://" + k8s.ingresses.Controller.Host
-		endpoint, err = util.GetControllerEndpoint(host)
-		if err != nil {
+	if cp.Spec.Services.Controller.Type == "ClusterIP" {
+		if cp.Spec.Ingresses != nil && cp.Spec.Ingresses.Controller != nil {
+			endpoint, err = util.GetControllerEndpoint(fmt.Sprintf("https://" + k8s.ingresses.Controller.Host))
+			if err != nil {
+				return
+			}
+		} else {
+			err = fmt.Errorf("Ingresses or Ingress Controller is not defined")
 			return
 		}
 	} else {
