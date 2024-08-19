@@ -247,9 +247,17 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	}
 
 	// Get endpoint of deployed Controller
-	endpoint, err = k8s.GetControllerEndpoint()
-	if err != nil {
-		return
+	if cp.Spec.Services.Controller.Type == corev1.ServiceTypeClusterIP {
+		host = "https://" + cp.Spec.Ingresses.Controller.Host
+		endpoint, err = util.GetControllerEndpoint(host)
+		if err != nil {
+			return
+		}
+	} else {
+		endpoint, err = k8s.GetControllerEndpoint()
+		if err != nil {
+			return
+		}
 	}
 
 	// Wait for Default Router to be registered by Port Manager
@@ -522,16 +530,6 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			nodePort, err = k8s.getPort(svc, name, targetPort)
 			return
 
-		case corev1.ServiceTypeClusterIP:
-			// Handle Ingress
-			addr, err := k8s.handleIngress(ctx, k8s.ns)
-			if err != nil {
-				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
-				continue
-			}
-			nodePort = targetPort
-			return
-
 		default:
 			err = util.NewError("Found Service was not of supported type")
 			return
@@ -617,34 +615,6 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 		addr = host
 	}
 	return
-}
-
-func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
-	ingress := &networkingv1.Ingress{}
-	err = k8s.opClient.Get(ctx, types.NamespacedName{Name: "pot-controller", Namespace: namespace}, ingress)
-	if err != nil {
-		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
-	}
-
-	// Check if there are any rules defined
-	if len(ingress.Spec.Rules) == 0 {
-		return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
-	}
-
-	// Extract the first rule's host
-	host := ingress.Spec.Rules[0].Host
-	if host == "" {
-		return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
-	}
-
-	// handle the case where HTTPS is used (if TLS is defined)
-	if len(ingress.Spec.TLS) > 0 {
-		addr = "https://" + host
-	} else {
-		addr = "http://" + host
-	}
-
-	return addr, nil
 }
 
 func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string) {
