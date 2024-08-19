@@ -14,14 +14,14 @@
 package get
 
 import (
-	"time"
 	"fmt"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
+	"time"
 )
 
 type controllerExecutor struct {
@@ -80,12 +80,11 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 	// Handle remote and local
 	controllers := ns.GetControllers()
 
-
 	controlPlaneForUser, err := ns.GetControlPlane()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	user := controlPlaneForUser.GetUser()
 
 	// Generate table and headers
@@ -119,7 +118,7 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 		if ctrlConfig.GetCreatedTime() != "" {
 			age, _ = util.ElapsedUTC(ctrlConfig.GetCreatedTime(), util.NowUTC())
 		}
-		
+
 		addr, port := getAddressAndPort(ctrlConfig.GetEndpoint(), client.ControllerPortString)
 
 		endpoint, err := controlPlaneForUser.GetEndpoint()
@@ -143,12 +142,11 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 		if subscriptionKey != "" {
 			if user.SubscriptionKey != subscriptionKey {
-				fmt.Println("Subscription Key is updated from controlplane endpoints: ",subscriptionKey)
+				fmt.Println("Subscription Key is updated from controlplane endpoints: ", subscriptionKey)
 				user.SubscriptionKey = subscriptionKey
 			}
 		}
 		expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, namespace, user.Email)
-
 
 		if err != nil {
 			return nil, err

@@ -14,15 +14,15 @@
 package install
 
 var pkg struct {
-	scriptPrereq            string
-	scriptInit              string
-	scriptInstallDeps       string
-	scriptInstallJava       string
-	scriptInstallDocker     string
-	scriptInstallIofog      string
-	scriptUninstallIofog    string
-	iofogDir                string
-	agentDir                string
+	scriptPrereq         string
+	scriptInit           string
+	scriptInstallDeps    string
+	scriptInstallJava    string
+	scriptInstallDocker  string
+	scriptInstallIofog   string
+	scriptUninstallIofog string
+	iofogDir             string
+	agentDir             string
 }
 
 func init() {

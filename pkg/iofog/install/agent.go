@@ -14,8 +14,8 @@
 package install
 
 import (
-	"github.com/datasance/potctl/pkg/util"
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 type Agent interface {

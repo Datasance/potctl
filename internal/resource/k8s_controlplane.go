@@ -22,12 +22,13 @@ type KubernetesControlPlane struct {
 	IofogUser      IofogUser              `yaml:"iofogUser"`
 	ControllerPods []KubernetesController `yaml:"controllerPods,omitempty"`
 	Database       Database               `yaml:"database"`
-	Auth		   Auth                   `yaml:"auth"`
+	Auth           Auth                   `yaml:"auth"`
 	Services       Services               `yaml:"services,omitempty"`
 	Replicas       Replicas               `yaml:"replicas,omitempty"`
 	Images         KubeImages             `yaml:"images,omitempty"`
 	Endpoint       string                 `yaml:"endpoint,omitempty"`
 	Controller     ControllerConfig       `yaml:"controller,omitempty"`
+	Ingresses      Ingresses              `yaml:"ingresses,omitempty"`
 }
 
 func (cp *KubernetesControlPlane) GetUser() IofogUser {

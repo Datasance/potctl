@@ -20,11 +20,12 @@ import (
 	"io"
 	"time"
 
-	"github.com/datasance/potctl/pkg/util"
 	ioclient "github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	iofogv3 "github.com/datasance/iofog-operator/v3/apis"
 	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
+	"github.com/datasance/potctl/pkg/util"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	extsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -37,24 +38,27 @@ import (
 	opclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	cpInstanceName = "pot"
-)
+// ECNname
+//const (
+//	cpInstanceName = "pot"
+//)
 
 // Kubernetes struct to manage state of deployment on Kubernetes cluster
 type Kubernetes struct {
-	config        *restclient.Config
-	opClient      opclient.Client
-	clientset     *kubernetes.Clientset
-	extsClientset *extsclientset.Clientset
-	ns            string
-	operator      *microservice
-	services      cpv3.Services
-	images        cpv3.Images
+	config         *restclient.Config
+	opClient       opclient.Client
+	clientset      *kubernetes.Clientset
+	extsClientset  *extsclientset.Clientset
+	ns             string
+	operator       *microservice
+	services       cpv3.Services
+	images         cpv3.Images
+	ingresses      cpv3.Ingresses
+	cpInstanceName string
 }
 
 // NewKubernetes constructs an object to manage cluster
-func NewKubernetes(configFilename, namespace string) (*Kubernetes, error) {
+func NewKubernetes(configFilename, namespace string, cpInstanceName string ) (*Kubernetes, error) {
 	// Get the kubernetes config from the filepath.
 	config, err := clientcmd.BuildConfigFromFlags("", configFilename)
 	if err != nil {
@@ -76,6 +80,7 @@ func NewKubernetes(configFilename, namespace string) (*Kubernetes, error) {
 		clientset:     clientset,
 		extsClientset: extsClientset,
 		ns:            namespace,
+		cpName:        cpInstanceName,
 		operator:      newOperatorMicroservice(),
 	}, nil
 }
@@ -118,6 +123,12 @@ func (k8s *Kubernetes) SetControllerImage(image string) {
 	} else {
 		k8s.images.Controller = util.GetControllerImage()
 	}
+}
+
+func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
+	if pullSecret != "" {
+		k8s.images.PullSecret = pullSecret
+	} 
 }
 
 func (k8s *Kubernetes) enableCustomResources() error {
@@ -189,7 +200,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	// Check if Control Plane exists
 	Verbose("Finding existing Control Plane")
 	cpKey := opclient.ObjectKey{
-		Name:      cpInstanceName,
+		Name:      k8s.cpName,
 		Namespace: k8s.ns,
 	}
 	var cp cpv3.ControlPlane
@@ -202,13 +213,13 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 		found = false
 		cp = cpv3.ControlPlane{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      cpInstanceName,
+				Name:      k8s.cpName,
 				Namespace: k8s.ns,
 			},
 		}
 	}
 
-	// Set specification 
+	// Set specification
 	cp.Spec.Replicas.Controller = conf.Replicas
 	cp.Spec.Database = cpv3.Database(conf.Database)
 	cp.Spec.Auth = cpv3.Auth(conf.Auth)
@@ -218,6 +229,8 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
+	cp.Spec.Controller.Https = conf.Https
+	cp.Spec.Controller.SecretName = conf.SecretName
 
 	// Create or update Control Plane
 	if found {
@@ -314,7 +327,7 @@ func (k8s *Kubernetes) monitorOperator(errCh chan error) {
 		// Check controlplane resource status
 		var cp cpv3.ControlPlane
 		if err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{
-			Name:      cpInstanceName,
+			Name:      k8s.cpName,
 			Namespace: k8s.ns,
 		}, &cp); err != nil {
 			errCh <- util.NewInternalError("Error reading Control Plane resource " + errSuffix)
@@ -437,7 +450,7 @@ func (k8s *Kubernetes) DeleteControlPlane() error {
 	// Delete Control Plane
 	cp := &cpv3.ControlPlane{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cpInstanceName,
+			Name:      k8s.cpName,
 			Namespace: k8s.ns,
 		},
 	}
@@ -509,17 +522,16 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			nodePort, err = k8s.getPort(svc, name, targetPort)
 			return
 		case corev1.ServiceTypeClusterIP:
-			addr, err = k8s.getClusterIPAddress(name)
+			// Ingress must be ready for ClusterIP service type
+			addr, err := k8s.handleIngress(context.Background(), k8s.ns)
 			if err != nil {
-				return
-			}
-			if len(svc.Status.LoadBalancer.Ingress) == 0 {
+				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
 				continue
 			}
-			addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
 			if addr == "" {
 				continue
 			}
+			nodePort = targetPort
 			return
 		default:
 			err = util.NewError("Found Service was not of supported type")
@@ -608,6 +620,34 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 	return
 }
 
+func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
+	ingress := &networkingv1.Ingress{}
+	err = k8s.Client.Get(ctx, types.NamespacedName{Name: "pot-controller", Namespace: namespace}, ingress)
+	if err != nil {
+		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
+	}
+
+	// Check if there are any rules defined
+	if len(ingress.Spec.Rules) == 0 {
+		return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
+	}
+
+	// Extract the first rule's host
+	host := ingress.Spec.Rules[0].Host
+	if host == "" {
+		return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
+	}
+
+	// handle the case where HTTPS is used (if TLS is defined)
+	if len(ingress.Spec.TLS) > 0 {
+		addr = "https://" + host
+	} else {
+		addr = "http://" + host
+	}
+
+	return addr, nil
+}
+
 func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string) {
 	if svcType != "" {
 		k8s.services.Controller.Type = svcType
@@ -636,6 +676,28 @@ func (k8s *Kubernetes) SetProxyService(svcType, address string, annotations map[
 	}
 	k8s.services.Proxy.Address = address
 	k8s.services.Proxy.Annotations = annotations
+}
+
+func (k8s *Kubernetes) SetControllerIngress(annotations map[string]string, ingressClassName string, host string, secretName string) {
+	k8s.ingresses.Controller.Annotations = annotations
+	k8s.ingresses.Controller.IngressClassName = ingressClassName
+	k8s.ingresses.Controller.Host = host
+	k8s.ingresses.Controller.SecretName = secretName
+}
+
+func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interiorPort int, edgePort int) {
+	k8s.ingresses.Router.Address = address
+	k8s.ingresses.Controller.MessagePort = messagePort
+	k8s.ingresses.Controller.InteriorPort = interiorPort
+	k8s.ingresses.Controller.EdgePort = edgePort
+}
+
+func (k8s *Kubernetes) SetHttpProxyIngress(address string) {
+	k8s.ingresses.HTTPProxy.Address = address
+}
+
+func (k8s *Kubernetes) SetTcpProxyIngress(address string) {
+	k8s.ingresses.TCPProxy.Address = address
 }
 
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {

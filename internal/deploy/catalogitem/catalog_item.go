@@ -17,12 +17,12 @@ import (
 	"fmt"
 	"strconv"
 
+	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/util"
-	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"gopkg.in/yaml.v2"
 )
 

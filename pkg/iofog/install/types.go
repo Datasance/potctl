@@ -14,21 +14,21 @@
 package install
 
 type IofogUser struct {
-	Name     string
-	Surname  string
-	Email    string
-	Password string
+	Name            string
+	Surname         string
+	Email           string
+	Password        string
 	SubscriptionKey string
 }
 
 type Auth struct {
-	URL               string
-	Realm             string
-	SSL               string
-	RealmKey          string
-	ControllerClient  string
-	ControllerSecret  string
-	ViewerClient      string
+	URL              string
+	Realm            string
+	SSL              string
+	RealmKey         string
+	ControllerClient string
+	ControllerSecret string
+	ViewerClient     string
 }
 
 type Database struct {
@@ -45,7 +45,6 @@ type Pod struct {
 	Status string
 }
 
-// 
 type ControllerConfig struct {
 	// User          IofogUser
 	Replicas      int32

@@ -64,6 +64,18 @@ func newOperatorMicroservice() *microservice {
 			},
 			{
 				APIGroups: []string{
+					"networking.k8s.io",
+				},
+				Resources: []string{
+					"ingresses",
+					"ingresses/status",
+				},
+				Verbs: []string{
+					"*",
+				},
+			},
+			{
+				APIGroups: []string{
 					"datasance.com",
 				},
 				Resources: []string{
