@@ -40,7 +40,7 @@ import (
 
 // ECNname
 const (
-cpInstanceName = "pot"
+	cpInstanceName = "pot"
 )
 
 // Kubernetes struct to manage state of deployment on Kubernetes cluster
@@ -621,7 +621,7 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 func (k8s *Kubernetes) handleIngress() (addr string, err error) {
 	// Fetch the Ingress resource for the ClusterIP service
 	var controllerIngress networkingv1.Ingress
-	err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{Name: "pot-controller", Namespace: k8s.ns}, &controllerIngress)
+	err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{Name: "pot-controller", Namespace: k8s.ns,}, &controllerIngress)
 	if err != nil {
 		util.PrintNotify("Failed to get Ingress resource 'pot-controller'")
 	}
