@@ -45,20 +45,20 @@ import (
 
 // Kubernetes struct to manage state of deployment on Kubernetes cluster
 type Kubernetes struct {
-	config         *restclient.Config
-	opClient       opclient.Client
-	clientset      *kubernetes.Clientset
-	extsClientset  *extsclientset.Clientset
-	ns             string
-	operator       *microservice
-	services       cpv3.Services
-	images         cpv3.Images
-	ingresses      cpv3.Ingresses
-	cpName         string
+	config        *restclient.Config
+	opClient      opclient.Client
+	clientset     *kubernetes.Clientset
+	extsClientset *extsclientset.Clientset
+	ns            string
+	operator      *microservice
+	services      cpv3.Services
+	images        cpv3.Images
+	ingresses     cpv3.Ingresses
+	cpName        string
 }
 
 // NewKubernetes constructs an object to manage cluster
-func NewKubernetes(configFilename, namespace string, cpInstanceName string ) (*Kubernetes, error) {
+func NewKubernetes(configFilename, namespace string, cpInstanceName string) (*Kubernetes, error) {
 	// Get the kubernetes config from the filepath.
 	config, err := clientcmd.BuildConfigFromFlags("", configFilename)
 	if err != nil {
@@ -128,7 +128,7 @@ func (k8s *Kubernetes) SetControllerImage(image string) {
 func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 	if pullSecret != "" {
 		k8s.images.PullSecret = pullSecret
-	} 
+	}
 }
 
 func (k8s *Kubernetes) enableCustomResources() error {
@@ -478,70 +478,70 @@ func (k8s *Kubernetes) DeleteControlPlane() error {
 }
 
 func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr string, nodePort int32, err error) {
-    // Get watch handler to observe changes to services
-    watch, err := k8s.clientset.CoreV1().Services(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
-    if err != nil {
-        return
-    }
-    defer watch.Stop()
+	// Get watch handler to observe changes to services
+	watch, err := k8s.clientset.CoreV1().Services(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return
+	}
+	defer watch.Stop()
 
-    // Wait for Services to have addresses allocated
-    for event := range watch.ResultChan() {
-        svc, ok := event.Object.(*corev1.Service)
-        if !ok {
-            err = util.NewInternalError("Failed to wait for services in namespace: " + k8s.ns)
-            return
-        }
+	// Wait for Services to have addresses allocated
+	for event := range watch.ResultChan() {
+		svc, ok := event.Object.(*corev1.Service)
+		if !ok {
+			err = util.NewInternalError("Failed to wait for services in namespace: " + k8s.ns)
+			return
+		}
 
-        // Ignore irrelevant service events
-        if svc.Name != name {
-            continue
-        }
+		// Ignore irrelevant service events
+		if svc.Name != name {
+			continue
+		}
 
-        switch svc.Spec.Type {
-        case corev1.ServiceTypeLoadBalancer:
-            // Load balancer must be ready
-            if len(svc.Status.LoadBalancer.Ingress) == 0 {
-                continue
-            }
-            addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
-            if addr == "" {
-                continue
-            }
-            return
+		switch svc.Spec.Type {
+		case corev1.ServiceTypeLoadBalancer:
+			// Load balancer must be ready
+			if len(svc.Status.LoadBalancer.Ingress) == 0 {
+				continue
+			}
+			addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
+			if addr == "" {
+				continue
+			}
+			return
 
-        case corev1.ServiceTypeNodePort:
-            addr, err = k8s.getNodePortAddress(name)
-            if err != nil {
-                util.PrintNotify("Could not get an external IP address of any Kubernetes nodes for NodePort service " + name + "\nTrying to reach the cluster IP of the service")
-                addr, err = k8s.getClusterIPAddress(name)
-                if err != nil {
-                    return
-                }
-            }
-            nodePort, err = k8s.getPort(svc, name, targetPort)
-            return
+		case corev1.ServiceTypeNodePort:
+			addr, err = k8s.getNodePortAddress(name)
+			if err != nil {
+				util.PrintNotify("Could not get an external IP address of any Kubernetes nodes for NodePort service " + name + "\nTrying to reach the cluster IP of the service")
+				addr, err = k8s.getClusterIPAddress(name)
+				if err != nil {
+					return
+				}
+			}
+			nodePort, err = k8s.getPort(svc, name, targetPort)
+			return
 
-        case corev1.ServiceTypeClusterIP:
-            // Ingress must be ready for ClusterIP service type
-            addr, err = k8s.handleIngress(context.Background(), k8s.ns)
-            if err != nil {
-                util.PrintNotify("Failed to handle Ingress for ClusterIP service of Controller")
-                continue
-            }
-            if addr == "" {
-                continue
-            }
-            nodePort = targetPort
-            return
+		case corev1.ServiceTypeClusterIP:
+			// Ingress must be ready for ClusterIP service type
+			addr, err = k8s.handleIngress(context.Background(), k8s.ns)
+			if err != nil {
+				util.PrintNotify("Failed to handle Ingress for ClusterIP service of Controller")
+				continue
+			}
+			if addr == "" {
+				continue
+			}
+			nodePort = targetPort
+			return
 
-        default:
-            err = util.NewError("Found Service was not of supported type")
-            return
-        }
-    }
-    err = util.NewError("Did not receive any events from Kuberenetes API Server")
-    return addr, nodePort, err
+		default:
+			err = util.NewError("Found Service was not of supported type")
+			return
+		}
+	}
+	err = util.NewError("Did not receive any events from Kuberenetes API Server")
+	return addr, nodePort, err
 }
 
 func (k8s *Kubernetes) getPort(svc *corev1.Service, name string, targetPort int32) (nodePort int32, err error) {
@@ -623,31 +623,31 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 }
 
 func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
-    ingress := &networkingv1.Ingress{}
-    err = k8s.opClient.Get(ctx, ObjectKey{Name: "pot-controller", Namespace: namespace}, ingress)
-    if err != nil {
-        return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
-    }
+	ingress := &networkingv1.Ingress{}
+	err = k8s.opClient.Get(ctx, ObjectKey{Name: "pot-controller", Namespace: namespace}, ingress)
+	if err != nil {
+		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
+	}
 
-    // Check if there are any rules defined
-    if len(ingress.Spec.Rules) == 0 {
-        return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
-    }
+	// Check if there are any rules defined
+	if len(ingress.Spec.Rules) == 0 {
+		return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
+	}
 
-    // Extract the first rule's host
-    host := ingress.Spec.Rules[0].Host
-    if host == "" {
-        return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
-    }
+	// Extract the first rule's host
+	host := ingress.Spec.Rules[0].Host
+	if host == "" {
+		return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
+	}
 
-    // handle the case where HTTPS is used (if TLS is defined)
-    if len(ingress.Spec.TLS) > 0 {
-        addr = "https://" + host
-    } else {
-        addr = "http://" + host
-    }
+	// handle the case where HTTPS is used (if TLS is defined)
+	if len(ingress.Spec.TLS) > 0 {
+		addr = "https://" + host
+	} else {
+		addr = "http://" + host
+	}
 
-    return addr, nil
+	return addr, nil
 }
 
 func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string) {
