@@ -25,12 +25,10 @@ import (
 	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
 	"github.com/datasance/potctl/pkg/util"
 	corev1 "k8s.io/api/core/v1"
-	networkingv1 "k8s.io/api/networking/v1"
 	extsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // GCP auth
 	restclient "k8s.io/client-go/rest"
@@ -247,7 +245,8 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	}
 
 	// Get endpoint of deployed Controller
-	if cp.Spec.Services.Controller.Type == corev1.ServiceTypeClusterIP {
+	if k8s.services.Controller.Type  == corev1.ServiceTypeClusterIP {
+		var host string
 		host = "https://" + cp.Spec.Ingresses.Controller.Host
 		endpoint, err = util.GetControllerEndpoint(host)
 		if err != nil {
