@@ -624,7 +624,7 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 
 func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
 	ingress := &networkingv1.Ingress{}
-	err = k8s.opClient.Get(ctx, ObjectKey{Name: "pot-controller", Namespace: namespace}, ingress)
+	err = k8s.opClient.Get(ctx, client.ObjectKey{Name: "pot-controller", Namespace: namespace}, ingress)
 	if err != nil {
 		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
 	}
