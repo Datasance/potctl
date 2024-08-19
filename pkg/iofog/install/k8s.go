@@ -39,9 +39,9 @@ import (
 )
 
 // ECNname
-//const (
-//	cpInstanceName = "pot"
-//)
+const (
+cpInstanceName = "pot"
+)
 
 // Kubernetes struct to manage state of deployment on Kubernetes cluster
 type Kubernetes struct {
@@ -54,11 +54,10 @@ type Kubernetes struct {
 	services      cpv3.Services
 	images        cpv3.Images
 	ingresses     cpv3.Ingresses
-	cpName        string
 }
 
 // NewKubernetes constructs an object to manage cluster
-func NewKubernetes(configFilename, namespace string, cpInstanceName string) (*Kubernetes, error) {
+func NewKubernetes(configFilename, namespace string) (*Kubernetes, error) {
 	// Get the kubernetes config from the filepath.
 	config, err := clientcmd.BuildConfigFromFlags("", configFilename)
 	if err != nil {
@@ -80,7 +79,6 @@ func NewKubernetes(configFilename, namespace string, cpInstanceName string) (*Ku
 		clientset:     clientset,
 		extsClientset: extsClientset,
 		ns:            namespace,
-		cpName:        cpInstanceName,
 		operator:      newOperatorMicroservice(),
 	}, nil
 }
@@ -200,7 +198,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	// Check if Control Plane exists
 	Verbose("Finding existing Control Plane")
 	cpKey := opclient.ObjectKey{
-		Name:      k8s.cpName,
+		Name:      cpInstanceName,
 		Namespace: k8s.ns,
 	}
 	var cp cpv3.ControlPlane
@@ -213,7 +211,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 		found = false
 		cp = cpv3.ControlPlane{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      k8s.cpName,
+				Name:      cpInstanceName,
 				Namespace: k8s.ns,
 			},
 		}
@@ -327,7 +325,7 @@ func (k8s *Kubernetes) monitorOperator(errCh chan error) {
 		// Check controlplane resource status
 		var cp cpv3.ControlPlane
 		if err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{
-			Name:      k8s.cpName,
+			Name:      cpInstanceName,
 			Namespace: k8s.ns,
 		}, &cp); err != nil {
 			errCh <- util.NewInternalError("Error reading Control Plane resource " + errSuffix)
@@ -450,7 +448,7 @@ func (k8s *Kubernetes) DeleteControlPlane() error {
 	// Delete Control Plane
 	cp := &cpv3.ControlPlane{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      k8s.cpName,
+			Name:      cpInstanceName,
 			Namespace: k8s.ns,
 		},
 	}

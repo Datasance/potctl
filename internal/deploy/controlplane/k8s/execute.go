@@ -84,14 +84,14 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 
 	// Get Kubernetes deployer
-	installer, err := install.NewKubernetes(exe.controlPlane.KubeConfig, exe.namespace, exe.name)
+	installer, err := install.NewKubernetes(exe.controlPlane.KubeConfig, exe.namespace)
 	if err != nil {
 		return
 	}
 
 	// Configure deploy
 	installer.SetOperatorImage(exe.controlPlane.Images.Operator)
-	instller.SetPullSecret(exe.controlPlane.Images.PullSecret)
+	installer.SetPullSecret(exe.controlPlane.Images.PullSecret)
 	installer.SetPortManagerImage(exe.controlPlane.Images.PortManager)
 	installer.SetRouterImage(exe.controlPlane.Images.Router)
 	installer.SetProxyImage(exe.controlPlane.Images.Proxy)
@@ -177,7 +177,7 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	routerService := controlPlane.Services.Router
 	routerIngress := controlPlane.Ingresses.Router
 	if routerService.Type == "ClusterIP" {
-		if routerIngress.Adress == "" || routerIngress.MessagePort == "" || routerIngress.InteriorPort == "" || routerIngress.EdgePort == "" {
+		if routerIngress.Address == "" || routerIngress.MessagePort == 0 || routerIngress.InteriorPort == 0 || routerIngress.EdgePort == 0 {
 			return util.NewInputError("When Router service type is ClusterIP, You must provide Ingress configuration for Default-Router")
 		}
 	}

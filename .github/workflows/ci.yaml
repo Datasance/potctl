@@ -31,7 +31,7 @@ env:
   proxy_image: 'ghcr.io/datasance/proxy:latest'
   proxy_arm_image: 'ghcr.io/datasance/proxy:latest'
   iofog_agent_version: '3.2.0'
-  controller_version: '3.3.0'
+  controller_version: '3.3.1'
   version:
   agent_vm_list:
   controller_vm:
