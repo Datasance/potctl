@@ -53,4 +53,6 @@ type ControllerConfig struct {
 	EcnViewerPort int
 	EcnViewerURL  string
 	Auth          Auth
+	Https         *bool
+	SecretName    string
 }
