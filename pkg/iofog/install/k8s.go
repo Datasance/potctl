@@ -30,6 +30,7 @@ import (
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // GCP auth
 	restclient "k8s.io/client-go/rest"
@@ -523,9 +524,9 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 
 		case corev1.ServiceTypeClusterIP:
 			// Handle Ingress
-			addr, err = k8s.handleIngress()
+			addr, err := k8s.handleIngress(ctx, k8s.ns)
 			if err != nil {
-				util.PrintNotify("Failed to handle Ingress for ClusterIP service 'pot-controller': " + err.Error())
+				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
 				continue
 			}
 			nodePort = targetPort
@@ -618,26 +619,26 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 	return
 }
 
-func (k8s *Kubernetes) handleIngress() (addr string, err error) {
-	// Fetch the Ingress resource for the ClusterIP service
-	controllerIngress := &networkingv1.Ingress{}
-	err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{Name: "pot-controller", Namespace: k8s.ns,}, controllerIngress)
+func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
+	ingress := &networkingv1.Ingress{}
+	err = k8s.opClient.Get(ctx, types.NamespacedName{Name: "pot-controller", Namespace: namespace}, ingress)
 	if err != nil {
-		util.PrintNotify("Failed to get Ingress resource 'pot-controller'")
+		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
 	}
+
 	// Check if there are any rules defined
-	if len(controllerIngress.Spec.Rules) == 0 {
+	if len(ingress.Spec.Rules) == 0 {
 		return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
 	}
 
 	// Extract the first rule's host
-	host := controllerIngress.Spec.Rules[0].Host
+	host := ingress.Spec.Rules[0].Host
 	if host == "" {
 		return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
 	}
 
 	// handle the case where HTTPS is used (if TLS is defined)
-	if len(controllerIngress.Spec.TLS) > 0 {
+	if len(ingress.Spec.TLS) > 0 {
 		addr = "https://" + host
 	} else {
 		addr = "http://" + host
