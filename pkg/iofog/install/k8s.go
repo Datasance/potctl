@@ -522,13 +522,10 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			return
 
 		case corev1.ServiceTypeClusterIP:
-			// Ingress must be ready for ClusterIP service type
-			addr, err = k8s.handleIngress(context.Background(), k8s.ns)
+			// Handle Ingress
+			addr, err = k8s.handleIngress()
 			if err != nil {
-				util.PrintNotify("Failed to handle Ingress for ClusterIP service of Controller")
-				continue
-			}
-			if addr == "" {
+				util.PrintNotify("Failed to handle Ingress for ClusterIP service 'pot-controller': " + err.Error())
 				continue
 			}
 			nodePort = targetPort
@@ -621,26 +618,26 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 	return
 }
 
-func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
-	ingress := &networkingv1.Ingress{}
-	err = k8s.opClient.Get(ctx, opclient.ObjectKey{Name: "pot-controller", Namespace: namespace}, ingress)
+func (k8s *Kubernetes) handleIngress() (addr string, err error) {
+	// Fetch the Ingress resource for the ClusterIP service
+	var controllerIngress networkingv1.Ingress
+	err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{Name: "pot-controller", Namespace: k8s.ns}, &controllerIngress)
 	if err != nil {
-		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
+		util.PrintNotify("Failed to get Ingress resource 'pot-controller': %v", err)
 	}
-
 	// Check if there are any rules defined
-	if len(ingress.Spec.Rules) == 0 {
+	if len(controllerIngress.Spec.Rules) == 0 {
 		return "", fmt.Errorf("no rules found in Ingress resource 'pot-controller'")
 	}
 
 	// Extract the first rule's host
-	host := ingress.Spec.Rules[0].Host
+	host := controllerIngress.Spec.Rules[0].Host
 	if host == "" {
 		return "", fmt.Errorf("no host found in the first rule of Ingress resource 'pot-controller'")
 	}
 
 	// handle the case where HTTPS is used (if TLS is defined)
-	if len(ingress.Spec.TLS) > 0 {
+	if len(controllerIngress.Spec.TLS) > 0 {
 		addr = "https://" + host
 	} else {
 		addr = "http://" + host
