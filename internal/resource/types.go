@@ -154,7 +154,7 @@ var FogTypeIntMap = map[int]string{
 type ControllerConfig struct {
 	PidBaseDir    string `yaml:"pidBaseDir,omitempty"`
 	EcnViewerPort int    `yaml:"ecnViewerPort,omitempty"`
-	EcnViewerURL  string `yaml:"ecnViewerURL,omitempty"`
+	EcnViewerURL  string `yaml:"ecnViewerUrl,omitempty"`
 	Https         *bool  `yaml:"https,omitempty"`
 	SecretName    string `yaml:"secretName,omitempty"`
 }
