@@ -223,6 +223,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	cp.Spec.Auth = cpv3.Auth(conf.Auth)
 	// cp.Spec.User = cpv3.User(conf.User)
 	cp.Spec.Services = k8s.services
+	cp.Spec.Ingresses = k8s.ingresses
 	cp.Spec.Images = k8s.images
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
