@@ -245,7 +245,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	}
 
 	// Get endpoint of deployed Controller
-	if k8s.services.Controller.Type  == corev1.ServiceTypeClusterIP {
+	if cp.Spec.Services.Controller.Type == "ClusterIP" {
 		var host string
 		host = "https://" + cp.Spec.Ingresses.Controller.Host
 		endpoint, err = util.GetControllerEndpoint(host)
