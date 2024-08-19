@@ -623,7 +623,7 @@ func (k8s *Kubernetes) handleIngress() (addr string, err error) {
 	var controllerIngress networkingv1.Ingress
 	err = k8s.opClient.Get(context.Background(), opclient.ObjectKey{Name: "pot-controller", Namespace: k8s.ns}, &controllerIngress)
 	if err != nil {
-		util.PrintNotify("Failed to get Ingress resource 'pot-controller': %v", err)
+		util.PrintNotify("Failed to get Ingress resource 'pot-controller'")
 	}
 	// Check if there are any rules defined
 	if len(controllerIngress.Spec.Rules) == 0 {
