@@ -25,12 +25,13 @@ const (
 )
 
 type microservice struct {
-	name       string
-	Address    string
-	ports      []int32
-	replicas   int32
-	containers []container
-	rbacRules  []rbacv1.PolicyRule
+	name                  string
+	Address               string
+	ports                 []int32
+	imagePullSecret       string
+	replicas              int32
+	containers            []container
+	rbacRules             []rbacv1.PolicyRule
 }
 
 type container struct {

@@ -622,7 +622,7 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 
 func (k8s *Kubernetes) handleIngress(ctx context.Context, namespace string) (addr string, err error) {
 	ingress := &networkingv1.Ingress{}
-	err = k8s.Client.Get(ctx, types.NamespacedName{Name: "pot-controller", Namespace: namespace}, ingress)
+	err = k8s.opClient.Get(ctx, types.NamespacedName{Name: "pot-controller", Namespace: namespace}, ingress)
 	if err != nil {
 		return "", fmt.Errorf("failed to get Ingress resource 'pot-controller': %w", err)
 	}
@@ -687,9 +687,9 @@ func (k8s *Kubernetes) SetControllerIngress(annotations map[string]string, ingre
 
 func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interiorPort int, edgePort int) {
 	k8s.ingresses.Router.Address = address
-	k8s.ingresses.Controller.MessagePort = messagePort
-	k8s.ingresses.Controller.InteriorPort = interiorPort
-	k8s.ingresses.Controller.EdgePort = edgePort
+	k8s.ingresses.Router.MessagePort = messagePort
+	k8s.ingresses.Router.InteriorPort = interiorPort
+	k8s.ingresses.Router.EdgePort = edgePort
 }
 
 func (k8s *Kubernetes) SetHttpProxyIngress(address string) {
