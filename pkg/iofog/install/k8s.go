@@ -54,7 +54,7 @@ type Kubernetes struct {
 	services       cpv3.Services
 	images         cpv3.Images
 	ingresses      cpv3.Ingresses
-	cpInstanceName string
+	cpName         string
 }
 
 // NewKubernetes constructs an object to manage cluster
@@ -525,7 +525,7 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			// Ingress must be ready for ClusterIP service type
 			addr, err := k8s.handleIngress(context.Background(), k8s.ns)
 			if err != nil {
-				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
+				util.PrintNotify("Failed to handle Ingress for ClusterIP service of Controller")
 				continue
 			}
 			if addr == "" {
