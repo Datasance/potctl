@@ -245,21 +245,9 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	}
 
 	// Get endpoint of deployed Controller
-	if cp.Spec.Services.Controller.Type == "ClusterIP" {
-		if cp.Spec.Ingresses != nil && cp.Spec.Ingresses.Controller != nil {
-			endpoint, err = util.GetControllerEndpoint(fmt.Sprintf("https://" + k8s.ingresses.Controller.Host))
-			if err != nil {
-				return
-			}
-		} else {
-			err = fmt.Errorf("Ingresses or Ingress Controller is not defined")
-			return
-		}
-	} else {
-		endpoint, err = k8s.GetControllerEndpoint()
-		if err != nil {
-			return
-		}
+	endpoint, err = k8s.GetControllerEndpoint()
+	if err != nil {
+		return
 	}
 
 	// Wait for Default Router to be registered by Port Manager
@@ -487,7 +475,7 @@ func (k8s *Kubernetes) DeleteControlPlane() error {
 	return nil
 }
 
-func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr string, nodePort int32, err error) {
+func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr string, nodePort *int32, err error) {
 	// Get watch handler to observe changes to services
 	watch, err := k8s.clientset.CoreV1().Services(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -532,6 +520,19 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			nodePort, err = k8s.getPort(svc, name, targetPort)
 			return
 
+		case corev1.ServiceTypeClusterIP:
+			// Ingress must be ready for ClusterIP service type
+			addr, err := k8s.waitForIngress(pot-controller)
+			if err != nil {
+				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
+				continue
+			}
+			if addr == "" {
+				continue
+			}
+			var np *int32
+			nodePort = np
+			return
 		default:
 			err = util.NewError("Found Service was not of supported type")
 			return
@@ -539,6 +540,40 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 	}
 	err = util.NewError("Did not receive any events from Kuberenetes API Server")
 	return addr, nodePort, err
+}
+
+func (k8s *Kubernetes) watchIngress(name string) (watch.Interface, error) {
+	// Create a watch on the Ingress resources in the specified namespace
+	watch, err := k8s.clientset.NetworkingV1().Ingresses(k8s.ns).Watch(context.Background(), metav1.ListOptions{
+		FieldSelector: "metadata.name=" + name, // Watch only the controller Ingress
+	})
+	if err != nil {
+		return nil, err
+	}
+	return watch, nil
+}
+
+func (k8s *Kubernetes) waitForIngress(name string) (addr string, err error) {
+	watch, err := k8s.watchIngress(name)
+	if err != nil {
+		return "", err
+	}
+	defer watch.Stop()
+
+	for event := range watch.ResultChan() {
+		ingress, ok := event.Object.(*networkingv1.Ingress)
+		if !ok {
+			err = util.NewInternalError("Failed to wait for ingress in namespace: " + k8s.ns)
+			return 
+		}
+		if len(ingress.Spec.Rules) == 0 || ingress.Spec.Rules[0].Host == "" {
+			return "", fmt.Errorf("no host found in the Ingress resource '%s'", name)
+		}
+		addr = "https://" + ingress.Spec.Rules[0].Host
+
+	}
+
+	return addr, err
 }
 
 func (k8s *Kubernetes) getPort(svc *corev1.Service, name string, targetPort int32) (nodePort int32, err error) {
