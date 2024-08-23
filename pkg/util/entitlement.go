@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-
 )
 
 type EntitlementResponse struct {

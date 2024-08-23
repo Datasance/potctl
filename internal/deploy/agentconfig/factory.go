@@ -14,8 +14,8 @@
 package deployagentconfig
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -24,11 +24,11 @@ import (
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"gopkg.in/yaml.v2"
 
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 type Options struct {
@@ -171,11 +171,10 @@ func (exe *RemoteExecutor) Execute() error {
 
 	if subscriptionKey != "" {
 		if user.SubscriptionKey != subscriptionKey {
-			fmt.Println("Subscription Key is updated from controlplane endpoints: ",subscriptionKey)
+			fmt.Println("Subscription Key is updated from controlplane endpoints: ", subscriptionKey)
 			user.SubscriptionKey = subscriptionKey
 		}
 	}
-
 
 	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
 
@@ -187,7 +186,7 @@ func (exe *RemoteExecutor) Execute() error {
 		return errors.New("Checking subscription/expiry date is unsuccessful")
 	}
 
-	if util.CheckNumOfAgentSeats(numOfAgents,agentSeats) == false {
+	if util.CheckNumOfAgentSeats(numOfAgents, agentSeats) == false {
 		return errors.New("Checking number of agents from subscription details is unsuccessful")
 	}
 

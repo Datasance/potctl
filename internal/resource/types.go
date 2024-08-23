@@ -41,6 +41,7 @@ type SSH struct {
 }
 
 type KubeImages struct {
+	PullSecret  string `yaml:"pullSecret,omitempty"`
 	Controller  string `yaml:"controller,omitempty"`
 	Operator    string `yaml:"operator,omitempty"`
 	Kubelet     string `yaml:"kubelet,omitempty"`
@@ -56,8 +57,8 @@ type Services struct {
 }
 
 type Service struct {
-	Type        string `json:"type,omitempty"`
-	Address     string `json:"address,omitempty"`
+	Type        string            `json:"type,omitempty"`
+	Address     string            `json:"address,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
@@ -72,13 +73,13 @@ type Credentials struct {
 }
 
 type Auth struct {
-	URL               string `yaml:"url"`
-	Realm             string `yaml:"realm"`
-	SSL               string `yaml:"ssl"`
-	RealmKey          string `yaml:"realmKey"`
-	ControllerClient  string `yaml:"controllerClient"`
-	ControllerSecret  string `yaml:"controllerSecret"`
-	ViewerClient      string `yaml:"viewerClient"`
+	URL              string `yaml:"url"`
+	Realm            string `yaml:"realm"`
+	SSL              string `yaml:"ssl"`
+	RealmKey         string `yaml:"realmKey"`
+	ControllerClient string `yaml:"controllerClient"`
+	ControllerSecret string `yaml:"controllerSecret"`
+	ViewerClient     string `yaml:"viewerClient"`
 }
 
 type Database struct {
@@ -153,5 +154,32 @@ var FogTypeIntMap = map[int]string{
 type ControllerConfig struct {
 	PidBaseDir    string `yaml:"pidBaseDir,omitempty"`
 	EcnViewerPort int    `yaml:"ecnViewerPort,omitempty"`
-	EcnViewerURL  string  `yaml:"ecnViewerURL,omitempty"`
+	EcnViewerURL  string `yaml:"ecnViewerUrl,omitempty"`
+	Https         *bool  `yaml:"https,omitempty"`
+	SecretName    string `yaml:"secretName,omitempty"`
+}
+
+type RouterIngress struct {
+	Address      string `yaml:"address,omitempty"`
+	MessagePort  int    `yaml:"messagePort,omitempty"`
+	InteriorPort int    `yaml:"interiorPort,omitempty"`
+	EdgePort     int    `yaml:"edgePort,omitempty"`
+}
+
+type ControllerIngress struct {
+	Annotations      map[string]string `yaml:"annotations,omitempty"`
+	IngressClassName string            `yaml:"ingressClassName,omitempty"`
+	Host             string            `yaml:"host,omitempty"`
+	SecretName       string            `yaml:"secretName,omitempty"`
+}
+
+type Ingress struct {
+	Address string `yaml:"address,omitempty"`
+}
+
+type Ingresses struct {
+	Controller ControllerIngress `yaml:"controller,omitempty"`
+	Router     RouterIngress     `yaml:"router,omitempty"`
+	HTTPProxy  Ingress           `yaml:"httpProxy,omitempty"`
+	TCPProxy   Ingress           `yaml:"tcpProxy,omitempty"`
 }

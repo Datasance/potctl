@@ -18,13 +18,16 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
+	"strings"
 	"time"
 
-	"github.com/datasance/potctl/pkg/util"
 	ioclient "github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	iofogv3 "github.com/datasance/iofog-operator/v3/apis"
 	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
+	"github.com/datasance/potctl/pkg/util"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	extsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -37,6 +40,7 @@ import (
 	opclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// ECNname
 const (
 	cpInstanceName = "pot"
 )
@@ -51,6 +55,7 @@ type Kubernetes struct {
 	operator      *microservice
 	services      cpv3.Services
 	images        cpv3.Images
+	ingresses     cpv3.Ingresses
 }
 
 // NewKubernetes constructs an object to manage cluster
@@ -117,6 +122,13 @@ func (k8s *Kubernetes) SetControllerImage(image string) {
 		k8s.images.Controller = image
 	} else {
 		k8s.images.Controller = util.GetControllerImage()
+	}
+}
+
+func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
+	if pullSecret != "" {
+		k8s.images.PullSecret = pullSecret
+		k8s.operator.imagePullSecret = pullSecret
 	}
 }
 
@@ -208,16 +220,19 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 		}
 	}
 
-	// Set specification 
+	// Set specification
 	cp.Spec.Replicas.Controller = conf.Replicas
 	cp.Spec.Database = cpv3.Database(conf.Database)
 	cp.Spec.Auth = cpv3.Auth(conf.Auth)
 	// cp.Spec.User = cpv3.User(conf.User)
 	cp.Spec.Services = k8s.services
+	cp.Spec.Ingresses = k8s.ingresses
 	cp.Spec.Images = k8s.images
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
+	cp.Spec.Controller.Https = conf.Https
+	cp.Spec.Controller.SecretName = conf.SecretName
 
 	// Create or update Control Plane
 	if found {
@@ -244,7 +259,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	go k8s.monitorOperator(errCh)
 	select {
 	case err = <-errCh:
-	case <-time.After(240 * time.Second):
+	case <-time.After(600 * time.Second):
 		err = util.NewInternalError("Failed to wait for Default Router registration")
 	}
 
@@ -509,17 +524,16 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			nodePort, err = k8s.getPort(svc, name, targetPort)
 			return
 		case corev1.ServiceTypeClusterIP:
-			addr, err = k8s.getClusterIPAddress(name)
+			// Ingress must be ready for ClusterIP service type
+			addr, err = k8s.waitForIngress("pot-controller")
 			if err != nil {
-				return
-			}
-			if len(svc.Status.LoadBalancer.Ingress) == 0 {
+				util.PrintNotify("Failed to handle Ingress for ClusterIP service")
 				continue
 			}
-			addr, nodePort = k8s.handleLoadBalancer(svc, targetPort)
 			if addr == "" {
 				continue
 			}
+			nodePort = targetPort
 			return
 		default:
 			err = util.NewError("Found Service was not of supported type")
@@ -528,6 +542,41 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 	}
 	err = util.NewError("Did not receive any events from Kuberenetes API Server")
 	return addr, nodePort, err
+}
+
+func (k8s *Kubernetes) waitForIngress(name string) (addr string, err error) {
+	// Create a watch to observe changes to Ingress resources
+	watcher, err := k8s.clientset.NetworkingV1().Ingresses(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		err = util.NewError("Failed to create watch for Ingress: " + err.Error())
+		return
+	}
+	defer watcher.Stop()
+
+	// Process events from the watch
+	for event := range watcher.ResultChan() {
+		ingress, ok := event.Object.(*networkingv1.Ingress)
+		if !ok {
+			err = util.NewInternalError("Failed to parse Ingress event")
+			return
+		}
+
+		// Check if the Ingress resource matches the name we're waiting for
+		if ingress.Name == name {
+			// Check if Ingress has rules
+			if len(ingress.Spec.Rules) > 0 {
+				host := ingress.Spec.Rules[0].Host
+				addr = "https://" + host
+				return
+			}
+
+			// Ingress found but has no rules, continue waiting
+			util.PrintNotify("Ingress resource found but no rules present, continuing to watch...")
+		}
+	}
+
+	err = util.NewError("Did not receive any valid Ingress events")
+	return
 }
 
 func (k8s *Kubernetes) getPort(svc *corev1.Service, name string, targetPort int32) (nodePort int32, err error) {
@@ -638,6 +687,28 @@ func (k8s *Kubernetes) SetProxyService(svcType, address string, annotations map[
 	k8s.services.Proxy.Annotations = annotations
 }
 
+func (k8s *Kubernetes) SetControllerIngress(annotations map[string]string, ingressClassName string, host string, secretName string) {
+	k8s.ingresses.Controller.Annotations = annotations
+	k8s.ingresses.Controller.IngressClassName = ingressClassName
+	k8s.ingresses.Controller.Host = host
+	k8s.ingresses.Controller.SecretName = secretName
+}
+
+func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interiorPort int, edgePort int) {
+	k8s.ingresses.Router.Address = address
+	k8s.ingresses.Router.MessagePort = messagePort
+	k8s.ingresses.Router.InteriorPort = interiorPort
+	k8s.ingresses.Router.EdgePort = edgePort
+}
+
+func (k8s *Kubernetes) SetHttpProxyIngress(address string) {
+	k8s.ingresses.HTTPProxy.Address = address
+}
+
+func (k8s *Kubernetes) SetTcpProxyIngress(address string) {
+	k8s.ingresses.TCPProxy.Address = address
+}
+
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	ctx := context.Background()
 	// Check namespace exists
@@ -662,12 +733,34 @@ func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	return util.NewError("Could not find Controller Service in Kubernetes namespace " + namespace)
 }
 
+func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, error) {
+	// Ensure protocol
+	if !strings.Contains(endpoint, "://") {
+		endpoint = fmt.Sprintf("http://%s", endpoint)
+	}
+	URL, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	// Ensure port for http
+	if !strings.Contains(URL.Host, ":") && URL.Scheme != "https" {
+		URL.Host += fmt.Sprintf(":%d", port)
+	}
+	return URL, nil
+
+}
+
 func (k8s *Kubernetes) GetControllerEndpoint() (endpoint string, err error) {
 	ip, port, err := k8s.waitForService(controller, ioclient.ControllerPort)
 	if err != nil {
-		return
+		return "", err
 	}
-	return util.GetControllerEndpoint(fmt.Sprintf("%s:%d", ip, port))
+	formattedURL, err := k8s.formatEndpoint(ip, port)
+	if err != nil {
+		return "", err
+	}
+	endpoint = formattedURL.String()
+	return util.GetControllerEndpoint(endpoint)
 }
 
 func (k8s *Kubernetes) GetControllerPods() (podNames []Pod, err error) {

@@ -1,9 +1,9 @@
 package connectcontrolplane
 
 import (
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 func Connect(ctrlPlane rsc.ControlPlane, endpoint string, ns *rsc.Namespace) error {

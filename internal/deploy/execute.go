@@ -16,6 +16,7 @@ package deploy
 import (
 	"fmt"
 
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	deployagent "github.com/datasance/potctl/internal/deploy/agent"
 	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
@@ -37,7 +38,6 @@ import (
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/twmb/algoimpl/go/graph"
 )
 

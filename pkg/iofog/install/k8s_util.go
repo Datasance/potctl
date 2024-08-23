@@ -78,12 +78,20 @@ func newDeployment(namespace string, ms *microservice) *appsv1.Deployment {
 }
 
 func newServiceAccount(namespace string, ms *microservice) *corev1.ServiceAccount {
-	return &corev1.ServiceAccount{
+	sa := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ms.name,
 			Namespace: namespace,
 		},
 	}
+	// If imagePullSecret is provided, add it to the ImagePullSecrets field
+	if ms.imagePullSecret != "" {
+		sa.ImagePullSecrets = []corev1.LocalObjectReference{
+			{Name: ms.imagePullSecret},
+		}
+	}
+
+	return sa
 }
 
 func newRoleBinding(namespace string, ms *microservice) *rbacv1.RoleBinding {

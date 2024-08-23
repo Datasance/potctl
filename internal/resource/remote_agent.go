@@ -24,10 +24,11 @@ type AgentScripts struct {
 }
 
 type RemoteAgent struct {
-	Name               string              `yaml:"name"`
-	Host               string              `yaml:"host"`
-	SSH                SSH                 `yaml:"ssh"`
-	UUID               string              `yaml:"uuid,omitempty"`
+	Name string `yaml:"name"`
+	Host string `yaml:"host"`
+	SSH  SSH    `yaml:"ssh"`
+	UUID string `yaml:"uuid,omitempty"`
+	// Container          Container           `yaml:"container,omitempty"`
 	Created            string              `yaml:"created,omitempty"`
 	Package            Package             `yaml:"package,omitempty"`
 	Config             *AgentConfiguration `yaml:"config,omitempty"`
@@ -101,10 +102,11 @@ func (agent *RemoteAgent) Clone() Agent {
 		*config = *agent.Config
 	}
 	return &RemoteAgent{
-		Name:               agent.Name,
-		Host:               agent.Host,
-		SSH:                agent.SSH,
-		UUID:               agent.UUID,
+		Name: agent.Name,
+		Host: agent.Host,
+		SSH:  agent.SSH,
+		UUID: agent.UUID,
+		// Container:          agent.Container,
 		Created:            agent.Created,
 		Package:            agent.Package,
 		Scripts:            scripts,

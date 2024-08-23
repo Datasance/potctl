@@ -18,10 +18,10 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
 	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/util"
 )
 
 func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, clt *client.Client) (*apps.Microservice, error) {

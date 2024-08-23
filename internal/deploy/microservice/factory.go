@@ -16,11 +16,11 @@ package deploymicroservice
 import (
 	"fmt"
 
+	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/util"
-	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"gopkg.in/yaml.v2"
 )
 

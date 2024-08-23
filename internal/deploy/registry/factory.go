@@ -16,12 +16,12 @@ package deployregistry
 import (
 	"fmt"
 
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"gopkg.in/yaml.v2"
 )
 

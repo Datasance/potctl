@@ -16,11 +16,11 @@ package client
 import (
 	"fmt"
 
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/util"
-	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
 // clientCacheRoutine handles concurrent requests for a cached Controller client
