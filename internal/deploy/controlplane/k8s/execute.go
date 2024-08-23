@@ -148,6 +148,8 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	return err
 }
 
+const clusterIP = "ClusterIP"
+
 func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	// Validate user
 	user := controlPlane.GetUser()
@@ -168,7 +170,7 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	// Validate controller service and ingress
 	controllerService := controlPlane.Services.Controller
 	controllerIngress := controlPlane.Ingresses.Controller
-	if controllerService.Type == "ClusterIP" {
+	if controllerService.Type == clusterIP {
 		if controllerIngress.Host == "" || controllerIngress.SecretName == "" {
 			return util.NewInputError("When Controller service type is ClusterIP, You must provide Ingress configuration for Controller")
 		}
@@ -176,7 +178,7 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	// Validate router service and ingress
 	routerService := controlPlane.Services.Router
 	routerIngress := controlPlane.Ingresses.Router
-	if routerService.Type == "ClusterIP" {
+	if routerService.Type == clusterIP {
 		if routerIngress.Address == "" || routerIngress.MessagePort == 0 || routerIngress.InteriorPort == 0 || routerIngress.EdgePort == 0 {
 			return util.NewInputError("When Router service type is ClusterIP, You must provide Ingress configuration for Default-Router")
 		}
@@ -185,7 +187,7 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	proxyService := controlPlane.Services.Proxy
 	httpIngress := controlPlane.Ingresses.HTTPProxy
 	tcpIngress := controlPlane.Ingresses.TCPProxy
-	if proxyService.Type == "ClusterIP" {
+	if proxyService.Type == clusterIP {
 		if httpIngress.Address == "" || tcpIngress.Address == "" {
 			return util.NewInputError("When Proxy service type is ClusterIP, You must provide Ingress configuration for HTTP and TCP Proxy")
 		}
