@@ -18,6 +18,8 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
+	"strings"
 	"time"
 
 	ioclient "github.com/datasance/iofog-go-sdk/v3/pkg/client"
@@ -25,6 +27,7 @@ import (
 	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
 	"github.com/datasance/potctl/pkg/util"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	extsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	extsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -125,6 +128,7 @@ func (k8s *Kubernetes) SetControllerImage(image string) {
 func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 	if pullSecret != "" {
 		k8s.images.PullSecret = pullSecret
+		k8s.operator.imagePullSecret = pullSecret
 	}
 }
 
@@ -255,7 +259,7 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	go k8s.monitorOperator(errCh)
 	select {
 	case err = <-errCh:
-	case <-time.After(240 * time.Second):
+	case <-time.After(600 * time.Second):
 		err = util.NewInternalError("Failed to wait for Default Router registration")
 	}
 
@@ -475,7 +479,7 @@ func (k8s *Kubernetes) DeleteControlPlane() error {
 	return nil
 }
 
-func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr string, nodePort *int32, err error) {
+func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr string, nodePort int32, err error) {
 	// Get watch handler to observe changes to services
 	watch, err := k8s.clientset.CoreV1().Services(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -519,19 +523,17 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 			}
 			nodePort, err = k8s.getPort(svc, name, targetPort)
 			return
-
 		case corev1.ServiceTypeClusterIP:
 			// Ingress must be ready for ClusterIP service type
-			addr, err := k8s.waitForIngress(pot-controller)
+			addr, err = k8s.waitForIngress("pot-controller")
 			if err != nil {
-				k8s.log.Error(err, "Failed to handle Ingress for ClusterIP service")
+				util.PrintNotify("Failed to handle Ingress for ClusterIP service")
 				continue
 			}
 			if addr == "" {
 				continue
 			}
-			var np *int32
-			nodePort = np
+			nodePort = targetPort
 			return
 		default:
 			err = util.NewError("Found Service was not of supported type")
@@ -542,38 +544,39 @@ func (k8s *Kubernetes) waitForService(name string, targetPort int32) (addr strin
 	return addr, nodePort, err
 }
 
-func (k8s *Kubernetes) watchIngress(name string) (watch.Interface, error) {
-	// Create a watch on the Ingress resources in the specified namespace
-	watch, err := k8s.clientset.NetworkingV1().Ingresses(k8s.ns).Watch(context.Background(), metav1.ListOptions{
-		FieldSelector: "metadata.name=" + name, // Watch only the controller Ingress
-	})
-	if err != nil {
-		return nil, err
-	}
-	return watch, nil
-}
-
 func (k8s *Kubernetes) waitForIngress(name string) (addr string, err error) {
-	watch, err := k8s.watchIngress(name)
+	// Create a watch to observe changes to Ingress resources
+	watcher, err := k8s.clientset.NetworkingV1().Ingresses(k8s.ns).Watch(context.Background(), metav1.ListOptions{})
 	if err != nil {
-		return "", err
+		err = util.NewError("Failed to create watch for Ingress: " + err.Error())
+		return
 	}
-	defer watch.Stop()
+	defer watcher.Stop()
 
-	for event := range watch.ResultChan() {
+	// Process events from the watch
+	for event := range watcher.ResultChan() {
 		ingress, ok := event.Object.(*networkingv1.Ingress)
 		if !ok {
-			err = util.NewInternalError("Failed to wait for ingress in namespace: " + k8s.ns)
-			return 
+			err = util.NewInternalError("Failed to parse Ingress event")
+			return
 		}
-		if len(ingress.Spec.Rules) == 0 || ingress.Spec.Rules[0].Host == "" {
-			return "", fmt.Errorf("no host found in the Ingress resource '%s'", name)
-		}
-		addr = "https://" + ingress.Spec.Rules[0].Host
 
+		// Check if the Ingress resource matches the name we're waiting for
+		if ingress.Name == name {
+			// Check if Ingress has rules
+			if len(ingress.Spec.Rules) > 0 {
+				host := ingress.Spec.Rules[0].Host
+				addr = "https://" + host
+				return
+			}
+
+			// Ingress found but has no rules, continue waiting
+			util.PrintNotify("Ingress resource found but no rules present, continuing to watch...")
+		}
 	}
 
-	return addr, err
+	err = util.NewError("Did not receive any valid Ingress events")
+	return
 }
 
 func (k8s *Kubernetes) getPort(svc *corev1.Service, name string, targetPort int32) (nodePort int32, err error) {
@@ -730,12 +733,34 @@ func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	return util.NewError("Could not find Controller Service in Kubernetes namespace " + namespace)
 }
 
+func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, error) {
+	// Ensure protocol
+	if !strings.Contains(endpoint, "://") {
+		endpoint = fmt.Sprintf("http://%s", endpoint)
+	}
+	URL, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+	// Ensure port for http
+	if !strings.Contains(URL.Host, ":") && URL.Scheme != "https" {
+		URL.Host += fmt.Sprintf(":%d", port)
+	}
+	return URL, nil
+
+}
+
 func (k8s *Kubernetes) GetControllerEndpoint() (endpoint string, err error) {
 	ip, port, err := k8s.waitForService(controller, ioclient.ControllerPort)
 	if err != nil {
-		return
+		return "", err
 	}
-	return util.GetControllerEndpoint(fmt.Sprintf("%s:%d", ip, port))
+	formattedURL, err := k8s.formatEndpoint(ip, port)
+	if err != nil {
+		return "", err
+	}
+	endpoint = formattedURL.String()
+	return util.GetControllerEndpoint(endpoint)
 }
 
 func (k8s *Kubernetes) GetControllerPods() (podNames []Pod, err error) {
