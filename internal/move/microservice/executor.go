@@ -63,7 +63,7 @@ func Execute(namespace, name, agent string) error {
 	}
 
 	file := apps.IofogHeader{
-		APIVersion: "datasance.com/v1",
+		APIVersion: "datasance.com/v3",
 		Kind:       apps.MicroserviceKind,
 		Metadata: apps.HeaderMetadata{
 			Name: strings.Join([]string{msvc.Application, msvc.Name}, "/"),

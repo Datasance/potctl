@@ -5,7 +5,7 @@ function login() {
   local EMAIL="$2"
   local PASSWORD="$3"
   local LOGIN=$(curl --request POST \
---url $API_ENDPOINT/api/v1/user/login \
+--url $API_ENDPOINT/api/v3/user/login \
 --header 'Content-Type: application/json' \
 --data "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
   echo $LOGIN

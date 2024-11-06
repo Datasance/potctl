@@ -51,7 +51,7 @@ NS="$NAMESPACE"
 @test "Deploy Control Plane" {
   startTest
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: KubernetesControlPlane
 metadata:
   name: func-controlplane
@@ -85,7 +85,7 @@ spec:
 
 @test "Get Controller logs on K8s after deploy" {
   startTest
-  potctl -v -n "$NS" logs controller "$NAME" | grep "api/v1"
+  potctl -v -n "$NS" logs controller "$NAME" | grep "api/v3"
   stopTest
 }
 
@@ -139,7 +139,7 @@ spec:
 @test "Deploy Controller for idempotence" {
   startTest
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: KubernetesControlPlane
 metadata:
   name: func-controlplane

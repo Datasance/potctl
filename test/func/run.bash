@@ -26,7 +26,7 @@ function runNoExecutors(){
 
 function runWrongNamespace(){
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: LocalControlPlane
 metadata:
   namespace: wrong

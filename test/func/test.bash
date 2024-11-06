@@ -9,7 +9,7 @@ function testDeployLocalVolume(){
     SRC=$(wslpath $YAML_SRC)
   fi
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: Volume
 spec:
   name: $VOL_NAME
@@ -85,7 +85,7 @@ function testDeployVolume(){
   fi
   initAgents
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: Volume
 spec:
   name: $VOL_NAME
