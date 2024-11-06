@@ -85,7 +85,7 @@ do_install_docker() {
 		"stretch")
 			$sh_c "apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common"
 			curl -fsSL https://download.docker.com/linux/debian/gpg | $sh_c "apt-key add -"
-			$sh_c "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable\""
+			$sh_c "sudo add-apt-repository \"deb [arch=$(dpkg --print-architecture) https://download.docker.com/linux/debian $(lsb_release -cs) stable\""
 			$sh_c "apt-get update -y"
 			$sh_c "sudo apt install -y docker-ce"
 		;;

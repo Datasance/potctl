@@ -129,6 +129,11 @@ func (exe *remoteExecutor) Execute() (err error) {
 		deployer.SetControllerExternalDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port)
 	}
 
+	if exe.controlPlane.Auth.Url != "" {
+		auth := exe.controlPlane.Auth
+		deployer.SetControllerAuth(auth.url, auth.realm, auth.ssl, auth.realmKey, auth.controllerClient, auth.controllerSecret, auth.viewerClient)
+	}
+
 	// Deploy Controller
 	if err = deployer.Install(); err != nil {
 		return

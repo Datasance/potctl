@@ -83,7 +83,7 @@ jobs:
           version: 1.1.0
           args: --snapshot --rm-dist --debug --config ./.goreleaser-potctl.yml
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: potctl
           path: ${{ github.workspace }}/dist
@@ -127,7 +127,7 @@ jobs:
           VERSION: ${{ needs.Build.outputs.VERSION }}
           GITHUB_TOKEN: ${{ secrets.PAT }}
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: potctl
           path: ${{ github.workspace }}/dist

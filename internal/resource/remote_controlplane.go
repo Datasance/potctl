@@ -24,6 +24,7 @@ type RemoteControlPlane struct {
 	IofogUser           IofogUser                 `yaml:"iofogUser"`
 	Controllers         []RemoteController        `yaml:"controllers"`
 	Database            Database                  `yaml:"database"`
+	Auth				Auth				      `yaml:"auth"` 		
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemAgent         Package                   `yaml:"systemAgent,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`
@@ -116,6 +117,7 @@ func (cp *RemoteControlPlane) Clone() ControlPlane {
 	return &RemoteControlPlane{
 		IofogUser:           cp.IofogUser,
 		Database:            cp.Database,
+		Auth:                cp.Auth,
 		Package:             cp.Package,
 		SystemAgent:         cp.SystemAgent,
 		SystemMicroservices: cp.SystemMicroservices,

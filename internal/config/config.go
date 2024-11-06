@@ -36,13 +36,13 @@ var (
 
 const (
 	apiVersionGroup      = "datasance.com"
-	latestVersion        = "v1"
+	latestVersion        = "v3"
 	LatestAPIVersion     = apiVersionGroup + "/" + latestVersion
 	defaultDirname       = ".iofog/" + latestVersion
 	namespaceDirname     = "namespaces/"
 	defaultFilename      = "config.yaml"
-	configV1             = "datasance.com/v1"
-	CurrentConfigVersion = configV1
+	configV3             = "potctl/v3"
+	CurrentConfigVersion = configV3
 	detachedNamespace    = "_detached"
 )
 

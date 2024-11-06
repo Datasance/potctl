@@ -56,10 +56,22 @@ type database struct {
 	port         int
 }
 
+type auth struct {
+	url              string
+	realm            string
+	ssl              string
+	realmKey         string
+	controllerClient string
+	controllerSecret string
+	viewerClient     string
+}
+
+
 type Controller struct {
 	*ControllerOptions
 	ssh      *util.SecureShellClient
 	db       database
+	auth     auth
 	ctrlDir  string
 	iofogDir string
 	svcDir   string
@@ -97,6 +109,19 @@ func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, prov
 		user:         user,
 		password:     password,
 		port:         port,
+	}
+}
+
+func (ctrl *Controller) SetControllerAuth(url, realm, ssl, realmKey, controllerClient, controllerSecret, viewerClient  string) {
+
+	ctrl.auth = auth{
+		url:              url,
+		realm:            realm,
+		ssl:              ssl,
+		realmKey:         realmKey,
+		controllerClient: controllerClient,
+		controllerSecret: controllerSecret,
+		viewerClient:     viewerClient,
 	}
 }
 
@@ -210,6 +235,17 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
 			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
 	}
+	if ctrl.auth.url != "" {
+		env = append(env,
+			fmt.Sprintf(`"KC_URL=%s"`, ctrl.auth.url),
+			fmt.Sprintf(`"KC_REALM=%s"`, ctrl.auth.realm),
+			fmt.Sprintf(`"KC_SSL_REQ=%s"`, ctrl.auth.ssl),
+			fmt.Sprintf(`"KC_REALM_KEY=%s"`, ctrl.auth.realmKey),
+			fmt.Sprintf(`"KC_CLIENT=%d"`, ctrl.auth.controllerClient),
+			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
+		    fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
+
+	}
 	if ctrl.PidBaseDir != "" {
 		env = append(env, fmt.Sprintf("\"PID_BASE=%s\"", ctrl.PidBaseDir))
 	}
@@ -268,7 +304,7 @@ func (ctrl *Controller) Install() (err error) {
 	Verbose("Waiting for Controller " + ctrl.Host)
 	if err = ctrl.ssh.RunUntil(
 		regexp.MustCompile("\"status\":\"online\""),
-		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v1/status", iofog.ControllerPortString),
+		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
 		ignoredErrors,
 	); err != nil {
 		return

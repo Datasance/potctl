@@ -49,7 +49,7 @@ NS="$NAMESPACE"
 @test "Deploy Control Plane" {
   startTest
   echo "---
-apiVersion: datasance.com/v1
+apiVersion: datasance.com/v3
 kind: KubernetesControlPlane
 metadata:
   name: ha-controlplane
