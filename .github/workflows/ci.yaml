@@ -24,7 +24,6 @@ env:
   controller_image: 'ghcr.io/datasance/controller:latest'
   agent_image: 'ghcr.io/datasance/agent:latest'
   operator_image: 'ghcr.io/datasance/operator:latest'
-  kubelet_image: 'ghcr.io/datasance/iofog-kubelet:latest'
   port_manager_image: 'ghcr.io/datasance/port-manager:latest'
   router_image: 'ghcr.io/datasance/router:latest'
   router_arm_image: 'ghcr.io/datasance/router:latest'

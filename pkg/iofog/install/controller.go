@@ -66,7 +66,6 @@ type auth struct {
 	viewerClient     string
 }
 
-
 type Controller struct {
 	*ControllerOptions
 	ssh      *util.SecureShellClient
@@ -112,7 +111,7 @@ func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, prov
 	}
 }
 
-func (ctrl *Controller) SetControllerAuth(url, realm, ssl, realmKey, controllerClient, controllerSecret, viewerClient  string) {
+func (ctrl *Controller) SetControllerAuth(url, realm, ssl, realmKey, controllerClient, controllerSecret, viewerClient string) {
 
 	ctrl.auth = auth{
 		url:              url,
@@ -243,7 +242,7 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"KC_REALM_KEY=%s"`, ctrl.auth.realmKey),
 			fmt.Sprintf(`"KC_CLIENT=%d"`, ctrl.auth.controllerClient),
 			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
-		    fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
+			fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
 
 	}
 	if ctrl.PidBaseDir != "" {

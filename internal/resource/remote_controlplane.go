@@ -24,7 +24,7 @@ type RemoteControlPlane struct {
 	IofogUser           IofogUser                 `yaml:"iofogUser"`
 	Controllers         []RemoteController        `yaml:"controllers"`
 	Database            Database                  `yaml:"database"`
-	Auth				Auth				      `yaml:"auth"` 		
+	Auth                Auth                      `yaml:"auth"`
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemAgent         Package                   `yaml:"systemAgent,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`

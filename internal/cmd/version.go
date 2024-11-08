@@ -37,7 +37,6 @@ func newVersionCommand() *cobra.Command {
 				fmt.Println(util.GetControllerImage())
 				fmt.Println(util.GetAgentImage())
 				fmt.Println(util.GetOperatorImage())
-				fmt.Println(util.GetKubeletImage())
 				fmt.Println(util.GetPortManagerImage())
 				fmt.Println(util.GetProxyImage())
 				fmt.Println(util.GetRouterImage())

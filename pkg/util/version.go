@@ -27,7 +27,6 @@ var (
 	controllerTag  = "undefined"
 	agentTag       = "undefined"
 	operatorTag    = "undefined"
-	kubeletTag     = "undefined"
 	routerTag      = "undefined"
 	portManagerTag = "undefined"
 	proxyTag       = "undefined"
@@ -40,7 +39,6 @@ const (
 	controllerImage  = "controller"
 	agentImage       = "agent"
 	operatorImage    = "operator"
-	kubeletImage     = "kubelet"
 	portManagerImage = "port-manager"
 	proxyImage       = "proxy"
 	proxyARMImage    = "proxy"
@@ -72,7 +70,6 @@ func GetControllerImage() string {
 }
 func GetAgentImage() string     { return fmt.Sprintf("%s/%s:%s", repo, agentImage, agentTag) }
 func GetOperatorImage() string  { return fmt.Sprintf("%s/%s:%s", repo, operatorImage, operatorTag) }
-func GetKubeletImage() string   { return fmt.Sprintf("%s/%s:%s", repo, kubeletImage, kubeletTag) }
 func GetRouterImage() string    { return fmt.Sprintf("%s/%s:%s", repo, routerImage, routerTag) }
 func GetRouterARMImage() string { return fmt.Sprintf("%s/%s:%s", repo, routerARMImage, routerTag) }
 func GetPortManagerImage() string {
