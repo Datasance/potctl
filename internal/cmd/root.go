@@ -21,16 +21,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const TitleHeader = " ██████╗  ██████╗ ████████╗ ██████╗████████╗██╗  \n" +
+const TitleHeader = "\n" +
+	" ██████╗  ██████╗ ████████╗ ██████╗████████╗██╗  \n" +
 	" ██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝╚══██╔══╝██║  \n" +
 	" ██████╔╝██║   ██║   ██║   ██║        ██║   ██║ \n" +
 	" ██╔═══╝ ██║   ██║   ██║   ██║        ██║   ██║  \n" +
 	" ██║     ╚██████╔╝   ██║   ╚██████╗   ██║   ███████╗\n" +
 	" ╚═╝      ╚═════╝    ╚═╝    ╚═════╝   ╚═╝   ╚══════╝\n"
 
-const TitleMessage = "potctl is the CLI for ioFog. Think of it as a mix between terraform and kubectl.\n" +
+const TitleMessage = "potctl is the CLI for Datasance PoT, an Enterprise version of Eclipse iofog. Think of it as a mix between terraform and kubectl.\n" +
 	"\n" +
-	"Use `potctl version` to display the current version.\n\n"
+	"Use `potctl version` to display the current version.\n\n" +
+	"Find more information at: https://docs.datasance.com \n\n"
 
 func printHeader() {
 	util.PrintInfo(TitleHeader)
