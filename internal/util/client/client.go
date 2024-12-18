@@ -181,7 +181,55 @@ func syncAgentInfo(namespace string) error {
 }
 
 func newControllerClient(namespace string) (*client.Client, error) {
-	// Get endpoint
+
+	// Try to get the client from the cache first
+	if cachedClient, found := pkg.clientCache[namespace]; found {
+
+		// If a cached client exists, use SessionLogin to refresh the session
+		ns, err := config.GetNamespace(namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		controlPlane, err := ns.GetControlPlane()
+		if err != nil {
+			return nil, err
+		}
+
+		endpoint, err := controlPlane.GetEndpoint()
+		if err != nil {
+			return nil, err
+		}
+
+		user := controlPlane.GetUser()
+
+		// Get base URL
+		baseURL, err := util.GetBaseURL(endpoint)
+		if err != nil {
+			return nil, err
+		}
+
+		// Use the refresh token from the cached client
+		refreshToken := cachedClient.GetRefreshToken()
+		user.AccessToken = cachedClient.GetAccessToken()
+		user.RefreshToken = cachedClient.GetRefreshToken()
+		// controlPlane.UpdateUserTokens(user.AccessToken, user.RefreshToken)
+		config.UpdateUser(namespace, user.AccessToken, user.RefreshToken)
+
+		// Use SessionLogin to attempt to refresh the session
+		refreshedClient, err := client.SessionLogin(client.Options{BaseURL: baseURL}, refreshToken, user.Email, user.GetRawPassword())
+		if err != nil {
+			fmt.Println("Error: Failed to refresh session:", err)
+			return nil, fmt.Errorf("failed to refresh session: %v", err)
+		}
+
+		// Update the cached client with the refreshed session
+		pkg.clientCache[namespace] = refreshedClient
+		config.Flush()
+		return refreshedClient, nil
+	}
+
+	// If no cached client, proceed with NewAndLogin to create a new client
 	ns, err := config.GetNamespace(namespace)
 	if err != nil {
 		return nil, err
@@ -200,13 +248,24 @@ func newControllerClient(namespace string) (*client.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	cachedClient, err := client.NewAndLogin(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+
+	// Create a new client and login
+	newClient, err := client.SessionLogin(client.Options{BaseURL: baseURL}, user.RefreshToken, user.Email, user.GetRawPassword())
 	if err != nil {
 		return nil, err
 	}
-	pkg.clientCache[namespace] = cachedClient
 
-	return cachedClient, nil
+	user.AccessToken = newClient.GetAccessToken()
+	user.RefreshToken = newClient.GetRefreshToken()
+	// controlPlane.UpdateUserTokens(user.AccessToken, user.RefreshToken)
+	config.UpdateUser(namespace, user.AccessToken, user.RefreshToken)
+
+	// Flush the config and handle errors
+	if err := config.Flush(); err != nil {
+		return nil, fmt.Errorf("failed to flush config: %v", err)
+	}
+
+	return newClient, nil
 }
 
 func getBackendAgents(namespace string, ioClient *client.Client) ([]client.AgentInfo, error) {

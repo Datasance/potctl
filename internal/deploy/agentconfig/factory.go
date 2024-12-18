@@ -14,7 +14,7 @@
 package deployagentconfig
 
 import (
-	"errors"
+	// "errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -138,12 +138,12 @@ func (exe *RemoteExecutor) Execute() error {
 		return err
 	}
 
-	user := controlPlane.GetUser()
+	// user := controlPlane.GetUser()
 
-	agents := ns.GetAgents()
-	numOfAgents := len(agents)
+	// agents := ns.GetAgents()
+	// numOfAgents := len(agents)
 
-	fmt.Println(": Current Number of Agents are ", numOfAgents)
+	// fmt.Println(": Current Number of Agents are ", numOfAgents)
 
 	endpoint, err := controlPlane.GetEndpoint()
 	if err != nil {
@@ -151,44 +151,60 @@ func (exe *RemoteExecutor) Execute() error {
 		return err
 	}
 
-	baseURL, err := util.GetBaseURL(endpoint)
-	if err != nil {
-		fmt.Println("Error occurred while fetching base url from controlplane", err)
-		return err
-	}
+	// baseURL, err := util.GetBaseURL(endpoint)
+	// if err != nil {
+	// 	fmt.Println("Error occurred while fetching base url from controlplane", err)
+	// 	return err
+	// }
 
-	ctrl, err, subscriptionKey := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, user.Email, user.GetRawPassword())
+	// ctrl, subscriptionKey, err := client.RefreshUserSubscriptionKey(client.Options{BaseURL: baseURL}, clt.GetRefreshToken(), user.Email, user.GetRawPassword())
 
-	if err != nil {
-		fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
-		return err
-	}
+	// if err != nil {
+	// 	fmt.Println("Error occurred while fetching subscription key from controlplane: ", err)
+	// 	return err
+	// }
 
-	if ctrl == nil {
-		fmt.Println("Client came empty while fetching subscription key from controlplane")
-		return errors.New("Client came empty while fetching subscription key from controlplane")
-	}
+	// if ctrl == nil {
+	// 	fmt.Println("Client came empty while fetching subscription key from controlplane")
+	// 	return errors.New("Client came empty while fetching subscription key from controlplane")
+	// }
 
-	if subscriptionKey != "" {
-		if user.SubscriptionKey != subscriptionKey {
-			fmt.Println("Subscription Key is updated from controlplane endpoints: ", subscriptionKey)
-			user.SubscriptionKey = subscriptionKey
-		}
-	}
+	// if subscriptionKey != "" {
+	// 	if user.SubscriptionKey != subscriptionKey {
+	// 		fmt.Println("Subscription Key is updated from controlplane endpoints:", subscriptionKey)
+	// 		user.SubscriptionKey = subscriptionKey
+	// 		// controlPlane.UpdateUserSubscriptionKey(subscriptionKey)
+	// 		config.UpdateSubscriptionKey(ns.Name, subscriptionKey)
+	// 	}
+	// }
 
-	expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
+	// expiryDate, agentSeats, err := util.GetEntitlementDatasance(user.SubscriptionKey, exe.namespace, user.Email)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	if util.CheckExpiryDate(expiryDate) == false {
-		return errors.New("Checking subscription/expiry date is unsuccessful")
-	}
+	// isValid, reason := util.CheckExpiryDate(expiryDate)
+	// if !isValid {
+	// 	switch reason {
+	// 	case "expired":
+	// 		// This is the expected case for expired subscriptions.
+	// 		return errors.New("subscription has expired")
+	// 	case "not_found":
+	// 		// Handle case when subscription is not found.
+	// 		return errors.New("subscription not found")
+	// 	case "engine_not_responding":
+	// 		// Handle case when the subscription engine is not responding.
+	// 		return errors.New("subscription engine is not responding")
+	// 	default:
+	// 		// Default case for unexpected errors, or if there's no specific reason.
+	// 		return errors.New("unknown error with subscription expiry date check")
+	// 	}
+	// }
 
-	if util.CheckNumOfAgentSeats(numOfAgents, agentSeats) == false {
-		return errors.New("Checking number of agents from subscription details is unsuccessful")
-	}
+	// if !util.HasAvailableAgentSeats(numOfAgents, agentSeats) {
+	// 	return errors.New("subscription limit reached: not enough agent seats available")
+	// }
 
 	if !isSystem || install.IsVerbose() {
 		util.SpinStart(fmt.Sprintf("Deploying agent %s configuration", exe.GetName()))

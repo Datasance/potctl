@@ -119,6 +119,81 @@ func AddNamespace(name, created string) error {
 	return nil
 }
 
+// UpdateUser modifies the user data of an existing namespace
+func UpdateUser(name, accessToken, refreshToken string) error {
+	// Fetch the existing namespace
+	ns, err := getNamespace(name)
+	if err != nil {
+		return err // Namespace not found
+	}
+
+	if ns.KubernetesControlPlane != nil {
+		ns.KubernetesControlPlane.IofogUser.AccessToken = accessToken
+		ns.KubernetesControlPlane.IofogUser.RefreshToken = refreshToken
+	}
+	if ns.RemoteControlPlane != nil {
+		ns.RemoteControlPlane.IofogUser.AccessToken = accessToken
+		ns.RemoteControlPlane.IofogUser.RefreshToken = refreshToken
+	}
+	if ns.LocalControlPlane != nil {
+		ns.LocalControlPlane.IofogUser.AccessToken = accessToken
+		ns.LocalControlPlane.IofogUser.RefreshToken = refreshToken
+	}
+
+	// Marshal the updated namespace into YAML
+	marshal, err := getNamespaceYAMLFile(ns)
+	if err != nil {
+		return err // Error in marshaling
+	}
+
+	// Write the updated YAML data back to the file
+	err = ioutil.WriteFile(getNamespaceFile(name), marshal, 0644)
+	if err != nil {
+		return err // Error in writing to the file
+	}
+
+	// Update the in-memory cache
+	namespaces[name] = ns
+
+	return nil
+}
+
+// // UpdateUser modifies the user data of an existing namespace
+// func UpdateSubscriptionKey(name, subscriptionKey string) error {
+// 	// Fetch the existing namespace
+// 	ns, err := getNamespace(name)
+// 	if err != nil {
+// 		return err // Namespace not found
+// 	}
+
+// 	if ns.KubernetesControlPlane != nil {
+// 		ns.KubernetesControlPlane.IofogUser.SubscriptionKey = subscriptionKey
+// 	}
+// 	if ns.RemoteControlPlane != nil {
+// 		ns.RemoteControlPlane.IofogUser.SubscriptionKey = subscriptionKey
+// 	}
+// 	if ns.LocalControlPlane != nil {
+// 		ns.LocalControlPlane.IofogUser.SubscriptionKey = subscriptionKey
+// 	}
+
+// 	// Marshal the updated namespace into YAML
+// 	marshal, err := getNamespaceYAMLFile(ns)
+// 	if err != nil {
+// 		return err // Error in marshaling
+// 	}
+
+// 	// Write the updated YAML data back to the file
+// 	err = ioutil.WriteFile(getNamespaceFile(name), marshal, 0644)
+// 	if err != nil {
+// 		return err // Error in writing to the file
+// 	}
+
+// 	// Update the in-memory cache
+// 	namespaces[name] = ns
+
+// 	return nil
+// }
+
 // DeleteNamespace removes a namespace including all the resources within it
 func DeleteNamespace(name string) error {
 	// Reset default namespace if required

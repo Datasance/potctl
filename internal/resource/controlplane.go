@@ -15,6 +15,8 @@ package resource
 
 type ControlPlane interface {
 	GetUser() IofogUser
+	// UpdateUserSubscriptionKey(string) IofogUser
+	UpdateUserTokens(string, string) IofogUser
 	GetControllers() []Controller
 	GetController(string) (Controller, error)
 	GetEndpoint() (string, error)

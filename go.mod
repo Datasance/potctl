@@ -4,9 +4,9 @@ go 1.21
 
 require (
 	github.com/GeertJohan/go.rice v1.0.2
-	github.com/briandowns/spinner v1.18.1
-	github.com/datasance/iofog-go-sdk/v3 v3.4.12
-	github.com/datasance/iofog-operator/v3 v3.4.7
+	github.com/briandowns/spinner v1.23.1
+	github.com/datasance/iofog-go-sdk/v3 v3.4.14
+	github.com/datasance/iofog-operator/v3 v3.4.11
 	github.com/docker/docker v20.10.24+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/json-iterator/go v1.1.12

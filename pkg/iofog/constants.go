@@ -26,8 +26,5 @@ const (
 	DefaultHTTPPort       = 80
 	DefaultHTTPPortString = "80"
 
-	ConnectorPort       = 8080
-	ConnectorPortString = "8080"
-
 	VanillaRouterAgentName string = client.DefaultRouterName
 )

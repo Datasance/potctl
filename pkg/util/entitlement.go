@@ -229,41 +229,54 @@ func DeactivateEntitlementDatasance(activationCode string, seatID string, seatNa
 	DeactivateLicense(accessToken, nonceDeactivation)
 }
 
-func CheckExpiryDate(dateString string) bool {
-
+func CheckExpiryDate(dateString string) (bool, string) {
 	SpinStart("Checking License Expiry Date from Subscription")
-	if strings.Contains(dateString, "Subscription has expired") {
-		fmt.Println("Subscription has expired, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
-		return false
+
+	// If no expiry date is provided (empty), consider it valid and return true
+	if dateString == "" {
+		return true, ""
 	}
-	if strings.Contains(dateString, "Subscription not found") {
-		fmt.Println("Subscription not found, Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
-		return false
+
+	// Handle specific expiry and error cases
+	switch {
+	case strings.Contains(dateString, "Subscription has expired"):
+		fmt.Println("Subscription has expired. Please contact the Datasance Sales Team at sales@datasance.com or a Datasance Reseller Partner.")
+		return false, ""
+	case strings.Contains(dateString, "Subscription not found"):
+		fmt.Println("Subscription not found. Please contact the Datasance Sales Team at sales@datasance.com or a Datasance Reseller Partner.")
+		return false, "not_found"
+	case strings.Contains(dateString, "Subscription Engine is not responding"):
+		fmt.Println("Subscription Engine is not responding. Please contact the Datasance Support Team at support@datasance.com.")
+		return false, "engine_not_responding"
+	default:
+		// If no known error is found, assume it's a valid date
+		return true, ""
 	}
-	if strings.Contains(dateString, "Subscription Engine is not responding") {
-		fmt.Println("Subscription Engine is not responding, Please contact with Datasance Support Team : support@datasance.com")
+}
+
+func HasAvailableAgentSeats(currentAgentNum int, maxAgentNum string) bool {
+	SpinStart("Checking number of agents from subscription details")
+
+	// Attempt to convert maxAgentNum to an integer if available
+	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
+
+	// If maxAgentNum is missing or invalid, just check if currentAgentNum > 5
+	if err != nil || maxAgentNumAsInt == 0 {
+		if currentAgentNum > 5 {
+			fmt.Println("You don't have enough subscription to deploy additional agents on this control plane.")
+			fmt.Println("Please contact the Datasance Sales Team at sales@datasance.com or reach out to a Datasance Reseller Partner.")
+			return false
+		}
+		return true
+	}
+
+	// Proceed with full check if maxAgentNum is valid
+	if currentAgentNum > 5 && currentAgentNum >= maxAgentNumAsInt {
+		fmt.Println("You don't have enough subscription to deploy additional agents on this control plane.")
+		fmt.Println("Your active subscription includes a maximum of", maxAgentNum, "agent seats.")
+		fmt.Println("Please contact the Datasance Sales Team at sales@datasance.com or reach out to a Datasance Reseller Partner.")
 		return false
 	}
 
 	return true
-}
-
-func CheckNumOfAgentSeats(currentAgentNum int, maxAgentNum string) bool {
-
-	maxAgentNumAsInt, err := strconv.Atoi(maxAgentNum)
-
-	SpinStart("Checking number of agents from subscription details")
-
-	if err != nil {
-		fmt.Println("Error while converting maximum agent number to integer:", err)
-		return false
-	}
-
-	if currentAgentNum > maxAgentNumAsInt {
-		fmt.Println("You don't have enough subscription to deploy additional agents on this controlplane")
-		fmt.Println("Your active subscription includes maximum agent seats as ", maxAgentNum)
-		fmt.Println("Please contact with Datasance Sales Team : sales@datasance.com or Datasance Reseller Partner")
-	}
-
-	return currentAgentNum < maxAgentNumAsInt
 }

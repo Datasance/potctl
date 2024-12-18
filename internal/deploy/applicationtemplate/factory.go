@@ -69,10 +69,11 @@ func (exe *remoteExecutor) Execute() error {
 	}
 
 	controller := apps.IofogController{
-		Endpoint: endpoint,
-		Email:    controlPlane.GetUser().Email,
-		Password: controlPlane.GetUser().Password,
-		Token:    clt.GetAccessToken(),
+		Endpoint:     endpoint,
+		Email:        controlPlane.GetUser().Email,
+		Password:     controlPlane.GetUser().Password,
+		Token:        clt.GetAccessToken(),
+		RefreshToken: clt.GetRefreshToken(),
 	}
 	baseURL, err := util.GetBaseURL(controller.Endpoint)
 	if err != nil {

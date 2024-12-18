@@ -26,6 +26,19 @@ func (cp *LocalControlPlane) GetUser() IofogUser {
 	return cp.IofogUser
 }
 
+func (cp *LocalControlPlane) UpdateUserTokens(accessToken, refreshToken string) IofogUser {
+	cp.IofogUser.AccessToken = accessToken
+	cp.IofogUser.RefreshToken = refreshToken
+
+	return cp.IofogUser
+}
+
+// func (cp *LocalControlPlane) UpdateUserSubscriptionKey(subscriptionKey string) IofogUser {
+// 	cp.IofogUser.SubscriptionKey = subscriptionKey
+
+// 	return cp.IofogUser
+// }
+
 func (cp *LocalControlPlane) GetControllers() []Controller {
 	if cp.Controller == nil {
 		return []Controller{}
