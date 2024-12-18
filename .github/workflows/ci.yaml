@@ -130,3 +130,4 @@ jobs:
         with:
           name: potctl
           path: ${{ github.workspace }}/dist
+          overwrite: true
