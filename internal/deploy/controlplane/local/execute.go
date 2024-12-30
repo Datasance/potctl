@@ -15,16 +15,17 @@ package deploylocalcontrolplane
 
 import (
 	"fmt"
-	"strings"
+	// "strings"
 
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
-	deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
+	// deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
 	iutil "github.com/datasance/potctl/internal/util"
-	"github.com/datasance/potctl/pkg/iofog"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	// "github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 )
@@ -42,38 +43,28 @@ type localControlPlaneExecutor struct {
 	name                string
 }
 
-// TODO: remove duplication
-func deploySystemAgent(namespace string) (err error) {
-	host := "localhost"
-	// Deploy system agent to host internal router
-	install.Verbose("Deploying system agent")
-	// Configure agent to be system agent with default router
-	RouterConfig := client.RouterConfig{
-		RouterMode:      iutil.MakeStrPtr("interior"),
-		MessagingPort:   iutil.MakeIntPtr(5672),
-		EdgeRouterPort:  iutil.MakeIntPtr(56721),
-		InterRouterPort: iutil.MakeIntPtr(56722),
-	}
-	deployAgentConfig := rsc.AgentConfiguration{
-		Name: iofog.VanillaRouterAgentName,
-		AgentConfiguration: client.AgentConfiguration{
-			IsSystem:     iutil.MakeBoolPtr(true),
-			Host:         &host,
-			RouterConfig: RouterConfig,
+func createDefaultRouter(clt *client.Client) (err error) {
+	routerConfig := client.Router{
+		Host: "localhost",
+		RouterConfig: client.RouterConfig{
+			RouterMode:      iutil.MakeStrPtr("interior"),
+			MessagingPort:   iutil.MakeIntPtr(5672),
+			EdgeRouterPort:  iutil.MakeIntPtr(56721),
+			InterRouterPort: iutil.MakeIntPtr(56722),
 		},
 	}
 
-	// Get Agentconfig executor
-	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRouterAgentName, &deployAgentConfig, namespace, nil)
-	// If there already is a system fog, ignore error
-	if err := deployAgentConfigExecutor.Execute(); err != nil {
-		return err
-	}
-	return nil
+	return clt.PutDefaultRouter(routerConfig)
 }
 
 func (exe localControlPlaneExecutor) postDeploy() (err error) {
-	if err := deploySystemAgent(exe.namespace); err != nil {
+	// Check controller is reachable
+	clt, err := clientutil.NewControllerClient(exe.namespace)
+	if err != nil {
+		return err
+	}
+
+	if err := createDefaultRouter(clt); err != nil {
 		return err
 	}
 	return nil
@@ -95,27 +86,28 @@ func (exe localControlPlaneExecutor) Execute() (err error) {
 	if err := install.WaitForControllerAPI(endpoint); err != nil {
 		return err
 	}
-	// Create new user
-	baseURL, err := util.GetBaseURL(endpoint)
-	if err != nil {
-		return err
-	}
-	exe.ctrlClient = client.New(client.Options{BaseURL: baseURL})
-	user := client.User(exe.controlPlane.GetUser())
-	user.Password = exe.controlPlane.GetUser().GetRawPassword()
-	if err = exe.ctrlClient.CreateUser(user); err != nil {
-		// If not error about account existing, fail
-		if !strings.Contains(err.Error(), "already an account associated") {
-			return err
-		}
-		// Try to log in
-		if err := exe.ctrlClient.Login(client.LoginRequest{
-			Email:    user.Email,
-			Password: user.Password,
-		}); err != nil {
-			return err
-		}
-	}
+
+	// // Create new user
+	// baseURL, err := util.GetBaseURL(endpoint)
+	// if err != nil {
+	// 	return err
+	// }
+	// exe.ctrlClient = client.New(client.Options{BaseURL: baseURL})
+	// user := client.User(exe.controlPlane.GetUser())
+	// user.Password = exe.controlPlane.GetUser().GetRawPassword()
+	// if err = exe.ctrlClient.CreateUser(user); err != nil {
+	// 	// If not error about account existing, fail
+	// 	if !strings.Contains(err.Error(), "already an account associated") {
+	// 		return err
+	// 	}
+	// 	// Try to log in
+	// 	if err := exe.ctrlClient.Login(client.LoginRequest{
+	// 		Email:    user.Email,
+	// 		Password: user.Password,
+	// 	}); err != nil {
+	// 		return err
+	// 	}
+	// }
 	// Update config
 	ns, err := config.GetNamespace(exe.namespace)
 	if err != nil {

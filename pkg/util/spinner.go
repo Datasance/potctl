@@ -16,7 +16,7 @@ var (
 
 func init() {
 	// Note: don't set the colour here, it will display the spinner when you don't want it to
-	spin = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	spin = spinner.New(spinner.CharSets[14], 10000*time.Millisecond)
 }
 
 func SpinEnable(isEnabled bool) {
@@ -31,8 +31,8 @@ func SpinStart(msg string) {
 		return
 	}
 	_ = spin.Color("red")
-	spin.Stop()
-	spin.Suffix = " " + msg
+	// spin.Stop()
+	spin.Suffix = " " + msg + "\n"
 	spin.Start()
 }
 

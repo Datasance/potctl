@@ -24,6 +24,8 @@ type IofogUser struct {
 	Email           string `yaml:"email,omitempty"`
 	Password        string `yaml:"password,omitempty"`
 	SubscriptionKey string `yaml:"subscriptionKey,omitempty"`
+	AccessToken     string `yaml:"accessToken,omitempty"`
+	RefreshToken    string `yaml:"refreshToken,omitempty"`
 }
 
 func (user *IofogUser) EncodePassword() {

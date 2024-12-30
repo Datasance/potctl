@@ -51,6 +51,18 @@ check_forked() {
 				fi
 				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
 				case "$dist_version" in
+					14)
+						dist_version="forky"
+					;;
+					13)
+						dist_version="trixie"
+					;;
+					12)
+						dist_version="bookworm"
+					;;
+					11)
+						dist_version="bullseye"
+					;;
 					10)
 						dist_version="buster"
 					;;

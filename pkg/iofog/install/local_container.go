@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,6 +34,8 @@ import (
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/docker/docker/api/types"
 	dockerContainer "github.com/docker/docker/api/types/container"
+	img "github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
@@ -68,12 +71,18 @@ type LocalContainerConfig struct {
 	DefaultImage  string
 	Privileged    bool
 	Binds         []string
+	Envs          []string
 	NetworkMode   string
 	Credentials   Credentials
 }
 
 type LocalControllerConfig struct {
-	ContainerMap map[string]*LocalContainerConfig
+	ContainerMap  map[string]*LocalContainerConfig
+	Database      Database
+	PidBaseDir    string
+	EcnViewerPort int
+	EcnViewerURL  string
+	Auth          Auth
 }
 
 type LocalContainerPort struct {
@@ -122,16 +131,24 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 			ContainerName: GetLocalContainerName("agent", isSystem),
 			Image:         image,
 			Privileged:    true,
-			Binds:         []string{"/var/run/docker.sock:/var/run/docker.sock:rw"},
-			NetworkMode:   "host",
-			Credentials:   credentials,
+			Binds: []string{
+				"/var/run/docker.sock:/var/run/docker.sock:rw",
+				"iofog-agent-config:/etc/iofog-agent:rw",
+				"iofog-agent-log:/var/log/iofog-agent:rw",
+				"iofog-agent-backup:/var/backups/iofog-agent:rw",
+				"iofog-agent-version:/usr/share/iofog-agent:rw",
+				"iofog-agent-iomessage:/var/lib/iofog-agent:rw",
+			},
+			Envs:        []string{},
+			NetworkMode: "host",
+			Credentials: credentials,
 		},
 		Name: name,
 	}
 }
 
 // NewLocalControllerConfig generats a static controller config
-func NewLocalControllerConfig(image string, credentials Credentials) *LocalContainerConfig {
+func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, db Database) *LocalContainerConfig {
 	if image == "" {
 		image = util.GetControllerImage()
 	}
@@ -144,9 +161,27 @@ func NewLocalControllerConfig(image string, credentials Credentials) *LocalConta
 		ContainerName: GetLocalContainerName("controller", false),
 		Image:         image,
 		Privileged:    false,
-		Binds:         []string{},
-		NetworkMode:   "bridge",
-		Credentials:   credentials,
+		Binds: []string{
+			"iofog-controller-db:/home/runner/.npm-global/lib/node_modules/@datasance/iofogcontroller/src/data/sqlite_files/:rw",
+			"iofog-controller-logs:/var/log/iofog-controller:rw",
+		},
+		Envs: []string{
+			"DB_PROVIDER=" + db.Provider,
+			"DB_HOST=" + db.Host,
+			"DB_USERNAME=" + db.User,
+			"DB_PASSWORD=" + db.Password,
+			"DB_PORT=" + strconv.Itoa(db.Port),
+			"DB_NAME=" + db.DatabaseName,
+			"KC_URL=" + auth.URL,
+			"KC_REALM=" + auth.Realm,
+			"KC_SSL_REQ=" + auth.SSL,
+			"KC_REALM_KEY=" + auth.RealmKey,
+			"KC_CLIENT=" + auth.ControllerClient,
+			"KC_CLIENT_SECRET=" + auth.ControllerSecret,
+			"KC_VIEWER_CLIENT=" + auth.ViewerClient,
+		},
+		NetworkMode: "bridge",
+		Credentials: credentials,
 	}
 }
 
@@ -167,7 +202,7 @@ func NewLocalContainerClient() (*LocalContainer, error) {
 // GetLogsByName returns the logs of the container specified by name
 func (lc *LocalContainer) GetLogsByName(name string) (stdout, stderr string, err error) {
 	ctx := context.Background()
-	r, err := lc.client.ContainerLogs(ctx, name, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
+	r, err := lc.client.ContainerLogs(ctx, name, dockerContainer.LogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		return
 	}
@@ -190,7 +225,7 @@ func (lc *LocalContainer) GetLogsByName(name string) (stdout, stderr string, err
 func (lc *LocalContainer) GetContainerByName(name string) (types.Container, error) {
 	ctx := context.Background()
 	// List containers
-	containers, err := lc.client.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := lc.client.ContainerList(ctx, dockerContainer.ListOptions{})
 	if err != nil {
 		return types.Container{}, err
 	}
@@ -209,7 +244,7 @@ func (lc *LocalContainer) GetContainerByName(name string) (types.Container, erro
 
 func (lc *LocalContainer) ListContainers() ([]types.Container, error) {
 	ctx := context.Background()
-	return lc.client.ContainerList(ctx, types.ContainerListOptions{})
+	return lc.client.ContainerList(ctx, dockerContainer.ListOptions{})
 }
 
 // CleanContainer stops and remove a container based on a container name
@@ -221,32 +256,32 @@ func (lc *LocalContainer) CleanContainer(name string) error {
 		return err
 	}
 	// Stop container if running (ignore error if there is no running container)
-	if err := lc.client.ContainerStop(ctx, container.ID, nil); err != nil {
+	if err := lc.client.ContainerStop(ctx, container.ID, dockerContainer.StopOptions{"SIGTERM", nil}); err != nil {
 		return err
 	}
 
 	// Force remove container
-	return lc.client.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true})
+	return lc.client.ContainerRemove(ctx, container.ID, dockerContainer.RemoveOptions{Force: true})
 }
 
 func (lc *LocalContainer) CleanContainerByID(id string) error {
 	ctx := context.Background()
 
 	// Stop container if running (ignore error if there is no running container)
-	if err := lc.client.ContainerStop(ctx, id, nil); err != nil {
+	if err := lc.client.ContainerStop(ctx, id, dockerContainer.StopOptions{"SIGTERM", nil}); err != nil {
 		return err
 	}
 
 	// Force remove container
-	return lc.client.ContainerRemove(ctx, id, types.ContainerRemoveOptions{Force: true})
+	return lc.client.ContainerRemove(ctx, id, dockerContainer.RemoveOptions{Force: true})
 }
 
-func (lc *LocalContainer) getPullOptions(config *LocalContainerConfig) (ret types.ImagePullOptions) {
+func (lc *LocalContainer) getPullOptions(config *LocalContainerConfig) (ret img.PullOptions) {
 	dockerUser := config.Credentials.User
 	dockerPwd := config.Credentials.Password
 
 	if dockerUser != "" {
-		authConfig := types.AuthConfig{
+		authConfig := registry.AuthConfig{
 			Username: dockerUser,
 			Password: dockerPwd,
 		}
@@ -272,7 +307,7 @@ func (lc *LocalContainer) waitForImage(image string, counter int8) error {
 		return util.NewInternalError("Could not find newly pulled image: " + image)
 	}
 	ctx := context.Background()
-	imgs, listErr := lc.client.ImageList(ctx, types.ImageListOptions{All: true})
+	imgs, listErr := lc.client.ImageList(ctx, img.ListOptions{All: true})
 	if listErr != nil {
 		return util.NewError(fmt.Sprintf("Could not list local images: %v\n", listErr))
 	}
@@ -312,6 +347,7 @@ func (lc *LocalContainer) DeployContainer(containerConfig *LocalContainerConfig)
 	dockerContainerConfig := &dockerContainer.Config{
 		Image:        containerConfig.Image,
 		ExposedPorts: portSet,
+		Env:          containerConfig.Envs,
 	}
 	hostConfig := &dockerContainer.HostConfig{
 		PortBindings: portMap,
@@ -325,7 +361,7 @@ func (lc *LocalContainer) DeployContainer(containerConfig *LocalContainerConfig)
 	imageTag := getImageTag(containerConfig.Image)
 	if err != nil {
 		Verbose(fmt.Sprintf("Could not pull image: %v, listing local images...\n", err.Error()))
-		imgs, listErr := lc.client.ImageList(ctx, types.ImageListOptions{All: true})
+		imgs, listErr := lc.client.ImageList(ctx, img.ListOptions{All: true})
 		if listErr != nil {
 			Verbose(fmt.Sprintf("Could not list local images: %v\n", listErr))
 			return "", err
@@ -365,7 +401,7 @@ func (lc *LocalContainer) DeployContainer(containerConfig *LocalContainerConfig)
 	}
 
 	// Start container
-	err = lc.client.ContainerStart(ctx, container.ID, types.ContainerStartOptions{})
+	err = lc.client.ContainerStart(ctx, container.ID, dockerContainer.StartOptions{})
 	if err != nil {
 		return "", util.NewError(fmt.Sprintf("Failed to start container: %v\n", err))
 	}

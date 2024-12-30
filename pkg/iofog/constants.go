@@ -23,11 +23,8 @@ const (
 	ControllerHostECNViewerPort       = 8008
 	ControllerHostECNViewerPortString = "8008"
 
-	DefaultHTTPPort       = 80
-	DefaultHTTPPortString = "80"
+	DefaultHTTPPort       = 8008
+	DefaultHTTPPortString = "8008"
 
-	ConnectorPort       = 8080
-	ConnectorPortString = "8080"
-
-	VanillaRouterAgentName string = client.DefaultRouterName
+	VanillaRouterAgentName string = "0-controlplane"
 )

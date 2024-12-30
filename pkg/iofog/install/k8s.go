@@ -56,6 +56,8 @@ type Kubernetes struct {
 	services      cpv3.Services
 	images        cpv3.Images
 	ingresses     cpv3.Ingresses
+	router        cpv3.Router
+	proxy         cpv3.Proxy
 }
 
 // NewKubernetes constructs an object to manage cluster
@@ -228,6 +230,8 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	cp.Spec.Services = k8s.services
 	cp.Spec.Ingresses = k8s.ingresses
 	cp.Spec.Images = k8s.images
+	cp.Spec.Router = k8s.router
+	cp.Spec.Proxy = k8s.proxy
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
@@ -707,6 +711,19 @@ func (k8s *Kubernetes) SetHttpProxyIngress(address string) {
 
 func (k8s *Kubernetes) SetTcpProxyIngress(address string) {
 	k8s.ingresses.TCPProxy.Address = address
+}
+
+func (k8s *Kubernetes) SetRouterConfig(internalSecret, amqpsSecret, requireSsl, saslMechanisms, authenticatePeer string) {
+	k8s.router.InternalSecret = internalSecret
+	k8s.router.AmqpsSecret = amqpsSecret
+	k8s.router.RequireSsl = requireSsl
+	k8s.router.SaslMechanisms = saslMechanisms
+	k8s.router.AuthenticatePeer = authenticatePeer
+}
+
+func (k8s *Kubernetes) SetProxyConfig(serverName, transport string) {
+	k8s.proxy.ServerName = serverName
+	k8s.proxy.Transport = transport
 }
 
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {

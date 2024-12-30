@@ -145,8 +145,8 @@ func (ctrl *Controller) CopyScript(srcDir, filename, destDir string) (err error)
 
 func (ctrl *Controller) Uninstall() (err error) {
 	// Stop controller gracefully
-	if err := ctrl.Stop(); err != nil {
-		return err
+	if err = ctrl.Stop(); err != nil {
+		return
 	}
 
 	// Connect to server
@@ -229,7 +229,7 @@ func (ctrl *Controller) Install() (err error) {
 		env = append(env,
 			fmt.Sprintf(`"DB_PROVIDER=%s"`, ctrl.db.provider),
 			fmt.Sprintf(`"DB_HOST=%s"`, ctrl.db.host),
-			fmt.Sprintf(`"DB_USER=%s"`, ctrl.db.user),
+			fmt.Sprintf(`"DB_USERNAME=%s"`, ctrl.db.user),
 			fmt.Sprintf(`"DB_PASSWORD=%s"`, ctrl.db.password),
 			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
 			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
@@ -240,7 +240,7 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"KC_REALM=%s"`, ctrl.auth.realm),
 			fmt.Sprintf(`"KC_SSL_REQ=%s"`, ctrl.auth.ssl),
 			fmt.Sprintf(`"KC_REALM_KEY=%s"`, ctrl.auth.realmKey),
-			fmt.Sprintf(`"KC_CLIENT=%d"`, ctrl.auth.controllerClient),
+			fmt.Sprintf(`"KC_CLIENT=%s"`, ctrl.auth.controllerClient),
 			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
 			fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
 

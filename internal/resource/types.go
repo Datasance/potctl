@@ -182,3 +182,16 @@ type Ingresses struct {
 	HTTPProxy  Ingress           `yaml:"httpProxy,omitempty"`
 	TCPProxy   Ingress           `yaml:"tcpProxy,omitempty"`
 }
+
+type RouterConfig struct {
+	InternalSecret   string `yaml:"internalSecret,omitempty"`
+	AmqpsSecret      string `yaml:"amqpsSecret,omitempty"`
+	RequireSsl       string `yaml:"requireSsl,omitempty"`
+	SaslMechanisms   string `yaml:"saslMechanisms,omitempty"`
+	AuthenticatePeer string `yaml:"authenticatePeer,omitempty"`
+}
+
+type ProxyConfig struct {
+	ServerName string `yaml:"serverName,omitempty"`
+	Transport  string `yaml:"transport,omitempty"`
+}

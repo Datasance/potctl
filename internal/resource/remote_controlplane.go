@@ -34,6 +34,19 @@ func (cp *RemoteControlPlane) GetUser() IofogUser {
 	return cp.IofogUser
 }
 
+func (cp *RemoteControlPlane) UpdateUserTokens(accessToken, refreshToken string) IofogUser {
+	cp.IofogUser.AccessToken = accessToken
+	cp.IofogUser.RefreshToken = refreshToken
+
+	return cp.IofogUser
+}
+
+// func (cp *RemoteControlPlane) UpdateUserSubscriptionKey(subscriptionKey string) IofogUser {
+// 	cp.IofogUser.SubscriptionKey = subscriptionKey
+
+// 	return cp.IofogUser
+// }
+
 func (cp *RemoteControlPlane) GetControllers() (controllers []Controller) {
 	for idx := range cp.Controllers {
 		controllers = append(controllers, cp.Controllers[idx].Clone())

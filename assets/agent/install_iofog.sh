@@ -47,14 +47,9 @@ do_install_iofog() {
 	echo $lsb_dist
 	if [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "centos" ]; then
 
-		cd /etc/yum.repos.d ; curl https://downloads.datasance.com/datasance.repo -LO
 		$sh_c "yum update"
 		$sh_c "yum install -y iofog-agent-$agent_version-1.noarch"
 	else
-    $sh_c "apt install -qy debian-archive-keyring"
-    $sh_c "apt install -qy apt-transport-https"
-	wget -qO- https://downloads.datasance.com/datasance.gpg |  tee /etc/apt/trusted.gpg.d/datasance.gpg >/dev/null
-	echo "deb [arch=all signed-by=/etc/apt/trusted.gpg.d/datasance.gpg] https://downloads.datasance.com/deb stable main" |  tee /etc/apt/sources.list.d/datansance.list >/dev/null
     $sh_c "apt update -qy"
     $sh_c "apt install --allow-downgrades iofog-agent=$agent_version -qy"
 	fi

@@ -37,7 +37,7 @@ func newLocalExecutor(namespace string, agent *rsc.LocalAgent, isSystem bool) (*
 		return nil, err
 	}
 	// Get Controller LocalContainerConfig
-	controllerContainerConfig := install.NewLocalControllerConfig("", install.Credentials{})
+	controllerContainerConfig := install.NewLocalControllerConfig("", install.Credentials{}, install.Auth{}, install.Database{})
 	return &localExecutor{
 		isSystem:  isSystem,
 		namespace: namespace,

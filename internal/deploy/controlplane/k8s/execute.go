@@ -103,6 +103,8 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetRouterIngress(exe.controlPlane.Ingresses.Router.Address, exe.controlPlane.Ingresses.Router.MessagePort, exe.controlPlane.Ingresses.Router.InteriorPort, exe.controlPlane.Ingresses.Router.EdgePort)
 	installer.SetHttpProxyIngress(exe.controlPlane.Ingresses.HTTPProxy.Address)
 	installer.SetTcpProxyIngress(exe.controlPlane.Ingresses.TCPProxy.Address)
+	installer.SetRouterConfig(exe.controlPlane.Router.InternalSecret, exe.controlPlane.Router.AmqpsSecret, exe.controlPlane.Router.RequireSsl, exe.controlPlane.Router.SaslMechanisms, exe.controlPlane.Router.AuthenticatePeer)
+	installer.SetProxyConfig(exe.controlPlane.Proxy.ServerName, exe.controlPlane.Proxy.Transport)
 
 	replicas := int32(1)
 	if exe.controlPlane.Replicas.Controller != 0 {
@@ -163,9 +165,12 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	}
 	// Validate database
 	db := controlPlane.Database
-	if db.Host == "" || db.DatabaseName == "" || db.Password == "" || db.Port == 0 || db.User == "" {
-		msg := `When you are specifying an external database for the Control Plane, you must provide non-empty values in host, databasename, user, password, and port fields.`
-		return util.NewInputError(msg)
+	replicas := controlPlane.Replicas.Controller
+	if replicas > 1 {
+		if db.Provider == "" || db.Host == "" || db.DatabaseName == "" || db.Password == "" || db.Port == 0 || db.User == "" {
+			msg := `When you would like to deploy controller with replicas you must specify an external database for the Control Plane, and you must provide non-empty values in host, databasename, user, password, and port fields.`
+			return util.NewInputError(msg)
+		}
 	}
 	// Validate controller service and ingress
 	controllerService := controlPlane.Services.Controller

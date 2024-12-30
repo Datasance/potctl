@@ -29,11 +29,26 @@ type KubernetesControlPlane struct {
 	Endpoint       string                 `yaml:"endpoint,omitempty"`
 	Controller     ControllerConfig       `yaml:"controller,omitempty"`
 	Ingresses      Ingresses              `yaml:"ingresses,omitempty"`
+	Router         RouterConfig           `yaml:"router,omitempty"`
+	Proxy          ProxyConfig            `yaml:"proxy,omitempty"`
 }
 
 func (cp *KubernetesControlPlane) GetUser() IofogUser {
 	return cp.IofogUser
 }
+
+func (cp *KubernetesControlPlane) UpdateUserTokens(accessToken, refreshToken string) IofogUser {
+	cp.IofogUser.AccessToken = accessToken
+	cp.IofogUser.RefreshToken = refreshToken
+
+	return cp.IofogUser
+}
+
+// func (cp *KubernetesControlPlane) UpdateUserSubscriptionKey(subscriptionKey string) IofogUser {
+// 	cp.IofogUser.SubscriptionKey = subscriptionKey
+
+// 	return cp.IofogUser
+// }
 
 func (cp *KubernetesControlPlane) GetControllers() (controllers []Controller) {
 	for idx := range cp.ControllerPods {
@@ -121,6 +136,8 @@ func (cp *KubernetesControlPlane) Clone() ControlPlane {
 		Database:       cp.Database,
 		Services:       cp.Services,
 		Ingresses:      cp.Ingresses,
+		Router:         cp.Router,
+		Proxy:          cp.Proxy,
 		Replicas:       cp.Replicas,
 		Images:         cp.Images,
 		Endpoint:       cp.Endpoint,

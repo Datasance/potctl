@@ -35,20 +35,20 @@ func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user Iofog
 	if err != nil {
 		return
 	}
-	ctrl, err := client.NewAndLogin(client.Options{BaseURL: baseURL}, user.Email, user.Password)
+	// Log in
+	ctrl, err := client.SessionLogin(client.Options{BaseURL: baseURL}, user.RefreshToken, user.Email, user.Password)
 	if err != nil {
 		return
 	}
 
-	// Log in
 	Verbose("Accessing Controller to generate Provisioning Key")
-	loginRequest := client.LoginRequest{
-		Email:    user.Email,
-		Password: user.Password,
-	}
-	if err = ctrl.Login(loginRequest); err != nil {
-		return
-	}
+	// loginRequest := client.LoginRequest{
+	// 	Email:    user.Email,
+	// 	Password: user.Password,
+	// }
+	// if err = ctrl.Login(loginRequest); err != nil {
+	// 	return
+	// }
 
 	// System agents have uuid passed through, normal agents dont
 	if agent.uuid == "" {

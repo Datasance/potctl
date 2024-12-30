@@ -19,6 +19,8 @@ type IofogUser struct {
 	Email           string
 	Password        string
 	SubscriptionKey string
+	AccessToken     string
+	RefreshToken    string
 }
 
 type Auth struct {
