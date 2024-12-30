@@ -49,7 +49,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.23'
+          go-version: '1.23.0'
           cache: false
       - run: go version
       - name: golangci-lint
@@ -112,7 +112,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.23'
+          go-version: '1.23.0'
           cache: false
       - name: Get image tag
         run: |
