@@ -63,6 +63,21 @@ install_deps() {
 	fi
 }
 
+create_logrotate() {
+    cat <<EOF > /etc/logrotate.d/iofog-controller
+/var/log/iofog-controller/iofog-controller.log {
+  rotate 10
+  size 100m
+  compress
+  notifempty
+  missingok
+  postrotate
+      kill -HUP `cat $INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/src/iofog-controller.pid`
+}
+EOF
+    chmod 644 /etc/logrotate.d/iofog-controller
+}
+
 deploy_controller() {
 	# Nuke any existing instances
 	if [ ! -z "$(lsof -ti tcp:51121)" ]; then
@@ -127,4 +142,5 @@ repo=$([ -z "$2" ] && echo "iofog/iofog-controller-snapshots" || echo "$2")
 token="$3"
 
 install_deps
+create_logrotate
 deploy_controller

@@ -28,7 +28,7 @@ import (
 type localExecutor struct {
 	namespace             string
 	ctrl                  *rsc.LocalController
-	ctrlPlane             rsc.ControlPlane
+	ctrlPlane             *rsc.LocalControlPlane
 	client                *install.LocalContainer
 	localControllerConfig *install.LocalContainerConfig
 	containersNames       []string
@@ -61,15 +61,25 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 	if err != nil {
 		return nil, err
 	}
-	controlPlane, err := ns.GetControlPlane()
+	// controlPlane, err := ns.GetControlPlane()
+	// if err != nil {
+	// 	return
+	// }
+
+	baseControlPlane, err := ns.GetControlPlane()
 	if err != nil {
+		return
+	}
+	controlPlane, ok := baseControlPlane.(*rsc.LocalControlPlane)
+	if !ok {
+		err = util.NewError("Could not convert Control Plane to Remote Control Plane")
 		return
 	}
 
 	return NewExecutorWithoutParsing(opt.Namespace, controlPlane, &controller)
 }
 
-func NewExecutorWithoutParsing(namespace string, controlPlane rsc.ControlPlane, controller *rsc.LocalController) (exe execute.Executor, err error) {
+func NewExecutorWithoutParsing(namespace string, controlPlane *rsc.LocalControlPlane, controller *rsc.LocalController) (exe execute.Executor, err error) {
 	_, err = config.GetNamespace(namespace)
 	if err != nil {
 		return
@@ -87,7 +97,7 @@ func NewExecutorWithoutParsing(namespace string, controlPlane rsc.ControlPlane, 
 }
 
 // TODO: Rewrite this pkg, don't need ctrl coming in here
-func newExecutor(namespace string, controlPlane rsc.ControlPlane, ctrl *rsc.LocalController, client *install.LocalContainer) *localExecutor {
+func newExecutor(namespace string, controlPlane *rsc.LocalControlPlane, ctrl *rsc.LocalController, client *install.LocalContainer) *localExecutor {
 	return &localExecutor{
 		namespace: namespace,
 		ctrl:      ctrl,
@@ -95,6 +105,21 @@ func newExecutor(namespace string, controlPlane rsc.ControlPlane, ctrl *rsc.Loca
 		localControllerConfig: install.NewLocalControllerConfig(ctrl.Container.Image, install.Credentials{
 			User:     ctrl.Container.Credentials.User,
 			Password: ctrl.Container.Credentials.Password,
+		}, install.Auth{
+			URL:              controlPlane.Auth.URL,
+			Realm:            controlPlane.Auth.Realm,
+			SSL:              controlPlane.Auth.SSL,
+			RealmKey:         controlPlane.Auth.RealmKey,
+			ControllerClient: controlPlane.Auth.ControllerClient,
+			ControllerSecret: controlPlane.Auth.ControllerSecret,
+			ViewerClient:     controlPlane.Auth.ViewerClient,
+		}, install.Database{
+			Provider:     controlPlane.Database.Provider,
+			Host:         controlPlane.Database.Host,
+			Port:         controlPlane.Database.Port,
+			User:         controlPlane.Database.User,
+			Password:     controlPlane.Database.Password,
+			DatabaseName: controlPlane.Database.DatabaseName,
 		}),
 		iofogUser: controlPlane.GetUser(),
 		ctrlPlane: controlPlane,

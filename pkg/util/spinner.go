@@ -31,7 +31,7 @@ func SpinStart(msg string) {
 		return
 	}
 	_ = spin.Color("red")
-	spin.Stop()
+	// spin.Stop()
 	spin.Suffix = " " + msg + "\n"
 	spin.Start()
 }

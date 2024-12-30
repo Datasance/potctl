@@ -20,6 +20,8 @@ import (
 type LocalControlPlane struct {
 	IofogUser  IofogUser        `yaml:"iofogUser"`
 	Controller *LocalController `yaml:"controller,omitempty"`
+	Database   Database         `yaml:"database"`
+	Auth       Auth             `yaml:"auth"`
 }
 
 func (cp *LocalControlPlane) GetUser() IofogUser {
@@ -94,5 +96,7 @@ func (cp *LocalControlPlane) Clone() ControlPlane {
 	return &LocalControlPlane{
 		IofogUser:  cp.IofogUser,
 		Controller: cp.Controller.Clone().(*LocalController),
+		Database:   cp.Database,
+		Auth:       cp.Auth,
 	}
 }

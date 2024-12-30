@@ -30,17 +30,17 @@ start_docker() {
 do_configure_overlay() {
 	local driver="$DOCKER_STORAGE_DRIVER"
 	if [ -z "$driver" ]; then
-		driver="overlay2"
+		driver="overlayfs"
 	fi
 	echo "# Configuring /etc/systemd/system/docker.service.d/overlay.conf..."
 	if [ "$lsb_dist" = "raspbian" ] || [ "$(uname -m)" = "armv7l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "armv8" ]; then
 		if [ ! -d "/etc/systemd/system/docker.service.d" ]; then
 			$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
 		fi
-		if [ ! -f "/etc/systemd/system/docker.service.d/overlay.conf" ] || ! grep -Fxq "ExecStart=/usr/bin/dockerd --storage-driver $driver -H unix:// -H tcp://127.0.0.1:2375" "/etc/systemd/system/docker.service.d/overlay.conf"; then
+		if [ ! -f "/etc/systemd/system/docker.service.d/overlay.conf" ] || ! grep -Fxq "ExecStart=/usr/bin/dockerd --storage-driver $driver " "/etc/systemd/system/docker.service.d/overlay.conf"; then
 			$sh_c 'echo "[Service]" > /etc/systemd/system/docker.service.d/overlay.conf'
 			$sh_c 'echo "ExecStart=" >> /etc/systemd/system/docker.service.d/overlay.conf'
-			$sh_c "echo \"ExecStart=/usr/bin/dockerd --storage-driver $driver -H unix:// -H tcp://127.0.0.1:2375\" >> /etc/systemd/system/docker.service.d/overlay.conf"
+			$sh_c "echo \"ExecStart=/usr/bin/dockerd --storage-driver $driver \" >> /etc/systemd/system/docker.service.d/overlay.conf"
 		fi
 		$sh_c "systemctl daemon-reload"
 		$sh_c "service docker restart"

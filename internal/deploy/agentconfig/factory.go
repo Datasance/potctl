@@ -27,6 +27,7 @@ import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
+	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 )
@@ -96,7 +97,7 @@ func (exe *RemoteExecutor) GetName() string {
 	return exe.name
 }
 
-func isOverridingSystemAgent(controllerHost, agentHost string, isSystem bool) (err error) {
+func isOverridingSystemAgent(controllerHost, agentHost, agentName string) (err error) {
 	// Generate controller endpoint
 	controllerURL, err := url.Parse(controllerHost)
 	if err != nil || controllerURL.Host == "" {
@@ -112,7 +113,7 @@ func isOverridingSystemAgent(controllerHost, agentHost string, isSystem bool) (e
 			return err
 		}
 	}
-	if agentURL.Hostname() == controllerURL.Hostname() && !isSystem {
+	if agentURL.Hostname() == controllerURL.Hostname() && agentName != iofog.VanillaRouterAgentName {
 		return util.NewConflictError("Cannot deploy an agent on the same host than the Controller\n")
 	}
 	return nil
@@ -215,7 +216,7 @@ func (exe *RemoteExecutor) Execute() error {
 		host = *exe.agentConfig.Host
 	}
 
-	if err := isOverridingSystemAgent(endpoint, host, isSystem); err != nil {
+	if err := isOverridingSystemAgent(endpoint, host, exe.name); err != nil {
 		return err
 	}
 

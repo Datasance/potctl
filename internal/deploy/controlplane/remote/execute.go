@@ -15,7 +15,7 @@ package deployremotecontrolplane
 
 import (
 	"fmt"
-	"strings"
+	// "strings"
 
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
@@ -25,6 +25,7 @@ import (
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
 	iutil "github.com/datasance/potctl/internal/util"
+	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -60,12 +61,16 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		EdgeRouterPort:  iutil.MakeIntPtr(56721),
 		InterRouterPort: iutil.MakeIntPtr(56722),
 	}
+
+	upstreamRouters := []string{}
+
 	deployAgentConfig := rsc.AgentConfiguration{
 		Name: iofog.VanillaRouterAgentName,
 		AgentConfiguration: client.AgentConfiguration{
-			IsSystem:     iutil.MakeBoolPtr(true),
-			Host:         &ctrl.Host,
-			RouterConfig: RouterConfig,
+			IsSystem:        iutil.MakeBoolPtr(false),
+			Host:            &ctrl.Host,
+			RouterConfig:    RouterConfig,
+			UpstreamRouters: &upstreamRouters,
 		},
 	}
 
@@ -83,6 +88,29 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	return agentDeployExecutor.Execute()
 }
 
+func createDefaultRouter(namespace string, ctrl *rsc.RemoteController) (err error) {
+	// Check controller is reachable
+	clt, err := clientutil.NewControllerClient(namespace)
+	if err != nil {
+		return err
+	}
+
+	routerConfig := client.Router{
+		Host: ctrl.Host,
+		RouterConfig: client.RouterConfig{
+			RouterMode:      iutil.MakeStrPtr("interior"),
+			MessagingPort:   iutil.MakeIntPtr(5672),
+			EdgeRouterPort:  iutil.MakeIntPtr(56721),
+			InterRouterPort: iutil.MakeIntPtr(56722),
+		},
+	}
+
+	if err := clt.PutDefaultRouter(routerConfig); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 	// Look for a Vanilla controller
 	controllers := exe.controlPlane.GetControllers()
@@ -94,6 +122,9 @@ func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 		remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
 		if !ok {
 			return util.NewInternalError("Could not convert ControlPlane to Remote ControlPlane")
+		}
+		if err := createDefaultRouter(exe.ns.Name, controller); err != nil {
+			return err
 		}
 		if err := deploySystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
 			return err
@@ -116,32 +147,33 @@ func (exe remoteControlPlaneExecutor) Execute() (err error) {
 	if err := install.WaitForControllerAPI(endpoint); err != nil {
 		return err
 	}
-	// Create new user
-	baseURL, err := util.GetBaseURL(endpoint)
-	if err != nil {
-		return err
-	}
-	exe.ctrlClient = client.New(client.Options{BaseURL: baseURL})
-	user := client.User(exe.controlPlane.GetUser())
-	user.Password = exe.controlPlane.GetUser().GetRawPassword()
-	if err = exe.ctrlClient.CreateUser(user); err != nil {
-		// If not error about account existing, fail
-		if !strings.Contains(err.Error(), "already an account associated") {
-			return err
-		}
-		// Try to log in
-		if err := exe.ctrlClient.Login(client.LoginRequest{
-			Email:    user.Email,
-			Password: user.Password,
-		}); err != nil {
-			return err
-		}
-	}
+	// // Create new user
+	// baseURL, err := util.GetBaseURL(endpoint)
+	// if err != nil {
+	// 	return err
+	// }
+	// exe.ctrlClient = client.New(client.Options{BaseURL: baseURL})
+	// user := client.User(exe.controlPlane.GetUser())
+	// user.Password = exe.controlPlane.GetUser().GetRawPassword()
+	// if err = exe.ctrlClient.CreateUser(user); err != nil {
+	// 	// If not error about account existing, fail
+	// 	if !strings.Contains(err.Error(), "already an account associated") {
+	// 		return err
+	// 	}
+	// 	// Try to log in
+	// 	if err := exe.ctrlClient.Login(client.LoginRequest{
+	// 		Email:    user.Email,
+	// 		Password: user.Password,
+	// 	}); err != nil {
+	// 		return err
+	// 	}
+	// }
 	// Update config
 	exe.ns.SetControlPlane(exe.controlPlane)
 	if err := config.Flush(); err != nil {
 		return err
 	}
+
 	// Post deploy steps
 	return exe.postDeploy()
 }
