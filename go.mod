@@ -1,6 +1,7 @@
 module github.com/datasance/potctl
 
-go 1.23.0
+go 1.23
+
 
 require (
 	github.com/GeertJohan/go.rice v1.0.2
