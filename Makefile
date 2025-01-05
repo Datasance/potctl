@@ -18,16 +18,16 @@ BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 PREFIX = github.com/datasance/potctl/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
 LDFLAGS += -X $(PREFIX).portManagerTag=3.1.5
-LDFLAGS += -X $(PREFIX).operatorTag=3.4.12
+LDFLAGS += -X $(PREFIX).operatorTag=3.4.13
 LDFLAGS += -X $(PREFIX).proxyTag=3.1.0
 LDFLAGS += -X $(PREFIX).routerTag=3.2.4
-LDFLAGS += -X $(PREFIX).controllerTag=3.4.6
+LDFLAGS += -X $(PREFIX).controllerTag=3.4.7
 LDFLAGS += -X $(PREFIX).agentTag=3.3.0
-LDFLAGS += -X $(PREFIX).controllerVersion=3.4.6
+LDFLAGS += -X $(PREFIX).controllerVersion=3.4.7
 LDFLAGS += -X $(PREFIX).agentVersion=3.3.0
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.4.14
-OPERATOR_MODULE = iofog-operator/v3@v3.4.12
+OPERATOR_MODULE = iofog-operator/v3@v3.4.13
 REPORTS_DIR ?= reports
 TEST_RESULTS ?= TEST-potctl.txt
 TEST_REPORT ?= TEST-potctl.xml
