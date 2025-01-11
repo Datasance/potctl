@@ -133,7 +133,7 @@ func ValidateRemoteAgent(agent *rsc.RemoteAgent) error {
 	if err := util.IsLowerAlphanumeric("Agent", agent.Name); err != nil {
 		return err
 	}
-	if agent.Name == iofog.VanillaRouterAgentName {
+	if agent.Name == iofog.VanillaRouterAgentName || agent.Name == iofog.VanillaRemoteAgentName {
 		return util.NewInputError(fmt.Sprintf("%s is a reserved name and cannot be used for an Agent", iofog.VanillaRouterAgentName))
 	}
 	if (agent.Host != "localhost" && agent.Host != "127.0.0.1") && (agent.Host == "" || agent.SSH.User == "" || agent.SSH.KeyFile == "") {

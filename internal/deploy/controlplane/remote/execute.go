@@ -49,7 +49,7 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	// Deploy system agent to host internal router
 	install.Verbose("Deploying system agent")
 	agent := rsc.RemoteAgent{
-		Name:    iofog.VanillaRouterAgentName,
+		Name:    iofog.VanillaRemoteAgentName,
 		Host:    ctrl.Host,
 		SSH:     ctrl.SSH,
 		Package: systemAgent,
@@ -65,7 +65,7 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	upstreamRouters := []string{}
 
 	deployAgentConfig := rsc.AgentConfiguration{
-		Name: iofog.VanillaRouterAgentName,
+		Name: iofog.VanillaRemoteAgentName,
 		AgentConfiguration: client.AgentConfiguration{
 			IsSystem:        iutil.MakeBoolPtr(false),
 			Host:            &ctrl.Host,
@@ -75,7 +75,7 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	}
 
 	// Get Agentconfig executor
-	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRouterAgentName, &deployAgentConfig, namespace, nil)
+	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRemoteAgentName, &deployAgentConfig, namespace, nil)
 	// If there already is a system fog, ignore error
 	if err := deployAgentConfigExecutor.Execute(); err != nil {
 		return err

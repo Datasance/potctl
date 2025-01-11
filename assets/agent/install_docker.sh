@@ -99,14 +99,14 @@ do_install_wasm_shim() {
         $sh_c "yum update -y" || { echo "Failed to update yum packages"; exit 1; }
 
         if [ "$arch" = "aarch64" ]; then
-            $sh_c "yum install -y containerd-shim-wasmedge-v1-aarch64-linux-gnu-0.7.0-1.aarch64"
-            $sh_c "yum install -y containerd-shim-wasmer-v1-aarch64-linux-gnu-0.7.0-1.aarch64"
-            $sh_c "yum install -y containerd-shim-wasmtime-v1-aarch64-linux-gnu-0.7.0-1.aarch64"
+            $sh_c "yum install -y containerd-shim-wasmedge-v1-aarch64-linux-gnu"
+            $sh_c "yum install -y containerd-shim-wasmer-v1-aarch64-linux-gnu"
+            $sh_c "yum install -y containerd-shim-wasmtime-v1-aarch64-linux-gnu"
         elif [ "$arch" = "x86_64" ]; then
-            $sh_c "yum install -y containerd-shim-wasmedge-v1-x86_64-linux-gnu-0.7.0-1.x86_64"
-            $sh_c "yum install -y containerd-shim-wasmer-v1-x86_64-linux-gnu-0.7.0-1.x86_64"
-            $sh_c "yum install -y containerd-shim-wasmtime-v1-x86_64-linux-gnu-0.7.0-1.x86_64"
-        else
+            $sh_c "yum install -y containerd-shim-wasmedge-v1-x86_64-linux-gnu"
+            $sh_c "yum install -y containerd-shim-wasmer-v1-x86_64-linux-gnu"
+            $sh_c "yum install -y containerd-shim-wasmtime-v1-x86_64-linux-gnu"
+        else						
             echo "Unsupported architecture: $arch for Fedora/CentOS"
             exit 1
         fi

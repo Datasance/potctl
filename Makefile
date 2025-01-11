@@ -21,9 +21,9 @@ LDFLAGS += -X $(PREFIX).portManagerTag=3.1.5
 LDFLAGS += -X $(PREFIX).operatorTag=3.4.13
 LDFLAGS += -X $(PREFIX).proxyTag=3.1.0
 LDFLAGS += -X $(PREFIX).routerTag=3.2.4
-LDFLAGS += -X $(PREFIX).controllerTag=3.4.7
+LDFLAGS += -X $(PREFIX).controllerTag=3.4.8
 LDFLAGS += -X $(PREFIX).agentTag=3.3.0
-LDFLAGS += -X $(PREFIX).controllerVersion=3.4.7
+LDFLAGS += -X $(PREFIX).controllerVersion=3.4.8
 LDFLAGS += -X $(PREFIX).agentVersion=3.3.0
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.4.14

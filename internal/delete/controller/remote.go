@@ -59,13 +59,13 @@ func (exe *RemoteExecutor) Execute() error {
 		ctrl.Host,
 		ctrl.SSH.Port,
 		ctrl.SSH.KeyFile,
-		iofog.VanillaRouterAgentName,
+		iofog.VanillaRemoteAgentName,
 		"")
 	if err != nil {
 		return err
 	}
 	if err = sshAgent.Uninstall(); err != nil {
-		util.PrintNotify(fmt.Sprintf("Failed to stop daemon on Agent %s. %s", iofog.VanillaRouterAgentName, err.Error()))
+		util.PrintNotify(fmt.Sprintf("Failed to stop daemon on Agent %s. %s", iofog.VanillaRemoteAgentName, err.Error()))
 	}
 
 	// Instantiate Controller uninstaller
