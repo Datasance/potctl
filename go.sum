@@ -20,8 +20,8 @@ github.com/daaku/go.zipexe v1.0.1 h1:wV4zMsDOI2SZ2m7Tdz1Ps96Zrx+TzaK15VbUaGozw0M
 github.com/daaku/go.zipexe v1.0.1/go.mod h1:5xWogtqlYnfBXkSB1o9xysukNP9GTvaNkqzUZbt3Bw8=
 github.com/datasance/iofog-go-sdk/v3 v3.4.16 h1:tLbOzUwjxEepqDrTvlHfGNL2fXuERrzTVRZlKIxWqw8=
 github.com/datasance/iofog-go-sdk/v3 v3.4.16/go.mod h1:Gx/T77nGu3QvC93c96IDMEHJ2cdqZA84icl7R87ds84=
-github.com/datasance/iofog-operator/v3 v3.4.14 h1:Y9jDe+m9DOgGH7Lby8orTLQKovZz/mdnIx4uiU+S0wg=
-github.com/datasance/iofog-operator/v3 v3.4.14/go.mod h1:P2qqNIxYP0aqpORF4Hl9E7cvi/BGd2dU7yer+37jyyk=
+github.com/datasance/iofog-operator/v3 v3.4.15 h1:ynsVZw4uYHK6HmhbIexQOjsKzuc8dEU5FtQckKoBPRY=
+github.com/datasance/iofog-operator/v3 v3.4.15/go.mod h1:P2qqNIxYP0aqpORF4Hl9E7cvi/BGd2dU7yer+37jyyk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
