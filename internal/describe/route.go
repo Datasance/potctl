@@ -62,11 +62,11 @@ func (exe *routeExecutor) Execute() error {
 	}
 
 	// Convert route details
-	from, err := clientutil.GetMicroserviceName(exe.namespace, route.SourceMicroserviceUUID)
+	from, err := clientutil.GetMicroserviceName(exe.namespace, appName, route.From)
 	if err != nil {
 		return err
 	}
-	to, err := clientutil.GetMicroserviceName(exe.namespace, route.DestMicroserviceUUID)
+	to, err := clientutil.GetMicroserviceName(exe.namespace, appName, route.To)
 	if err != nil {
 		return err
 	}

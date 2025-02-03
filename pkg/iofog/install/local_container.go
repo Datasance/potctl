@@ -138,6 +138,7 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 				"iofog-agent-backup:/var/backups/iofog-agent:rw",
 				"iofog-agent-version:/usr/share/iofog-agent:rw",
 				"iofog-agent-iomessage:/var/lib/iofog-agent:rw",
+				// "/sbin/shutdown:/sbin/shutdown",
 			},
 			Envs:        []string{},
 			NetworkMode: "host",

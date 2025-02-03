@@ -73,7 +73,7 @@ func (exe *remoteControllerExecutor) Execute() error {
 	}
 
 	// Get logs
-	out, err := ssh.Run("sudo cat /var/log/iofog-controller/*")
+	out, err := ssh.Run("sudo docker logs iofog-controller")
 	if err != nil {
 		return err
 	}

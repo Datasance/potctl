@@ -222,7 +222,7 @@ func Flush() error {
 
 func ValidateHeader(header *Header) error {
 	if header.APIVersion != LatestAPIVersion {
-		return util.NewInputError(fmt.Sprintf("Unsupported YAML API version %s.\nPlease use version %s. See iofog.org for specification details.", header.APIVersion, LatestAPIVersion))
+		return util.NewInputError(fmt.Sprintf("Unsupported YAML API version %s.\nPlease use version %s. See https://docs.datasance.com for specification details.", header.APIVersion, LatestAPIVersion))
 	}
 	return nil
 }

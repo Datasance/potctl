@@ -84,18 +84,18 @@ deploy_controller() {
 		lsof -ti tcp:51121 | xargs kill
 	fi
 
-#	 If token is provided, set up private repo
-	if [ ! -z $token ]; then
-		if [ ! -z $(npmrc | grep iofog) ]; then
-			npmrc -c iofog
-			npmrc iofog
-		fi
-		curl -s https://"$token":@packagecloud.io/install/repositories/"$repo"/script.node.sh?package_id=7463817 | force_npm=1 bash
-		mv ~/.npmrc ~/.npmrcs/npmrc
-		ln -s ~/.npmrcs/npmrc ~/.npmrc
-	else
-		npmrc default
-	fi
+# #	 If token is provided, set up private repo
+# 	if [ ! -z $token ]; then
+# 		if [ ! -z $(npmrc | grep iofog) ]; then
+# 			npmrc -c iofog
+# 			npmrc iofog
+# 		fi
+# 		curl -s https://"$token":@packagecloud.io/install/repositories/"$repo"/script.node.sh?package_id=7463817 | force_npm=1 bash
+# 		mv ~/.npmrc ~/.npmrcs/npmrc
+# 		ln -s ~/.npmrcs/npmrc ~/.npmrc
+# 	else
+# 		npmrc default
+# 	fi
 	# Save DB
 	if [ -f "$INSTALL_DIR/controller/lib/node_modules/@datasance/iofogcontroller/package.json" ]; then
 		# If iofog-controller is not running, it will fail to stop - ignore that failure.
@@ -138,8 +138,8 @@ deploy_controller() {
 
 # main
 version="$1"
-repo=$([ -z "$2" ] && echo "iofog/iofog-controller-snapshots" || echo "$2")
-token="$3"
+# repo=$([ -z "$2" ] && echo "iofog/iofog-controller-snapshots" || echo "$2")
+# token="$3"
 
 install_deps
 create_logrotate
