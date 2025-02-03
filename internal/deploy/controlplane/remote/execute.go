@@ -65,7 +65,8 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	upstreamRouters := []string{}
 
 	deployAgentConfig := rsc.AgentConfiguration{
-		Name: iofog.VanillaRemoteAgentName,
+		Name:    iofog.VanillaRemoteAgentName,
+		FogType: iutil.MakeStrPtr("auto"),
 		AgentConfiguration: client.AgentConfiguration{
 			IsSystem:        iutil.MakeBoolPtr(false),
 			Host:            &ctrl.Host,
@@ -81,11 +82,44 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		return err
 	}
 	agent.UUID = deployAgentConfigExecutor.GetAgentUUID()
-	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, true)
+	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, false)
 	if err != nil {
 		return err
 	}
 	return agentDeployExecutor.Execute()
+}
+
+func tagControllerImage(ctrl *rsc.RemoteController, image string) (err error) {
+
+	if image == "" {
+		image = util.GetControllerImage()
+	}
+
+	// Connect
+	ssh, err := util.NewSecureShellClient(ctrl.SSH.User, ctrl.Host, ctrl.SSH.KeyFile)
+	if err != nil {
+		return err
+	}
+	if err := ssh.Connect(); err != nil {
+		return err
+	}
+
+	defer util.Log(ssh.Disconnect)
+
+	cmds := []string{
+		fmt.Sprintf(`echo "IOFOG_CONTROLLER_IMAGE=%s" | sudo tee -a "/etc/iofog/agent/iofog-agent.env" > /dev/null`, image),
+		fmt.Sprintf("sudo service iofog-agent restart"),
+	}
+
+	// Execute commands
+	for _, cmd := range cmds {
+		_, err = ssh.Run(cmd)
+		if err != nil {
+			return
+		}
+	}
+
+	return
 }
 
 func createDefaultRouter(namespace string, ctrl *rsc.RemoteController) (err error) {
@@ -127,6 +161,9 @@ func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 			return err
 		}
 		if err := deploySystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
+			return err
+		}
+		if err := tagControllerImage(controller, remoteControlPlane.Package.Container.Image); err != nil {
 			return err
 		}
 	}

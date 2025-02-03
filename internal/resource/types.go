@@ -28,10 +28,17 @@ type Container struct {
 	Credentials Credentials `yaml:"credentials,omitempty"` // Optional credentials if needed to pull images
 }
 
+type RemoteContainer struct {
+	Image string `yaml:"image,omitempty"`
+	// Repo        string      `yaml:"repo,omitempty"`
+	// Credentials Credentials `yaml:"credentials,omitempty"` // Optional credentials if needed to pull images
+}
+
 type Package struct {
-	Version string `yaml:"version,omitempty"`
-	Repo    string `yaml:"repo,omitempty"`
-	Token   string `yaml:"token,omitempty"`
+	Version   string `yaml:"version,omitempty"`
+	Container RemoteContainer
+	// Repo    string `yaml:"repo,omitempty"`
+	// Token   string `yaml:"token,omitempty"`
 }
 
 type SSH struct {

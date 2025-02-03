@@ -35,13 +35,14 @@ type RemoteSystemMicroservices struct {
 }
 
 type ControllerOptions struct {
-	User                string
-	Host                string
-	Port                int
-	PrivKeyFilename     string
-	Version             string
-	Repo                string
-	Token               string
+	User            string
+	Host            string
+	Port            int
+	PrivKeyFilename string
+	Version         string
+	Image           string
+	// Repo                string
+	// Token               string
 	SystemMicroservices RemoteSystemMicroservices
 	PidBaseDir          string
 	EcnViewerPort       int
@@ -73,7 +74,7 @@ type Controller struct {
 	auth     auth
 	ctrlDir  string
 	iofogDir string
-	svcDir   string
+	// svcDir   string
 }
 
 func NewController(options *ControllerOptions) (*Controller, error) {
@@ -82,25 +83,25 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 		return nil, err
 	}
 	ssh.SetPort(options.Port)
-	if options.Version == "" || options.Version == "latest" {
-		options.Version = util.GetControllerVersion()
+	if options.Image == "" {
+		options.Image = util.GetControllerImage()
 	}
 	return &Controller{
 		ControllerOptions: options,
 		ssh:               ssh,
 		iofogDir:          "/etc/iofog",
 		ctrlDir:           "/etc/iofog/controller",
-		svcDir:            "/etc/iofog/controller/service",
+		// svcDir:            "/etc/iofog/controller/service",
 	}, nil
 }
 
 func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int) {
-	if provider == "" {
-		provider = "mysql"
-	}
-	if databaseName == "" {
-		databaseName = "potcontroller"
-	}
+	// if provider == "" {
+	// 	provider = "mysql"
+	// }
+	// if databaseName == "" {
+	// 	databaseName = "potcontroller"
+	// }
 	ctrl.db = database{
 		databaseName: databaseName,
 		provider:     provider,
@@ -162,7 +163,7 @@ func (ctrl *Controller) Uninstall() (err error) {
 		"uninstall_iofog.sh",
 	}
 	for _, script := range scripts {
-		if err := ctrl.CopyScript("controller", script, ctrl.ctrlDir); err != nil {
+		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
 			return err
 		}
 	}
@@ -195,30 +196,18 @@ func (ctrl *Controller) Install() (err error) {
 
 	// Copy installation scripts to remote host
 	Verbose("Copying install files to server")
-	if _, err = ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.svcDir, ctrl.iofogDir)); err != nil {
+	if _, err = ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.ctrlDir, ctrl.ctrlDir)); err != nil {
 		return err
 	}
 	scripts := []string{
 		"check_prereqs.sh",
-		"install_node.sh",
+		"init.sh",
+		"install_docker.sh",
 		"install_iofog.sh",
 		"set_env.sh",
 	}
 	for _, script := range scripts {
-		if err := ctrl.CopyScript("controller", script, ctrl.ctrlDir); err != nil {
-			return err
-		}
-	}
-
-	// Copy service scripts to remote host
-	Verbose("Copying service files to server")
-	scripts = []string{
-		"iofog-controller.initctl",
-		"iofog-controller.systemd",
-		"iofog-controller.update-rc",
-	}
-	for _, script := range scripts {
-		if err := ctrl.CopyScript("controller/service", script, ctrl.svcDir); err != nil {
+		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
 			return err
 		}
 	}
@@ -273,15 +262,15 @@ func (ctrl *Controller) Install() (err error) {
 			msg: "Checking prerequisites on Controller " + ctrl.Host,
 		},
 		{
-			cmd: fmt.Sprintf("sudo %s/install_node.sh", ctrl.ctrlDir),
-			msg: "Installing Node.js on Controller " + ctrl.Host,
+			cmd: fmt.Sprintf("sudo %s/install_docker.sh", ctrl.ctrlDir),
+			msg: "Installing Docker container engine on Controller " + ctrl.Host,
 		},
 		{
 			cmd: fmt.Sprintf("sudo %s/set_env.sh %s", ctrl.ctrlDir, envString),
 			msg: "Setting up environment variables for Controller " + ctrl.Host,
 		},
 		{
-			cmd: fmt.Sprintf("sudo %s/install_iofog.sh %s %s %s", ctrl.ctrlDir, ctrl.Version, ctrl.Repo, ctrl.Token),
+			cmd: fmt.Sprintf("sudo %s/install_iofog.sh %s", ctrl.ctrlDir, ctrl.Image),
 			msg: "Installing ioFog on Controller " + ctrl.Host,
 		},
 	}
@@ -328,7 +317,7 @@ func (ctrl *Controller) Stop() (err error) {
 	// TODO: Clear the database
 	// Define commands
 	cmds := []string{
-		"sudo iofog-controller stop",
+		"sudo service iofog-controller stop",
 	}
 
 	// Execute commands

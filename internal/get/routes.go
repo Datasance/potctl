@@ -77,11 +77,11 @@ func tabulateRoutes(namespace string, routes []client.Route) (table [][]string, 
 	// Populate rows
 	for idx, route := range routes {
 		// Convert route details
-		from, err := clientutil.GetMicroserviceName(namespace, route.SourceMicroserviceUUID)
+		from, err := clientutil.GetMicroserviceName(namespace, route.Application, route.From)
 		if err != nil {
 			return table, err
 		}
-		to, err := clientutil.GetMicroserviceName(namespace, route.DestMicroserviceUUID)
+		to, err := clientutil.GetMicroserviceName(namespace, route.Application, route.To)
 		if err != nil {
 			return table, err
 		}

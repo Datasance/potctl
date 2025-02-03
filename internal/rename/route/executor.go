@@ -43,8 +43,8 @@ func Execute(namespace, name, newName string) error {
 	util.SpinStart(fmt.Sprintf("Renaming route %s", name))
 	route.Name = newName
 	// Temporary fix
-	route.SourceMicroserviceUUID = ""
-	route.DestMicroserviceUUID = ""
+	route.From = ""
+	route.To = ""
 
 	if err := clt.PatchRoute(appName, routeName, &route); err != nil {
 		return err

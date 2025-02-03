@@ -117,8 +117,8 @@ func (exe *applicationExecutor) Execute() error {
 	}
 
 	for _, route := range exe.routes {
-		from, okSrc := exe.msvcPerID[route.SourceMicroserviceUUID]
-		to, okDest := exe.msvcPerID[route.DestMicroserviceUUID]
+		from, okSrc := exe.msvcPerID[route.From]
+		to, okDest := exe.msvcPerID[route.To]
 		if okSrc {
 			if !okDest {
 				return util.NewNotFoundError(fmt.Sprintf("Route %s contains a destination microservice that could not be found in the application", route.Name))

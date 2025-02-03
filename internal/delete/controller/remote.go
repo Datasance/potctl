@@ -14,11 +14,11 @@
 package deletecontroller
 
 import (
-	"fmt"
+	// "fmt"
 
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
-	"github.com/datasance/potctl/pkg/iofog"
+	// "github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 )
@@ -54,19 +54,19 @@ func (exe *RemoteExecutor) Execute() error {
 		return util.NewInternalError("Could not assert Controller type to Remote Controller")
 	}
 
-	// Try to remove default router
-	sshAgent, err := install.NewRemoteAgent(ctrl.SSH.User,
-		ctrl.Host,
-		ctrl.SSH.Port,
-		ctrl.SSH.KeyFile,
-		iofog.VanillaRemoteAgentName,
-		"")
-	if err != nil {
-		return err
-	}
-	if err = sshAgent.Uninstall(); err != nil {
-		util.PrintNotify(fmt.Sprintf("Failed to stop daemon on Agent %s. %s", iofog.VanillaRemoteAgentName, err.Error()))
-	}
+	// Try to remove default router TODO: skipping right now as systemAgent is not deployed with isSystem
+	// sshAgent, err := install.NewRemoteAgent(ctrl.SSH.User,
+	// 	ctrl.Host,
+	// 	ctrl.SSH.Port,
+	// 	ctrl.SSH.KeyFile,
+	// 	iofog.VanillaRemoteAgentName,
+	// 	"")
+	// if err != nil {
+	// 	return err
+	// }
+	// if err = sshAgent.Uninstall(); err != nil {
+	// 	util.PrintNotify(fmt.Sprintf("Failed to stop daemon on Agent %s. %s", iofog.VanillaRemoteAgentName, err.Error()))
+	// }
 
 	// Instantiate Controller uninstaller
 	controllerOptions := &install.ControllerOptions{

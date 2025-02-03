@@ -64,13 +64,13 @@ func IsEdgeResourceCapable(namespace string) error {
 	return nil
 }
 
-func GetMicroserviceName(namespace, uuid string) (name string, err error) {
+func GetMicroserviceName(namespace, appName, mscvName string) (name string, err error) {
 	clt, err := NewControllerClient(namespace)
 	if err != nil {
 		return
 	}
 
-	response, err := clt.GetMicroserviceByID(uuid)
+	response, err := clt.GetMicroserviceByName(appName, mscvName)
 	if err != nil {
 		return
 	}
@@ -195,6 +195,7 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 		Description: agentInfo.Description,
 		FogType:     &fogType,
 		AgentConfiguration: client.AgentConfiguration{
+			NetworkInterface:          agentInfo.NetworkInterface,
 			DockerURL:                 &agentInfo.DockerURL,
 			DiskLimit:                 &agentInfo.DiskLimit,
 			DiskDirectory:             &agentInfo.DiskDirectory,
@@ -221,3 +222,40 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 
 	return agentConfig, tags, err
 }
+
+// func GetAgentInfo(agentName, namespace string) (agentConfig client.AgentInfo, err error) {
+// 	util.PrintInfo("provision6")
+// 	ns, err := config.GetNamespace(namespace)
+// 	if err != nil {
+// 		return
+// 	}
+// 	util.PrintInfo("provision7")
+// 	// Get config
+// 	agent, err := ns.GetAgent(agentName)
+// 	if err != nil {
+// 		return
+// 	}
+// 	util.PrintInfo("provision8")
+// 	// Connect to controller
+// 	ctrl, err := NewControllerClient(namespace)
+// 	if err != nil {
+// 		return
+// 	}
+// 	util.PrintInfo("provision9")
+// 	agentInfo, err := ctrl.GetAgentByID(agent.GetUUID())
+// 	if err != nil {
+// 		// The agents might not be provisioned with Controller
+// 		if strings.Contains(err.Error(), "NotFoundError") {
+// 			err = util.NewInputError("Cannot describe an Agent that is not provisioned with the Controller in Namespace " + namespace)
+// 			return
+// 		}
+// 		return
+// 	}
+
+// 	// Dereference agentInfo before returning
+// 	if agentInfo != nil {
+// 		return *agentInfo, nil
+// 	}
+
+// 	return *agentInfo, err
+// }

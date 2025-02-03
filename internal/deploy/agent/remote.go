@@ -18,6 +18,7 @@ import (
 
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
+	// clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -42,12 +43,37 @@ func (exe *remoteExecutor) GetName() string {
 
 func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 	// Get agent
-	agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
-		exe.agent.Host,
-		exe.agent.SSH.Port,
-		exe.agent.SSH.KeyFile,
-		exe.agent.Name,
-		exe.agent.UUID)
+	// agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
+	// 	exe.agent.Host,
+	// 	exe.agent.SSH.Port,
+	// 	exe.agent.SSH.KeyFile,
+	// 	exe.agent.Name,
+	// 	exe.agent.UUID)
+	var agent *install.RemoteAgent
+	var err error
+
+	if exe.agent.Package.Container.Image != "" {
+		// Use NewRemoteContainerAgent
+		agent, err = install.NewRemoteContainerAgent(
+			exe.agent.SSH.User,
+			exe.agent.Host,
+			exe.agent.SSH.Port,
+			exe.agent.SSH.KeyFile,
+			exe.agent.Name,
+			exe.agent.UUID,
+		)
+	} else {
+		// Use NewRemoteAgent
+		agent, err = install.NewRemoteAgent(
+			exe.agent.SSH.User,
+			exe.agent.Host,
+			exe.agent.SSH.Port,
+			exe.agent.SSH.KeyFile,
+			exe.agent.Name,
+			exe.agent.UUID,
+		)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -72,6 +98,39 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 	// Configure the agent with Controller details
 	user := install.IofogUser(controlPlane.GetUser())
 	user.Password = controlPlane.GetUser().GetRawPassword()
+	// Get Config before provision and set iofog-agent config
+	agentConfig := exe.agent.GetConfig()
+
+	// Check if agentConfig is empty
+	if agentConfig == nil || (agentConfig.Name == "" && agentConfig.FogType == nil) {
+		util.PrintNotify(fmt.Sprintf("Skipping initial agent configuration for %s as agent config parameters are empty. Default config parameters will be used.", exe.agent.Name))
+
+	} else {
+		err = agent.SetInitialConfig(
+			agentConfig.Name,
+			agentConfig.Location,
+			agentConfig.Latitude,
+			agentConfig.Longitude,
+			agentConfig.Description,
+			*agentConfig.FogType,           // Dereference after checking nil
+			agentConfig.AgentConfiguration, // Pass the embedded client.AgentConfiguration
+		)
+		if err != nil {
+			return "", err
+		}
+	}
+	// err = agent.SetInitialConfig(
+	// 	agentConfig.Name,
+	// 	agentConfig.Location,
+	// 	agentConfig.Latitude,
+	// 	agentConfig.Longitude,
+	// 	agentConfig.Description,
+	// 	*agentConfig.FogType,
+	// 	agentConfig.AgentConfiguration, // Pass the embedded client.AgentConfiguration
+	// )
+	// if err != nil {
+	// 	return "", err
+	// }
 	return agent.Configure(controllerEndpoint, user)
 }
 
@@ -89,12 +148,36 @@ func (exe *remoteExecutor) Execute() (err error) {
 	}
 
 	// Connect to agent via SSH
-	agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
-		exe.agent.Host,
-		exe.agent.SSH.Port,
-		exe.agent.SSH.KeyFile,
-		exe.agent.Name,
-		exe.agent.UUID)
+	// agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
+	// 	exe.agent.Host,
+	// 	exe.agent.SSH.Port,
+	// 	exe.agent.SSH.KeyFile,
+	// 	exe.agent.Name,
+	// 	exe.agent.UUID)
+
+	var agent *install.RemoteAgent
+
+	if exe.agent.Package.Container.Image != "" {
+		// Use NewRemoteContainerAgent
+		agent, err = install.NewRemoteContainerAgent(
+			exe.agent.SSH.User,
+			exe.agent.Host,
+			exe.agent.SSH.Port,
+			exe.agent.SSH.KeyFile,
+			exe.agent.Name,
+			exe.agent.UUID,
+		)
+	} else {
+		// Use NewRemoteAgent
+		agent, err = install.NewRemoteAgent(
+			exe.agent.SSH.User,
+			exe.agent.Host,
+			exe.agent.SSH.Port,
+			exe.agent.SSH.KeyFile,
+			exe.agent.Name,
+			exe.agent.UUID,
+		)
+	}
 	if err != nil {
 		return err
 	}
@@ -107,10 +190,17 @@ func (exe *remoteExecutor) Execute() (err error) {
 			return err
 		}
 	}
+	if exe.agent.Package.Container.Image != "" {
+		// Set Image
+		agent.SetContainerImage(exe.agent.Package.Container.Image)
 
-	// Set version
-	agent.SetVersion(exe.agent.Package.Version)
-	agent.SetRepository(exe.agent.Package.Repo, exe.agent.Package.Token)
+	} else {
+		// Set version
+		agent.SetVersion(exe.agent.Package.Version)
+	}
+	// // Set version
+	// agent.SetVersion(exe.agent.Package.Version)
+	// agent.SetRepository(exe.agent.Package.Repo, exe.agent.Package.Token)
 
 	// Try the deploy
 	err = agent.Bootstrap()

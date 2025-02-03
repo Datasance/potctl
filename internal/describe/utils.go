@@ -135,6 +135,10 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	msvc.Container.Volumes = &volumes
 	msvc.Container.Env = &envs
 	msvc.Container.ExtraHosts = &extraHosts
+	msvc.MsRoutes = apps.MsRoutes{
+		PubTags: msvcInfo.PubTags,
+		SubTags: msvcInfo.SubTags,
+	}
 	msvc.Application = &appName
 	return msvc, err
 }

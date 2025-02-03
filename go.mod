@@ -7,8 +7,8 @@ toolchain go1.23.2
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.23.1
-	github.com/datasance/iofog-go-sdk/v3 v3.4.15
-	github.com/datasance/iofog-operator/v3 v3.4.13
+	github.com/datasance/iofog-go-sdk/v3 v3.4.16
+	github.com/datasance/iofog-operator/v3 v3.4.14
 	github.com/docker/docker v27.4.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/json-iterator/go v1.1.12

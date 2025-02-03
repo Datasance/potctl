@@ -18,17 +18,17 @@ do_stop_iofog() {
 	fi
 }
 
-do_check_iofog_on_arm() {
-  if [ "$lsb_dist" = "raspbian" ] || [ "$(uname -m)" = "armv7l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "armv8" ]; then
-    echo "# We re on ARM ($(uname -m)) : Updating config.xml to use correct docker_url"
-    $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
+# do_check_iofog_on_arm() {
+#   if [ "$lsb_dist" = "raspbian" ] || [ "$(uname -m)" = "armv7l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "armv8" ]; then
+#     echo "# We re on ARM ($(uname -m)) : Updating config.xml to use correct docker_url"
+#     $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
 
-    echo "# Restarting iofog-agent service"
-    $sh_c "service iofog-agent stop"
-    sleep 3
-    $sh_c "service iofog-agent start"
- fi
-}
+#     echo "# Restarting iofog-agent service"
+#     $sh_c "service iofog-agent stop"
+#     sleep 3
+#     $sh_c "service iofog-agent start"
+#  fi
+# }
 
 do_install_iofog() {
 	AGENT_CONFIG_FOLDER=/etc/iofog-agent
@@ -53,7 +53,7 @@ do_install_iofog() {
     $sh_c "apt update -qy"
     $sh_c "apt install --allow-downgrades iofog-agent=$agent_version -qy"
 	fi
-	do_check_iofog_on_arm
+	# do_check_iofog_on_arm
 
 	# Restore iofog-agent config
 	if [ -d ${SAVED_AGENT_CONFIG_FOLDER} ]; then
