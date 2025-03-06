@@ -358,8 +358,8 @@ func (agent *RemoteAgent) SetInitialConfig(
 	}
 
 	// Add values from agentConfig to configOptions, properly handling pointers
-	if agentConfig.NetworkInterface != "" {
-		configOptions["-n"] = agentConfig.NetworkInterface
+	if agentConfig.NetworkInterface != nil && *agentConfig.NetworkInterface != "" {
+		configOptions["-n"] = *agentConfig.NetworkInterface
 	}
 	if agentConfig.DockerURL != nil && *agentConfig.DockerURL != "" {
 		configOptions["-c"] = *agentConfig.DockerURL
