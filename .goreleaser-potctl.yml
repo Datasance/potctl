@@ -194,9 +194,8 @@ nfpms:
 
     overrides:
       deb:
-        file_name_template: "{{ .ConventionalFileName }}"
+        file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
       rpm:
-        # Note: file_name_template must have this EXACT format
          file_name_template: "{{ .ProjectName }}-{{ .Version }}-1.{{ if eq .Arch `amd64` }}x86_64{{ else if eq .Arch `arm64` }}aarch64{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}hl{{ end }}"
       apk:
         file_name_template: "{{ .ConventionalFileName }}"
