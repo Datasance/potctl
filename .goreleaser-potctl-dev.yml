@@ -101,33 +101,31 @@ builds:
 archives:
   -
     id: linux
-    builds:
+    ids:
       - build_linux
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    format: tar.gz
+    formats: [ 'tar.gz' ]
     files:
       - README.md
       - LICENSE
   -
     id: macos
-    builds:
+    ids:
       - build_macos
-    name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}_{{.Arch}}"
-    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os `darwin` }}macos{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}"
+    formats: [ 'tar.gz' ]
     files:
       - README.md
       - LICENSE
-    replacements:
-      darwin: macos
 
 checksum:
   name_template: "{{.ProjectName}}-checksums.txt"
 
 snapshot:
-  name_template: "{{ .Version }}~dev"
+  version_template: "{{ .Version }}~dev"
 
 changelog:
-  skip: true
+  disable: true
   sort: asc
   filters:
     exclude:
@@ -159,7 +157,7 @@ brews:
     homepage: "https://github.com/datasance/potctl"
     description: "CLI for managing Datasance PoT's Distributed Edge Compute clusters"
 
-    tap:
+    repository:
       owner: datasance
       name: homebrew-potctl
 
@@ -169,7 +167,7 @@ brews:
       name: emirhandurmus
       email: emirhan.durmus@datasance.com
 
-    folder: Formula
+    directory: Formula
 
     test: |
       system "#{bin}/potctl version"
@@ -179,7 +177,7 @@ brews:
 
 nfpms:
   -
-    builds: ['build_linux']
+    ids: ['build_linux']
     homepage:  "https://github.com/datasance/potctl"
     description: CLI for managing Datasance PoT's Distributed Edge Compute clusters
     maintainer: Datasance Teknoloji A.S.
@@ -196,9 +194,6 @@ nfpms:
         file_name_template: "{{ .ConventionalFileName }}"
       rpm:
         # Note: file_name_template must have this EXACT format
-        file_name_template: "{{ .ProjectName }}-{{ .Version }}-1.{{ .Arch }}{{ if .Arm }}v{{ .Arm }}hl{{ end }}"
-        replacements:
-          amd64: x86_64
-          arm64: aarch64
+        file_name_template: "{{ .ProjectName }}-{{ .Version }}-1.{{ if eq .Arch `amd64` }}x86_64{{ else if eq .Arch `arm64` }}aarch64{{ else }}{{ .Arch }}{{ end }}{{ if .Arm }}v{{ .Arm }}hl{{ end }}"
       apk:
         file_name_template: "{{ .ConventionalFileName }}"
