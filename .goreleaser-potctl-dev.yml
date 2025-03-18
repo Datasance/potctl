@@ -10,6 +10,7 @@
 # The release target does the same, but also publishes the packages.
 #
 # See README.md for more.
+version: 2
 project_name: potctl
 env:
   - GO111MODULE=on
