@@ -8,21 +8,18 @@ ETC_DIR="/etc/iofog/controller"
 CONTROLLER_LOG_FOLDER=/var/log/iofog-controller
 CONTROLLER_CONTAINER_NAME="iofog-controller"
 
-
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
 do_stop_iofog_controller() {
-	if command_exists iofog-controller; then
-		sudo service iofog-controller stop
-	fi
+    if command_exists iofog-controller; then
+        sudo systemctl stop iofog-controller
+    fi
 }
 
 do_install_iofog_controller() {
-
-	echo "# Installing ioFog controller..."
-
+    echo "# Installing ioFog controller..."
 
     # 1. Ensure folders exist
     for FOLDER in ${ETC_DIR} ${CONTROLLER_LOG_FOLDER}; do
@@ -33,11 +30,66 @@ do_install_iofog_controller() {
         fi
     done
 
-    # 4. Create systemd service file
-    echo "Creating systemd service for ioFog controller..."
-    SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-controller.service
+    # Check if we're using Podman (RHEL, CentOS, Fedora, etc.)
+    if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
+        # Using Podman - Create Quadlet container file
+        echo "Creating Quadlet container file for ioFog controller..."
+        SYSTEMD_SERVICE_FILE=/etc/containers/systemd/iofog-controller.container
 
-    cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
+        cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
+[Unit]
+Description=Datasance PoT IoFog Controller Service
+After=podman.service
+Requires=podman.service
+
+[Container]
+ContainerName=${CONTROLLER_CONTAINER_NAME}
+Image=${controller_image}
+PodmanArgs=--stop-timeout=60
+Environment=IOFOG_CONTROLLER_IMAGE=${controller_image}
+EnvironmentFile=${ETC_DIR}/iofog-controller.env
+Volume=iofog-controller-db:/home/runner/.npm-global/lib/node_modules/@datasance/iofogcontroller/src/data/sqlite_files/:rw
+Volume=iofog-controller-log:/var/log/iofog-controller:rw
+PublishPort=51121:51121
+PublishPort=8008:8008
+LogDriver=journald
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOF
+
+        # Reload systemd and enable the service
+        sudo systemctl daemon-reload
+        sudo systemctl restart podman
+        sudo systemctl start iofog-controller.service
+
+        # Create the executable script for Podman
+        echo "Creating iofog-controller executable script..."
+        EXECUTABLE_FILE=/usr/local/bin/iofog-controller
+
+        cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
+#!/bin/bash
+CONTAINER_NAME="iofog-controller"
+
+# Check if the container is running
+if ! podman ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    echo "Error: The iofog-controller container is not running."
+    exit 1
+fi
+
+# Execute the command in the container
+podman exec ${CONTAINER_NAME} iofog-controller "$@"
+EOF
+
+    else
+        # Using Docker - Create systemd service file
+        echo "Creating systemd service for ioFog controller..."
+        SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-controller.service
+
+        cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
 [Unit]
 Description=Datasance PoT IoFog Controller Service
 After=docker.service
@@ -65,16 +117,16 @@ ExecStop=/usr/bin/docker stop ${CONTROLLER_CONTAINER_NAME}
 WantedBy=default.target
 EOF
 
-    # Reload systemd and enable the service
-    sudo systemctl daemon-reload
-    sudo systemctl enable iofog-controller.service
-	sudo systemctl start iofog-controller.service
+        # Reload systemd and enable the service
+        sudo systemctl daemon-reload
+        sudo systemctl enable iofog-controller.service
+        sudo systemctl start iofog-controller.service
 
-    # 5. Create the /usr/local/bin/iofog-controller script
-    echo "Creating iofog-controller executable script..."
-    EXECUTABLE_FILE=/usr/local/bin/iofog-controller
+        # Create the executable script for Docker
+        echo "Creating iofog-controller executable script..."
+        EXECUTABLE_FILE=/usr/local/bin/iofog-controller
 
-    cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
+        cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
 #!/bin/bash
 CONTAINER_NAME="iofog-controller"
 
@@ -87,14 +139,13 @@ fi
 # Execute the command in the container
 docker exec ${CONTAINER_NAME} iofog-controller "$@"
 EOF
+    fi
 
     # Make the script executable
     sudo chmod +x ${EXECUTABLE_FILE}
 
     echo "ioFog controller installation completed!"
-
 }
-
 
 # main
 controller_image="$1"

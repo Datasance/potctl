@@ -42,13 +42,6 @@ func (exe *remoteExecutor) GetName() string {
 }
 
 func (exe *remoteExecutor) ProvisionAgent() (string, error) {
-	// Get agent
-	// agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
-	// 	exe.agent.Host,
-	// 	exe.agent.SSH.Port,
-	// 	exe.agent.SSH.KeyFile,
-	// 	exe.agent.Name,
-	// 	exe.agent.UUID)
 	var agent *install.RemoteAgent
 	var err error
 
@@ -102,35 +95,30 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 	agentConfig := exe.agent.GetConfig()
 
 	// Check if agentConfig is empty
-	if agentConfig == nil || (agentConfig.Name == "" && agentConfig.FogType == nil) {
+	if agentConfig == nil {
 		util.PrintNotify(fmt.Sprintf("Skipping initial agent configuration for %s as agent config parameters are empty. Default config parameters will be used.", exe.agent.Name))
 
 	} else {
+		var fogType *string
+		if agentConfig.FogType == nil {
+			auto := "auto"
+			fogType = &auto
+		} else {
+			fogType = agentConfig.FogType
+		}
 		err = agent.SetInitialConfig(
 			agentConfig.Name,
 			agentConfig.Location,
 			agentConfig.Latitude,
 			agentConfig.Longitude,
 			agentConfig.Description,
-			*agentConfig.FogType,           // Dereference after checking nil
+			*fogType,
 			agentConfig.AgentConfiguration, // Pass the embedded client.AgentConfiguration
 		)
 		if err != nil {
 			return "", err
 		}
 	}
-	// err = agent.SetInitialConfig(
-	// 	agentConfig.Name,
-	// 	agentConfig.Location,
-	// 	agentConfig.Latitude,
-	// 	agentConfig.Longitude,
-	// 	agentConfig.Description,
-	// 	*agentConfig.FogType,
-	// 	agentConfig.AgentConfiguration, // Pass the embedded client.AgentConfiguration
-	// )
-	// if err != nil {
-	// 	return "", err
-	// }
 	return agent.Configure(controllerEndpoint, user)
 }
 
@@ -146,14 +134,6 @@ func (exe *remoteExecutor) Execute() (err error) {
 		util.PrintError("You must deploy a Controller to a namespace before deploying any Agents")
 		return
 	}
-
-	// Connect to agent via SSH
-	// agent, err := install.NewRemoteAgent(exe.agent.SSH.User,
-	// 	exe.agent.Host,
-	// 	exe.agent.SSH.Port,
-	// 	exe.agent.SSH.KeyFile,
-	// 	exe.agent.Name,
-	// 	exe.agent.UUID)
 
 	var agent *install.RemoteAgent
 

@@ -105,3 +105,5 @@ exclude github.com/Sirupsen/logrus v1.2.0
 exclude github.com/Sirupsen/logrus v1.1.1
 
 exclude github.com/Sirupsen/logrus v1.1.0
+
+replace github.com/datasance/iofog-go-sdk/v3 => /Users/emirhan/Documents/GitHub/iofog-go-sdk

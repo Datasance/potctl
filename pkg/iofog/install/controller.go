@@ -96,12 +96,7 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 }
 
 func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int) {
-	// if provider == "" {
-	// 	provider = "mysql"
-	// }
-	// if databaseName == "" {
-	// 	databaseName = "potcontroller"
-	// }
+
 	ctrl.db = database{
 		databaseName: databaseName,
 		provider:     provider,
@@ -288,13 +283,26 @@ func (ctrl *Controller) Install() (err error) {
 	ignoredErrors := []string{
 		"Process exited with status 7", // curl: (7) Failed to connect to localhost port 8080: Connection refused
 	}
-	// Wait for Controller
+
+	// Add a small delay before checking
+	time.Sleep(5 * time.Second)
+
 	Verbose("Waiting for Controller " + ctrl.Host)
-	if err = ctrl.ssh.RunUntil(
-		regexp.MustCompile("\"status\":\"online\""),
-		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
-		ignoredErrors,
-	); err != nil {
+	// Increase timeout or retry attempts
+	maxRetries := 15
+	for i := 0; i < maxRetries; i++ {
+		Verbose(fmt.Sprintf("Try %d of %d", i+1, maxRetries))
+		err = ctrl.ssh.RunUntil(
+			regexp.MustCompile("\"status\":\"online\""),
+			fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
+			ignoredErrors,
+		)
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second * time.Duration(i+1)) // Exponential backoff
+	}
+	if err != nil {
 		return
 	}
 

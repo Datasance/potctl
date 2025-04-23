@@ -6,12 +6,20 @@ AGENT_CONFIG_FOLDER=iofog-agent-config
 AGENT_LOG_FOLDER=/var/log/iofog-agent
 AGENT_BACKUP_FOLDER=/var/backups/iofog-agent
 AGENT_MESSAGE_FOLDER=/var/lib/iofog-agent
-SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-agent.service
 EXECUTABLE_FILE=/usr/local/bin/iofog-agent
 CONTAINER_NAME="iofog-agent"
 
 do_uninstall_iofog() {
     echo "# Removing ioFog agent..."
+
+    # Set the appropriate systemd service file based on the Linux distribution
+    if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
+        SYSTEMD_SERVICE_FILE=/etc/containers/systemd/iofog-agent.container
+        CONTAINER_RUNTIME="podman"
+    else
+        SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-agent.service
+        CONTAINER_RUNTIME="docker"
+    fi
 
     # Disable and stop the systemd service
     if [ -f ${SYSTEMD_SERVICE_FILE} ]; then
@@ -22,22 +30,22 @@ do_uninstall_iofog() {
         sudo systemctl daemon-reload
     fi
 
-    # Remove the Docker container
-    if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    # Remove the container
+    if ${CONTAINER_RUNTIME} ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         echo "Stopping and removing the ioFog agent container..."
-        docker stop ${CONTAINER_NAME}
-        docker rm ${CONTAINER_NAME}
+        ${CONTAINER_RUNTIME} stop ${CONTAINER_NAME}
+        ${CONTAINER_RUNTIME} rm ${CONTAINER_NAME}
     fi
 
     # Remove config files
-    echo "Checking if the Docker volume exists..."
+    echo "Checking if the ${CONTAINER_RUNTIME} volume exists..."
 
-    if sudo docker volume inspect "${AGENT_CONFIG_FOLDER}" >/dev/null 2>&1; then
-        echo "Docker volume '${AGENT_CONFIG_FOLDER}' found. Removing..."
-        sudo docker volume rm "${AGENT_CONFIG_FOLDER}"
-        echo "Docker volume '${AGENT_CONFIG_FOLDER}' has been removed."
+    if sudo ${CONTAINER_RUNTIME} volume inspect "${AGENT_CONFIG_FOLDER}" >/dev/null 2>&1; then
+        echo "${CONTAINER_RUNTIME} volume '${AGENT_CONFIG_FOLDER}' found. Removing..."
+        sudo ${CONTAINER_RUNTIME} volume rm "${AGENT_CONFIG_FOLDER}"
+        echo "${CONTAINER_RUNTIME} volume '${AGENT_CONFIG_FOLDER}' has been removed."
     else
-        echo "Docker volume '${AGENT_CONFIG_FOLDER}' does not exist. Skipping removal."
+        echo "${CONTAINER_RUNTIME} volume '${AGENT_CONFIG_FOLDER}' does not exist. Skipping removal."
     fi
 
     # Remove log files

@@ -18,8 +18,6 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/daaku/go.zipexe v1.0.0/go.mod h1:z8IiR6TsVLEYKwXAoE/I+8ys/sDkgTzSL0CLnGVd57E=
 github.com/daaku/go.zipexe v1.0.1 h1:wV4zMsDOI2SZ2m7Tdz1Ps96Zrx+TzaK15VbUaGozw0M=
 github.com/daaku/go.zipexe v1.0.1/go.mod h1:5xWogtqlYnfBXkSB1o9xysukNP9GTvaNkqzUZbt3Bw8=
-github.com/datasance/iofog-go-sdk/v3 v3.4.17 h1:8IaLHgIB3WXIUPI+kf8gyhQo2xz2s+M9is0JPdd9MHY=
-github.com/datasance/iofog-go-sdk/v3 v3.4.17/go.mod h1:Gx/T77nGu3QvC93c96IDMEHJ2cdqZA84icl7R87ds84=
 github.com/datasance/iofog-operator/v3 v3.4.18 h1:fC9Ys2TJXp0whD/uDK15txhnVjoy5fRyK1bXzGhBl9k=
 github.com/datasance/iofog-operator/v3 v3.4.18/go.mod h1:qUdEH0TWTCvn8L1KGTYy8OwJusyKd72YuhiOFujcmho=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

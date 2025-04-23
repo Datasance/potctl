@@ -85,6 +85,7 @@ func NewRootCommand() *cobra.Command {
 		newStartCommand(),
 		newStopCommand(),
 		newMoveCommand(),
+		newRebuildCommand(),
 		newRenameCommand(),
 		newDockerPruneCommand(),
 		newUpgradeCommand(),

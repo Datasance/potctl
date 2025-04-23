@@ -1,177 +1,241 @@
 #!/bin/sh
-set -x
-set -e
+# Script to detect Linux distribution and version
+# Used as a precursor for system-specific installations
 
+# Exit on error and print commands for debugging
+set -e
+set -x
+
+# Define user variable
+user="$(id -un 2>/dev/null || true)"
+
+# Check if a command exists
+command_exists() {
+    command -v "$@" > /dev/null 2>&1
+}
+
+# Detect the Linux distribution
 get_distribution() {
-	lsb_dist=""
-	# Every system that we officially support has /etc/os-release
-	if [ -r /etc/os-release ]; then
-		lsb_dist="$(. /etc/os-release && echo "$ID")"
-		lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
-	else
-		echo "Unsupported Linux distribution!"
-		exit 1
-	fi
-	echo "# Our distro is $lsb_dist"
+    lsb_dist=""
+    dist_version=""
+    
+    # Every system that we officially support has /etc/os-release
+    if [ -r /etc/os-release ]; then
+        
+        lsb_dist="$(. /etc/os-release && echo "$ID")"
+        
+        dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+        lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
+    else
+        echo "Error: Unsupported Linux distribution! /etc/os-release not found."
+        exit 1
+    fi
+    
+    echo "# Detected distribution: $lsb_dist (version: $dist_version)"
 }
 
 # Check if this is a forked Linux distro
 check_forked() {
-	# Check for lsb_release command existence, it usually exists in forked distros
-	if command_exists lsb_release; then
-		# Check if the `-u` option is supported
-		set +e
-		lsb_release -a
-		lsb_release_exit_code=$?
-		set -e
+    # Skip if lsb_release doesn't exist
+    if ! command_exists lsb_release; then
+        return
+    fi
+    
+    # Check if the `-u` option is supported
+    set +e
+    lsb_release -a > /dev/null 2>&1
+    lsb_release_exit_code=$?
+    set -e
 
-		# Check if the command has exited successfully, it means we're in a forked distro
-		if [ "$lsb_release_exit_code" = "0" ]; then
-			# Print info about current distro
-			cat <<-EOF
-			You're using '$lsb_dist' version '$dist_version'.
-			EOF
+    # Check if the command has exited successfully, it means we're in a forked distro
+    if [ "$lsb_release_exit_code" = "0" ]; then
+        # Get the upstream release info
+        current_lsb_dist=$(lsb_release -a 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
+        current_dist_version=$(lsb_release -a 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
 
-			# Get the upstream release info
-			lsb_dist=$(lsb_release -a 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
-			dist_version=$(lsb_release -a 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
-
-			# Print info about upstream distro
-			cat <<-EOF
-			Upstream release is '$lsb_dist' version '$dist_version'.
-			EOF
-		else
-			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
-				if [ "$lsb_dist" = "osmc" ]; then
-					# OSMC runs Raspbian
-					lsb_dist=raspbian
-				else
-					# We're Debian and don't even know it!
-					lsb_dist=debian
-				fi
-				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-				case "$dist_version" in
-					14)
-						dist_version="forky"
-					;;
-					13)
-						dist_version="trixie"
-					;;
-					12)
-						dist_version="bookworm"
-					;;
-					11)
-						dist_version="bullseye"
-					;;
-					10)
-						dist_version="buster"
-					;;
-					9)
-						dist_version="stretch"
-					;;
-					8|'Kali Linux 2')
-						dist_version="jessie"
-					;;
-					7)
-						dist_version="wheezy"
-					;;
-				esac
-			elif [ -r /etc/redhat-release ] && [ "$lsb_dist" = "" ]; then
-				lsb_dist=redhat
-			fi
-		fi
-	fi
+        # Print info about current distro
+        echo "You're using '$current_lsb_dist' version '$current_dist_version'."
+        
+        # Check if current is different from detected (indicating a fork)
+        if [ "$current_lsb_dist" != "$lsb_dist" ] || [ "$current_dist_version" != "$dist_version" ]; then
+            echo "Upstream release is '$lsb_dist' version '$dist_version'."
+        fi
+    else
+        # Additional checks for specific distros that might not be properly detected
+        if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
+            if [ "$lsb_dist" = "osmc" ]; then
+                # OSMC runs Raspbian
+                lsb_dist=raspbian
+            else
+                # We're Debian and don't even know it!
+                lsb_dist=debian
+            fi
+            # Get Debian version and map it to codename
+            dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
+            case "$dist_version" in
+                14)
+                    dist_version="forky"
+                ;;
+                13)
+                    dist_version="trixie"
+                ;;
+                12)
+                    dist_version="bookworm"
+                ;;
+                11)
+                    dist_version="bullseye"
+                ;;
+                10)
+                    dist_version="buster"
+                ;;
+                9)
+                    dist_version="stretch"
+                ;;
+                8|'Kali Linux 2')
+                    dist_version="jessie"
+                ;;
+                7)
+                    dist_version="wheezy"
+                ;;
+            esac
+        elif [ -r /etc/redhat-release ] && [ -z "$lsb_dist" ]; then
+            lsb_dist=redhat
+            # Extract version from redhat-release file
+            dist_version="$(sed 's/.*release \([0-9.]*\).*/\1/' /etc/redhat-release)"
+        fi
+    fi
 }
 
-command_exists() {
-	command -v "$@"
+# Set up sudo command if necessary
+setup_sudo() {
+    sh_c='sh -c'
+    if [ "$user" != 'root' ]; then
+        if command_exists sudo; then
+            sh_c='sudo -E sh -c'
+        elif command_exists su; then
+            sh_c='su -c'
+        else
+            echo "Error: this installer needs the ability to run commands as root."
+            echo "We are unable to find either 'sudo' or 'su' available to make this happen."
+            exit 1
+        fi
+    fi
+    echo "# Using command executor: $sh_c"
 }
 
+# Refine distribution version detection based on the distro
+refine_distribution_version() {
+    case "$lsb_dist" in
+        ubuntu)
+            if command_exists lsb_release; then
+                dist_version="$(lsb_release --codename | cut -f2)"
+            fi
+            if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
+                
+                dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
+            fi
+        ;;
+
+        debian|raspbian)
+            # If we only have a number, map it to a codename for better recognition
+            if echo "$dist_version" | grep -qE '^[0-9]+$'; then
+                case "$dist_version" in
+                    14)
+                        dist_version="forky"
+                    ;;
+                    13)
+                        dist_version="trixie"
+                    ;;
+                    12)
+                        dist_version="bookworm"
+                    ;;
+                    11)
+                        dist_version="bullseye"
+                    ;;
+                    10)
+                        # Handle special case for Buster
+                        dist_version="buster"
+                        if [ "$user" = 'root' ]; then
+                            apt-get update --allow-releaseinfo-change || true
+                        elif command_exists sudo; then
+                            sudo apt-get update --allow-releaseinfo-change || true
+                        fi
+                    ;;
+                    9)
+                        dist_version="stretch"
+                    ;;
+                    8)
+                        dist_version="jessie"
+                    ;;
+                    7)
+                        dist_version="wheezy"
+                    ;;
+                esac
+            fi
+        ;;
+
+        centos|rhel|fedora|ol)
+            # Make sure we have a version number
+            if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
+                
+                dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+            fi
+            if [ -z "$dist_version" ] && [ -r /etc/redhat-release ]; then
+                dist_version="$(sed 's/.*release \([0-9.]*\).*/\1/' /etc/redhat-release)"
+            fi
+        ;;
+
+        sles|opensuse)
+            if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
+                dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+            fi
+            # Fallback for older versions
+            if [ -z "$dist_version" ] && [ -r /etc/SuSE-release ]; then
+                dist_version="$(grep VERSION /etc/SuSE-release | sed 's/^VERSION = //')"
+            fi
+            # Ensure version is in the correct format (e.g., 15.4 for SLES 15 SP4)
+            if [ -n "$dist_version" ]; then
+                # Remove any non-numeric characters except dots
+                dist_version="$(echo "$dist_version" | sed 's/[^0-9.]//g')"
+            fi
+            # Normalize distribution name
+            if [ "$lsb_dist" = "sles" ]; then
+                lsb_dist="sles"
+            elif [ "$lsb_dist" = "opensuse" ]; then
+                lsb_dist="opensuse"
+            fi
+        ;;
+
+        *)
+            if command_exists lsb_release; then
+                dist_version="$(lsb_release --release | cut -f2)"
+            fi
+            if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
+                
+                dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
+            fi
+        ;;
+    esac
+}
+
+# Init function
 init() {
-	sh_c='sh -c'
-	if [ "$user" != 'root' ]; then
-		if command_exists sudo; then
-			sh_c='sudo -E sh -c'
-		elif command_exists su; then
-			sh_c='su -c'
-		else
-			cat >&2 <<-'EOF'
-			Error: this installer needs the ability to run commands as root.
-			We are unable to find either "sudo" or "su" available to make this happen.
-			EOF
-			exit 1
-		fi
-	fi
-
-	get_distribution
-
-	case "$lsb_dist" in
-
-		ubuntu)
-			if command_exists lsb_release; then
-				dist_version="$(lsb_release --codename | cut -f2)"
-			fi
-			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
-				dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
-			fi
-		;;
-
-		debian|raspbian)
-			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-			case "$dist_version" in
-				10)
-					dist_version="buster"
-					# Avoid https://stackoverflow.com/questions/68802802/repository-http-security-debian-org-debian-security-buster-updates-inrelease
-					$sh_c "apt-get update --allow-releaseinfo-change"
-				;;
-				9)
-					dist_version="stretch"
-				;;
-				8)
-					dist_version="jessie"
-				;;
-				7)
-					dist_version="wheezy"
-				;;
-			esac
-		;;
-
-		centos)
-			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-			fi
-		;;
-
-		rhel|ol|sles)
-			ee_notice "$lsb_dist"
-			exit 1
-			;;
-
-		*)
-			if command_exists lsb_release; then
-				dist_version="$(lsb_release --release | cut -f2)"
-			fi
-			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-			fi
-		;;
-
-	esac
-
-	# Check if this is a forked Linux distro
-	check_forked
-
-	# Check if we actually support this configuration
-	if [ "$lsb_dist" = "redhat" ]; then
-		cat >&2 <<-'EOF'
-
-		Since Docker Community Edition is not supported for RedHat you have to procceed with installation manually.
-		Please visit the following URL for more detailed installation instructions:
-
-		https://iofog.org/install/RHEL
-
-		EOF
-		exit 1
-	fi
-
+    # Detect basic distribution info
+    get_distribution
+    
+    # Set up sudo for privileged commands
+    setup_sudo
+    
+    # Refine version information
+    refine_distribution_version
+    
+    # Check if this is a forked distro
+    check_forked
+    
+    # Print final distribution information
+    echo "----------------------------------------"
+    echo "Linux Distribution: $lsb_dist"
+    echo "Version: $dist_version"
+    echo "----------------------------------------"
+    
 }

@@ -36,11 +36,12 @@ func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user Iofog
 		return
 	}
 	// Log in
+	util.SpinHandlePrompt()
 	ctrl, err := client.SessionLogin(client.Options{BaseURL: baseURL}, user.RefreshToken, user.Email, user.Password)
 	if err != nil {
 		return
 	}
-
+	util.SpinHandlePromptComplete()
 	Verbose("Accessing Controller to generate Provisioning Key")
 	// loginRequest := client.LoginRequest{
 	// 	Email:    user.Email,

@@ -217,12 +217,13 @@ func newControllerClient(namespace string) (*client.Client, error) {
 		config.UpdateUser(namespace, user.AccessToken, user.RefreshToken)
 
 		// Use SessionLogin to attempt to refresh the session
+		util.SpinHandlePrompt()
 		refreshedClient, err := client.SessionLogin(client.Options{BaseURL: baseURL}, refreshToken, user.Email, user.GetRawPassword())
 		if err != nil {
 			fmt.Println("Error: Failed to refresh session:", err)
 			return nil, fmt.Errorf("failed to refresh session: %v", err)
 		}
-
+		util.SpinHandlePromptComplete()
 		// Update the cached client with the refreshed session
 		pkg.clientCache[namespace] = refreshedClient
 		config.Flush()
@@ -250,11 +251,12 @@ func newControllerClient(namespace string) (*client.Client, error) {
 	}
 
 	// Create a new client and login
+	util.SpinHandlePrompt()
 	newClient, err := client.SessionLogin(client.Options{BaseURL: baseURL}, user.RefreshToken, user.Email, user.GetRawPassword())
 	if err != nil {
 		return nil, err
 	}
-
+	util.SpinHandlePromptComplete()
 	user.AccessToken = newClient.GetAccessToken()
 	user.RefreshToken = newClient.GetRefreshToken()
 	// controlPlane.UpdateUserTokens(user.AccessToken, user.RefreshToken)
