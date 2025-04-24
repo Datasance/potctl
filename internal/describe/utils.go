@@ -124,7 +124,12 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	if err := jsoniter.Unmarshal([]byte(msvcInfo.Config), &jsonConfig); err != nil {
 		return msvc, err
 	}
+	jsonAnnotations := make(map[string]interface{})
+	if err := jsoniter.Unmarshal([]byte(msvcInfo.Annotations), &jsonAnnotations); err != nil {
+		return msvc, err
+	}
 	msvc.Config = jsonConfig
+	msvc.Container.Annotations = jsonAnnotations
 	msvc.Container.RootHostAccess = msvcInfo.RootHostAccess
 	msvc.Container.Runtime = msvcInfo.Runtime
 	msvc.Container.Platform = msvcInfo.Platform
