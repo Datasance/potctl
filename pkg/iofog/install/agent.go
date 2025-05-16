@@ -20,7 +20,7 @@ import (
 
 type Agent interface {
 	Bootstrap() error
-	getProvisionKey(string, IofogUser) (string, string, error)
+	getProvisionKey(string, IofogUser) (string, string, string, error)
 }
 
 // defaultAgent implements commong behavior
@@ -29,7 +29,7 @@ type defaultAgent struct {
 	uuid string
 }
 
-func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user IofogUser) (key string, err error) {
+func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user IofogUser) (key string, caCert string, err error) {
 	// Connect to controller
 	baseURL, err := util.GetBaseURL(controllerEndpoint)
 	if err != nil {
@@ -67,5 +67,6 @@ func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user Iofog
 		return
 	}
 	key = provisionResponse.Key
-	return key, err
+	caCert = provisionResponse.CaCert
+	return key, caCert, err
 }

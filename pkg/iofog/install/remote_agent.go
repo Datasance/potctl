@@ -295,7 +295,7 @@ func (agent *RemoteAgent) Bootstrap() error {
 }
 
 func (agent *RemoteAgent) Configure(controllerEndpoint string, user IofogUser) (string, error) {
-	key, err := agent.getProvisionKey(controllerEndpoint, user)
+	key, caCert, err := agent.getProvisionKey(controllerEndpoint, user)
 	if err != nil {
 		return "", err
 	}
@@ -310,11 +310,20 @@ func (agent *RemoteAgent) Configure(controllerEndpoint string, user IofogUser) (
 			cmd: "sudo iofog-agent config -a " + controllerBaseURL.String(),
 			msg: "Configuring Agent " + agent.name + " with Controller URL " + controllerBaseURL.String(),
 		},
-		{
-			cmd: "sudo iofog-agent provision " + key,
-			msg: "Provisioning Agent " + agent.name + " with Controller",
-		},
 	}
+
+	// Only add cert command if caCert is not empty
+	if caCert != "" {
+		cmds = append(cmds, command{
+			cmd: "sudo iofog-agent cert " + caCert,
+			msg: "Configuring Agent " + agent.name + " with CA Certificate",
+		})
+	}
+
+	cmds = append(cmds, command{
+		cmd: "sudo iofog-agent provision " + key,
+		msg: "Provisioning Agent " + agent.name + " with Controller",
+	})
 
 	// Execute commands on remote server
 	if err := agent.run(cmds); err != nil {
