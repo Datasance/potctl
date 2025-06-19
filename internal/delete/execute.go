@@ -20,13 +20,18 @@ import (
 	deleteagent "github.com/datasance/potctl/internal/delete/agent"
 	deleteapplication "github.com/datasance/potctl/internal/delete/application"
 	deletecatalogitem "github.com/datasance/potctl/internal/delete/catalogitem"
+	deletecertificate "github.com/datasance/potctl/internal/delete/certificate"
+	deleteconfigmap "github.com/datasance/potctl/internal/delete/configmap"
 	deletecontroller "github.com/datasance/potctl/internal/delete/controller"
 	deletek8scontrolplane "github.com/datasance/potctl/internal/delete/controlplane/k8s"
 	deletelocalcontrolplane "github.com/datasance/potctl/internal/delete/controlplane/local"
 	deleteremotecontrolplane "github.com/datasance/potctl/internal/delete/controlplane/remote"
 	deletemicroservice "github.com/datasance/potctl/internal/delete/microservice"
 	deleteregistry "github.com/datasance/potctl/internal/delete/registry"
+	deletesecret "github.com/datasance/potctl/internal/delete/secret"
+	deleteservice "github.com/datasance/potctl/internal/delete/service"
 	deletevolume "github.com/datasance/potctl/internal/delete/volume"
+	deletevolumemount "github.com/datasance/potctl/internal/delete/volumemount"
 	"github.com/datasance/potctl/internal/execute"
 	"github.com/datasance/potctl/pkg/util"
 )
@@ -50,6 +55,12 @@ var kindOrder = []config.Kind{
 	config.RemoteControlPlaneKind,
 	config.LocalControlPlaneKind,
 	config.VolumeKind,
+	config.SecretKind,
+	config.ConfigMapKind,
+	config.ServiceKind,
+	config.VolumeMountKind,
+	config.CertificateKind,
+	config.CertificateAuthorityKind,
 }
 
 var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error){
@@ -88,6 +99,24 @@ var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Execut
 	},
 	config.VolumeKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
 		return deletevolume.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.SecretKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deletesecret.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.ConfigMapKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deleteconfigmap.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.ServiceKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deleteservice.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.VolumeMountKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deletevolumemount.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.CertificateKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deletecertificate.NewExecutor(opt.Namespace, opt.Name)
+	},
+	config.CertificateAuthorityKind: func(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+		return deletecertificate.NewExecutor(opt.Namespace, opt.Name)
 	},
 }
 

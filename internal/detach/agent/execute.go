@@ -107,7 +107,8 @@ potctl rename agent %s %s-2 -n %s --detached`
 	}
 
 	// Get UUID for deletion
-	agentInfo, err := ctrl.GetAgentByName(exe.name, false)
+	// agentInfo, err := ctrl.GetAgentByName(exe.name, false)
+	agentInfo, err := ctrl.GetAgentByName(exe.name)
 	if err != nil {
 		return err
 	}

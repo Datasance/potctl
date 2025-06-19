@@ -65,7 +65,7 @@ func (exe *microserviceExecutor) Execute() error {
 		return nil
 	}
 
-	yamlMsvc, err := MapClientMicroserviceToDeployMicroservice(exe.msvc, exe.client)
+	yamlMsvc, status, execStatus, err := MapClientMicroserviceToDeployMicroservice(exe.msvc, exe.client)
 	if err != nil {
 		return err
 	}
@@ -78,6 +78,10 @@ func (exe *microserviceExecutor) Execute() error {
 			Name:      exe.name,
 		},
 		Spec: yamlMsvc,
+		Status: map[string]interface{}{
+			"status":     status,
+			"execStatus": execStatus,
+		},
 	}
 
 	if exe.filename == "" {

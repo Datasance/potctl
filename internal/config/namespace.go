@@ -15,7 +15,6 @@ package config
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"sort"
 
@@ -39,11 +38,19 @@ func SetDefaultNamespace(name string) (err error) {
 
 // GetNamespaces returns all namespaces in config
 func GetNamespaces() (namespaces []string) {
-	files, err := ioutil.ReadDir(namespaceDirectory)
+	files, err := os.ReadDir(namespaceDirectory)
 	util.Check(err)
 
 	sort.Slice(files, func(i, j int) bool {
-		return files[i].ModTime().Before(files[j].ModTime())
+		infoI, err := files[i].Info()
+		if err != nil {
+			return false
+		}
+		infoJ, err := files[j].Info()
+		if err != nil {
+			return false
+		}
+		return infoI.ModTime().After(infoJ.ModTime())
 	})
 
 	for _, file := range files {
@@ -111,7 +118,7 @@ func AddNamespace(name, created string) error {
 		return err
 	}
 	// Overwrite the file
-	err = ioutil.WriteFile(getNamespaceFile(name), marshal, 0644)
+	err = os.WriteFile(getNamespaceFile(name), marshal, 0644)
 	if err != nil {
 		return err
 	}
@@ -147,7 +154,7 @@ func UpdateUser(name, accessToken, refreshToken string) error {
 	}
 
 	// Write the updated YAML data back to the file
-	err = ioutil.WriteFile(getNamespaceFile(name), marshal, 0644)
+	err = os.WriteFile(getNamespaceFile(name), marshal, 0644)
 	if err != nil {
 		return err // Error in writing to the file
 	}

@@ -31,7 +31,6 @@ type RemoteSystemImages struct {
 
 type RemoteSystemMicroservices struct {
 	Router RemoteSystemImages `yaml:"router,omitempty"`
-	Proxy  RemoteSystemImages `yaml:"proxy,omitempty"`
 }
 
 type ControllerOptions struct {
@@ -46,6 +45,21 @@ type ControllerOptions struct {
 	SystemMicroservices RemoteSystemMicroservices
 	PidBaseDir          string
 	EcnViewerPort       int
+	Https               *Https
+	SiteCA              *SiteCertificate
+	LocalCA             *SiteCertificate
+}
+
+type Https struct {
+	Enabled *bool
+	CACert  string
+	TLSCert string
+	TLSKey  string
+}
+
+type SiteCertificate struct {
+	TLSCert string
+	TLSKey  string
 }
 
 type database struct {
@@ -209,6 +223,15 @@ func (ctrl *Controller) Install() (err error) {
 
 	// Encode environment variables
 	env := []string{}
+	env = append(env, "CONTROL_PLANE=Remote")
+	if ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+		env = append(env, fmt.Sprintf("\"SERVER_DEV_MODE=%t\"", "false"))
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_CERT=%s\"", ctrl.Https.TLSCert))
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_KEY=%s\"", ctrl.Https.TLSKey))
+	}
+	if ctrl.Https.CACert != "" {
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_INTERMEDIATE_CERT=%s\"", ctrl.Https.CACert))
+	}
 	if ctrl.db.host != "" {
 		env = append(env,
 			fmt.Sprintf(`"DB_PROVIDER=%s"`, ctrl.db.provider),
@@ -235,17 +258,11 @@ func (ctrl *Controller) Install() (err error) {
 	if ctrl.EcnViewerPort != 0 {
 		env = append(env, fmt.Sprintf("\"VIEWER_PORT=%d\"", ctrl.EcnViewerPort))
 	}
-	if ctrl.SystemMicroservices.Proxy.X86 != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Proxy_1=%s\"", ctrl.SystemMicroservices.Proxy.X86))
-	}
-	if ctrl.SystemMicroservices.Proxy.ARM != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Proxy_2=%s\"", ctrl.SystemMicroservices.Proxy.ARM))
-	}
 	if ctrl.SystemMicroservices.Router.X86 != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Router_1=%s\"", ctrl.SystemMicroservices.Router.X86))
+		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_1=%s\"", ctrl.SystemMicroservices.Router.X86))
 	}
 	if ctrl.SystemMicroservices.Router.ARM != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Router_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
+		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
 	}
 
 	envString := strings.Join(env, " ")
@@ -290,11 +307,17 @@ func (ctrl *Controller) Install() (err error) {
 	Verbose("Waiting for Controller " + ctrl.Host)
 	// Increase timeout or retry attempts
 	maxRetries := 15
+	var protocol string
+	if ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+		protocol = "https"
+	} else {
+		protocol = "http"
+	}
 	for i := 0; i < maxRetries; i++ {
 		Verbose(fmt.Sprintf("Try %d of %d", i+1, maxRetries))
 		err = ctrl.ssh.RunUntil(
 			regexp.MustCompile("\"status\":\"online\""),
-			fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
+			fmt.Sprintf("curl --request GET --url %s://localhost:%s/api/v3/status", protocol, iofog.ControllerPortString),
 			ignoredErrors,
 		)
 		if err == nil {
@@ -307,9 +330,20 @@ func (ctrl *Controller) Install() (err error) {
 	}
 
 	// Wait for API
-	endpoint := fmt.Sprintf("%s:%s", ctrl.Host, iofog.ControllerPortString)
+	endpoint := fmt.Sprintf("%s://%s:%s", protocol, ctrl.Host, iofog.ControllerPortString)
 	if err = WaitForControllerAPI(endpoint); err != nil {
 		return
+	}
+	// Deploy router secrets
+	if ctrl.SiteCA != nil {
+		if err = DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
+			return
+		}
+	}
+	if ctrl.LocalCA != nil {
+		if err = DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
+			return
+		}
 	}
 
 	return nil
@@ -359,4 +393,26 @@ func WaitForControllerAPI(endpoint string) (err error) {
 
 	// Return last error
 	return
+}
+
+func DeployRouterSecrets(endpoint, secretName string, TLSCert, TLSKey string) (err error) {
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		return err
+	}
+	ctrlClient := client.New(client.Options{BaseURL: baseURL})
+
+	request := client.SecretCreateRequest{
+		Name: secretName,
+		Type: "tls",
+		Data: map[string]string{
+			"TLSCert": TLSCert,
+			"TLSKey":  TLSKey,
+		},
+	}
+
+	if err = ctrlClient.CreateSecret(&request); err != nil {
+		return err
+	}
+	return nil
 }

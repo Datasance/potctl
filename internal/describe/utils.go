@@ -14,20 +14,20 @@
 package describe
 
 import (
-	"fmt"
+	// "fmt"
 
 	jsoniter "github.com/json-iterator/go"
 
 	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
-	"github.com/datasance/potctl/pkg/iofog"
-	"github.com/datasance/potctl/pkg/util"
+	// "github.com/datasance/potctl/pkg/iofog"
+	// "github.com/datasance/potctl/pkg/util"
 )
 
-func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, clt *client.Client) (*apps.Microservice, error) {
+func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, clt *client.Client) (*apps.Microservice, *apps.MicroserviceStatusInfo, *apps.MicroserviceExecStatusInfo, error) {
 	agent, err := clt.GetAgentByID(msvc.AgentUUID)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	var catalogItem *client.CatalogItemInfo
 	if msvc.CatalogItemID != 0 {
@@ -36,7 +36,7 @@ func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, cl
 			if httpErr, ok := err.(*client.HTTPError); ok && httpErr.Code == 404 {
 				catalogItem = nil
 			} else {
-				return nil, err
+				return nil, nil, nil, err
 			}
 		}
 	}
@@ -47,31 +47,36 @@ func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, cl
 			// Legacy
 			flow, err := clt.GetFlowByID(msvc.FlowID)
 			if err != nil {
-				return nil, err
+				return nil, nil, nil, err
 			}
 			applicationName = flow.Name
-		}
-	}
-
-	// Map port host to agent name
-	for idx, port := range msvc.Ports {
-		if port.Public != nil && port.Public.Router != nil && port.Public.Router.Host != "" && port.Public.Router.Host != iofog.VanillaRouterAgentName {
-			hostAgent, err := clt.GetAgentByID(port.Public.Router.Host)
-			var name string
-			if err != nil {
-				util.PrintNotify(fmt.Sprintf("Could not find Agent with UUID %s\n", port.Public.Router.Host))
-				name = "UNKNOWN_" + port.Public.Router.Host
-			} else {
-				name = hostAgent.Name
-			}
-			msvc.Ports[idx].Public.Router.Host = name
 		}
 	}
 
 	return constructMicroservice(msvc, agent.Name, applicationName, catalogItem)
 }
 
-func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName string, catalogItem *client.CatalogItemInfo) (msvc *apps.Microservice, err error) {
+// func MapClientMicroserviceStatusToDeployMicroserviceStatus(msvc *client.MicroserviceInfo, clt *client.Client) (*apps.MicroserviceStatusInfo, *apps.MicroserviceExecStatusInfo, error) {
+// 	msvcStatus := new(apps.MicroserviceStatusInfo)
+// 	msvcStatus.Status = msvc.Status.Status
+// 	msvcStatus.StartTime = msvc.Status.StartTime
+// 	msvcStatus.OperatingDuration = msvc.Status.OperatingDuration
+// 	msvcStatus.MemoryUsage = msvc.Status.MemoryUsage
+// 	msvcStatus.CPUUsage = msvc.Status.CPUUsage
+// 	msvcStatus.ContainerID = msvc.Status.ContainerID
+// 	msvcStatus.Percentage = msvc.Status.Percentage
+// 	msvcStatus.IPAddress = msvc.Status.IPAddress
+// 	msvcStatus.ErrorMessage = msvc.Status.ErrorMessage
+// 	msvcStatus.ExecSessionIDs = msvc.Status.ExecSessionIDs
+
+// 	msvcExecStatus := new(apps.MicroserviceExecStatusInfo)
+// 	msvcExecStatus.Status = msvc.ExecStatus.Status
+// 	msvcExecStatus.ExecSessionID = msvc.ExecStatus.ExecSessionID
+
+// 	return msvcStatus, msvcExecStatus, nil
+// }
+
+func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName string, catalogItem *client.CatalogItemInfo) (msvc *apps.Microservice, status *apps.MicroserviceStatusInfo, execStatus *apps.MicroserviceExecStatusInfo, err error) {
 	msvc = new(apps.Microservice)
 	msvc.UUID = msvcInfo.UUID
 	msvc.Name = msvcInfo.Name
@@ -122,15 +127,17 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	msvc.Images = &images
 	jsonConfig := make(map[string]interface{})
 	if err := jsoniter.Unmarshal([]byte(msvcInfo.Config), &jsonConfig); err != nil {
-		return msvc, err
+		return msvc, nil, nil, err
 	}
 	jsonAnnotations := make(map[string]interface{})
 	if err := jsoniter.Unmarshal([]byte(msvcInfo.Annotations), &jsonAnnotations); err != nil {
-		return msvc, err
+		return msvc, nil, nil, err
 	}
 	msvc.Config = jsonConfig
 	msvc.Container.Annotations = jsonAnnotations
 	msvc.Container.RootHostAccess = msvcInfo.RootHostAccess
+	msvc.Container.PidMode = msvcInfo.PidMode
+	msvc.Container.IpcMode = msvcInfo.IpcMode
 	msvc.Container.Runtime = msvcInfo.Runtime
 	msvc.Container.Platform = msvcInfo.Platform
 	msvc.Container.RunAsUser = msvcInfo.RunAsUser
@@ -146,30 +153,25 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 		PubTags: msvcInfo.PubTags,
 		SubTags: msvcInfo.SubTags,
 	}
+	msvc.Schedule = msvcInfo.Schedule
 	msvc.Application = &appName
-	return msvc, err
-}
+	status = new(apps.MicroserviceStatusInfo)
 
-func mapPublicPortInfo(in *client.MicroservicePublicPortRouterInfo) (out *apps.MicroservicePublicPortRouterInfo) {
-	if in == nil {
-		return nil
-	}
-	return &apps.MicroservicePublicPortRouterInfo{
-		Host: in.Host,
-		Port: in.Port,
-	}
-}
+	status.Status = msvcInfo.Status.Status
+	status.StartTime = msvcInfo.Status.StartTime
+	status.OperatingDuration = msvcInfo.Status.OperatingDuration
+	status.MemoryUsage = msvcInfo.Status.MemoryUsage
+	status.CPUUsage = msvcInfo.Status.CPUUsage
+	status.ContainerID = msvcInfo.Status.ContainerID
+	status.Percentage = msvcInfo.Status.Percentage
+	status.ErrorMessage = msvcInfo.Status.ErrorMessage
+	status.IPAddress = msvcInfo.Status.IPAddress
+	status.ExecSessionIDs = msvcInfo.Status.ExecSessionIDs
+	execStatus = new(apps.MicroserviceExecStatusInfo)
+	execStatus.Status = msvcInfo.ExecStatus.Status
+	execStatus.ExecSessionID = msvcInfo.ExecStatus.ExecSessionID
 
-func mapPublicPort(in *client.MicroservicePublicPortInfo) (out *apps.MicroservicePublicPortInfo) {
-	if in == nil {
-		return nil
-	}
-	return &apps.MicroservicePublicPortInfo{
-		Schemes:  in.Schemes,
-		Protocol: in.Protocol,
-		Links:    in.Links,
-		Router:   mapPublicPortInfo(in.Router),
-	}
+	return msvc, status, execStatus, err
 }
 
 func mapPort(in *client.MicroservicePortMappingInfo) (out *apps.MicroservicePortMapping) {
@@ -180,7 +182,6 @@ func mapPort(in *client.MicroservicePortMappingInfo) (out *apps.MicroservicePort
 		Internal: in.Internal,
 		External: in.External,
 		Protocol: in.Protocol,
-		Public:   mapPublicPort(in.Public),
 	}
 }
 

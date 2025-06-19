@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -28,6 +27,10 @@ import (
 	"time"
 
 	"golang.org/x/crypto/ssh"
+)
+
+const (
+	maxFileSize = 100 * 1024 * 1024 // 100MB
 )
 
 type SecureShellClient struct {
@@ -152,7 +155,7 @@ func format(err error, stdout, stderr fmt.Stringer) error {
 func (cl *SecureShellClient) getPublicKey() (authMeth ssh.AuthMethod, err error) {
 	// Read priv key file, MUST BE RSA
 	SSHVerbose(fmt.Sprintf("Reading private key: %s", cl.privKeyFilename))
-	key, err := ioutil.ReadFile(cl.privKeyFilename)
+	key, err := os.ReadFile(cl.privKeyFilename)
 	if err != nil {
 		return
 	}
@@ -293,7 +296,7 @@ func (cl *SecureShellClient) CopyTo(reader io.Reader, destPath, destFilename, pe
 
 func (cl *SecureShellClient) CopyFolderTo(srcPath, destPath, permissions string, recurse bool) error {
 	SSHVerbose("Copying folder...")
-	files, err := ioutil.ReadDir(srcPath)
+	files, err := os.ReadDir(srcPath)
 	if err != nil {
 		return err
 	}
@@ -318,8 +321,15 @@ func (cl *SecureShellClient) CopyFolderTo(srcPath, destPath, permissions string,
 			if err != nil {
 				return err
 			}
+			fileInfo, err := openFile.Stat()
+			if err != nil {
+				return err
+			}
+			if fileInfo.Size() > maxFileSize {
+				return fmt.Errorf("file %s is too large (max size: %d bytes)", fileInfo.Name(), maxFileSize)
+			}
 			// Copy the file
-			if err := cl.CopyTo(openFile, destPath, file.Name(), addLeadingZero(permissions), file.Size()); err != nil {
+			if err := cl.CopyTo(openFile, destPath, file.Name(), addLeadingZero(permissions), fileInfo.Size()); err != nil {
 				return err
 			}
 		}

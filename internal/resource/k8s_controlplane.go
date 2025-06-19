@@ -27,10 +27,9 @@ type KubernetesControlPlane struct {
 	Replicas       Replicas               `yaml:"replicas,omitempty"`
 	Images         KubeImages             `yaml:"images,omitempty"`
 	Endpoint       string                 `yaml:"endpoint,omitempty"`
-	Controller     ControllerConfig       `yaml:"controller,omitempty"`
+	Controller     K8SControllerConfig    `yaml:"controller,omitempty"`
 	Ingresses      Ingresses              `yaml:"ingresses,omitempty"`
-	Router         RouterConfig           `yaml:"router,omitempty"`
-	Proxy          ProxyConfig            `yaml:"proxy,omitempty"`
+	// Router         RouterConfig           `yaml:"router,omitempty"`
 }
 
 func (cp *KubernetesControlPlane) GetUser() IofogUser {
@@ -130,14 +129,13 @@ func (cp *KubernetesControlPlane) Clone() ControlPlane {
 	controllerPods := make([]KubernetesController, len(cp.ControllerPods))
 	copy(controllerPods, cp.ControllerPods)
 	return &KubernetesControlPlane{
-		KubeConfig:     cp.KubeConfig,
-		IofogUser:      cp.IofogUser,
-		Auth:           cp.Auth,
-		Database:       cp.Database,
-		Services:       cp.Services,
-		Ingresses:      cp.Ingresses,
-		Router:         cp.Router,
-		Proxy:          cp.Proxy,
+		KubeConfig: cp.KubeConfig,
+		IofogUser:  cp.IofogUser,
+		Auth:       cp.Auth,
+		Database:   cp.Database,
+		Services:   cp.Services,
+		Ingresses:  cp.Ingresses,
+		// Router:         cp.Router,
 		Replicas:       cp.Replicas,
 		Images:         cp.Images,
 		Endpoint:       cp.Endpoint,

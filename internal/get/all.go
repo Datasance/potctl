@@ -25,8 +25,10 @@ var (
 		getControllerTable,
 		getAgentTable,
 		getApplicationTable,
+		getSystemApplicationTable,
 		getVolumeTable,
 		getRouteTable,
+		getServiceTable,
 	}
 )
 
@@ -114,6 +116,18 @@ func getApplicationTable(namespace string, tableChan tableChannel) {
 	}
 }
 
+func getSystemApplicationTable(namespace string, tableChan tableChannel) {
+	appExe := newSystemApplicationExecutor(namespace)
+	if err := appExe.init(); err != nil {
+		tableChan <- tableQuery{err: err}
+		return
+	}
+	table := appExe.generateSystemApplicationOutput()
+	tableChan <- tableQuery{
+		table: table,
+	}
+}
+
 func getVolumeTable(namespace string, tableChan tableChannel) {
 	table, err := generateVolumeOutput(namespace)
 	tableChan <- tableQuery{
@@ -135,5 +149,16 @@ func getEdgeResourceTable(namespace string, tableChan tableChannel) {
 	tableChan <- tableQuery{
 		table: table,
 		err:   err,
+	}
+}
+
+func getServiceTable(namespace string, tableChan tableChannel) {
+	table, err := generateServicesOutput(namespace)
+	if err != nil {
+		tableChan <- tableQuery{err: err}
+		return
+	}
+	tableChan <- tableQuery{
+		table: table,
 	}
 }

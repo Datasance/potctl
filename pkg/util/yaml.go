@@ -15,14 +15,13 @@ package util
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
 func UnmarshalYAML(filename string, object interface{}) error {
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		return err
 	}

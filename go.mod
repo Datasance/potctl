@@ -7,16 +7,19 @@ toolchain go1.23.2
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.23.1
-	github.com/datasance/iofog-go-sdk/v3 v3.4.17
-	github.com/datasance/iofog-operator/v3 v3.4.18
+	github.com/datasance/iofog-go-sdk/v3 v3.5.0-beta
+	github.com/datasance/iofog-operator/v3 v3.5.0
 	github.com/docker/docker v27.4.1+incompatible
 	github.com/docker/go-connections v0.5.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/spf13/cobra v1.8.1
 	github.com/twmb/algoimpl v0.0.0-20170717182524-076353e90b94
+	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.30.0
+	golang.org/x/term v0.32.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.32.0
 	k8s.io/apiextensions-apiserver v0.32.0
@@ -65,6 +68,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
@@ -75,8 +79,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.33.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
 	google.golang.org/protobuf v1.35.2 // indirect
@@ -107,3 +110,5 @@ exclude github.com/Sirupsen/logrus v1.1.1
 exclude github.com/Sirupsen/logrus v1.1.0
 
 replace github.com/datasance/iofog-go-sdk/v3 => /Users/emirhan/Documents/GitHub/iofog-go-sdk
+
+replace github.com/datasance/iofog-operator/v3 => /Users/emirhan/Documents/GitHub/iofog-operator

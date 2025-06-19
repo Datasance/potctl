@@ -29,6 +29,8 @@ func newAttachCommand() *cobra.Command {
 	cmd.AddCommand(
 		newAttachAgentCommand(),
 		newAttachEdgeResourceCommand(),
+		newAttachVolumeMountCommand(),
+		newAttachExecCommand(),
 	)
 
 	return cmd

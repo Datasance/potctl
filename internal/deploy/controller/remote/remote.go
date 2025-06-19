@@ -118,6 +118,20 @@ func (exe *remoteExecutor) Execute() (err error) {
 		// Repo:                exe.controlPlane.Package.Repo,
 		// Token:               exe.controlPlane.Package.Token,
 		SystemMicroservices: exe.controlPlane.SystemMicroservices,
+		Https: &install.Https{
+			Enabled: exe.controller.Https.Enabled,
+			CACert:  exe.controller.Https.CACert,
+			TLSCert: exe.controller.Https.TLSCert,
+			TLSKey:  exe.controller.Https.TLSKey,
+		},
+		SiteCA: &install.SiteCertificate{
+			TLSCert: exe.controller.SiteCA.TLSCert,
+			TLSKey:  exe.controller.SiteCA.TLSKey,
+		},
+		LocalCA: &install.SiteCertificate{
+			TLSCert: exe.controller.LocalCA.TLSCert,
+			TLSKey:  exe.controller.LocalCA.TLSKey,
+		},
 	}
 	deployer, err := install.NewController(controllerOptions)
 	if err != nil {
@@ -148,12 +162,6 @@ func (exe *remoteExecutor) Execute() (err error) {
 }
 
 func (exe *remoteExecutor) setDefaultValues() {
-	if exe.controlPlane.SystemMicroservices.Proxy.X86 == "" {
-		exe.controlPlane.SystemMicroservices.Proxy.X86 = util.GetProxyImage()
-	}
-	if exe.controlPlane.SystemMicroservices.Proxy.ARM == "" {
-		exe.controlPlane.SystemMicroservices.Proxy.ARM = util.GetProxyARMImage()
-	}
 	if exe.controlPlane.SystemMicroservices.Router.X86 == "" {
 		exe.controlPlane.SystemMicroservices.Router.X86 = util.GetRouterImage()
 	}

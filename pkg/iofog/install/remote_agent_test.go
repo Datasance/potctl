@@ -14,14 +14,13 @@
 package install
 
 import (
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
 )
 
 func copyDir(src, dst string) (err error) {
-	files, err := ioutil.ReadDir(src)
+	files, err := os.ReadDir(src)
 	if err != nil {
 		return
 	}
@@ -34,12 +33,12 @@ func copyDir(src, dst string) (err error) {
 }
 
 func copyFile(src, dst string) (err error) {
-	input, err := ioutil.ReadFile(src)
+	input, err := os.ReadFile(src)
 	if err != nil {
 		return
 	}
 
-	err = ioutil.WriteFile(dst, input, 0644)
+	err = os.WriteFile(dst, input, 0644)
 	if err != nil {
 		return
 	}
@@ -76,7 +75,7 @@ func runTest(t *testing.T, state testState) {
 		t.Fatalf("Failed to customize procedures: %s", err.Error())
 	}
 
-	expectFiles, err := ioutil.ReadDir(state.srcDir)
+	expectFiles, err := os.ReadDir(state.srcDir)
 	if err != nil {
 		t.Fatalf("Failed to count files in src script dir: %s", err.Error())
 	}
@@ -87,7 +86,7 @@ func runTest(t *testing.T, state testState) {
 			t.Fatalf("Expected %d scripts contents, found %d", len(agent.procs.scriptNames), len(agent.procs.scriptContents))
 		}
 		for idx, filename := range agent.procs.scriptNames {
-			fileBytes, err := ioutil.ReadFile(filename)
+			fileBytes, err := os.ReadFile(filename)
 			if err != nil {
 				t.Fatalf("Failed to read script %s: %s", filename, err.Error())
 			}

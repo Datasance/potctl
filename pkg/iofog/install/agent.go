@@ -54,7 +54,8 @@ func (agent *defaultAgent) getProvisionKey(controllerEndpoint string, user Iofog
 	// System agents have uuid passed through, normal agents dont
 	if agent.uuid == "" {
 		var agentInfo *client.AgentInfo
-		agentInfo, err = ctrl.GetAgentByName(agent.name, false)
+		// agentInfo, err = ctrl.GetAgentByName(agent.name, false)
+		agentInfo, err = ctrl.GetAgentByName(agent.name)
 		if err != nil {
 			return
 		}

@@ -90,6 +90,7 @@ func NewRootCommand() *cobra.Command {
 		newDockerPruneCommand(),
 		newUpgradeCommand(),
 		newRollbackCommand(),
+		newExecCommand(),
 	)
 
 	return cmd

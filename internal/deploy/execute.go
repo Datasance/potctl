@@ -23,6 +23,8 @@ import (
 	deployapplication "github.com/datasance/potctl/internal/deploy/application"
 	deployapplicationtemplate "github.com/datasance/potctl/internal/deploy/applicationtemplate"
 	deploycatalogitem "github.com/datasance/potctl/internal/deploy/catalogitem"
+	deploycertificate "github.com/datasance/potctl/internal/deploy/certificate"
+	deployconfigmap "github.com/datasance/potctl/internal/deploy/configmap"
 	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
 	deployremotecontroller "github.com/datasance/potctl/internal/deploy/controller/remote"
 	deployk8scontrolplane "github.com/datasance/potctl/internal/deploy/controlplane/k8s"
@@ -32,7 +34,10 @@ import (
 	deploymicroservice "github.com/datasance/potctl/internal/deploy/microservice"
 	deployregistry "github.com/datasance/potctl/internal/deploy/registry"
 	deployroute "github.com/datasance/potctl/internal/deploy/route"
+	deploysecret "github.com/datasance/potctl/internal/deploy/secret"
+	deployservice "github.com/datasance/potctl/internal/deploy/service"
 	deployvolume "github.com/datasance/potctl/internal/deploy/volume"
+	deployvolumemount "github.com/datasance/potctl/internal/deploy/volumeMount"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
@@ -52,6 +57,12 @@ var kindOrder = []config.Kind{
 	config.ApplicationKind,
 	config.MicroserviceKind,
 	config.RouteKind,
+	config.SecretKind,
+	config.ConfigMapKind,
+	config.ServiceKind,
+	config.VolumeMountKind,
+	config.CertificateAuthorityKind,
+	config.CertificateKind,
 }
 
 type Options struct {
@@ -123,6 +134,26 @@ func deployRoute(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) 
 	return deployroute.NewExecutor(deployroute.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
 }
 
+func deploySecret(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deploysecret.NewExecutor(deploysecret.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Data: opt.Data, Name: opt.Name})
+}
+
+func deployConfigMap(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployconfigmap.NewExecutor(deployconfigmap.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Data: opt.Data, Name: opt.Name})
+}
+
+func deployService(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployservice.NewExecutor(deployservice.Options{Namespace: opt.Namespace, Tags: opt.Tags, Yaml: opt.YAML, Name: opt.Name})
+}
+
+func deployVolumeMount(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployvolumemount.NewExecutor(deployvolumemount.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
+}
+
+func deployCertificate(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deploycertificate.NewExecutor(deploycertificate.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name, Kind: opt.Kind})
+}
+
 var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error){
 	config.ApplicationKind:            deployApplication,
 	config.ApplicationTemplateKind:    deployApplicationTemplate,
@@ -140,6 +171,12 @@ var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Execut
 	config.RegistryKind:               deployRegistry,
 	config.VolumeKind:                 deployVolume,
 	config.RouteKind:                  deployRoute,
+	config.SecretKind:                 deploySecret,
+	config.ConfigMapKind:              deployConfigMap,
+	config.ServiceKind:                deployService,
+	config.VolumeMountKind:            deployVolumeMount,
+	config.CertificateAuthorityKind:   deployCertificate,
+	config.CertificateKind:            deployCertificate,
 }
 
 // Execute deploy from yaml file
@@ -160,6 +197,7 @@ func Execute(opt *Options) (err error) {
 		found := false
 		host := agentExecutor.GetHost()
 		tags := agentExecutor.GetTags()
+		deployConfig := agentExecutor.GetConfig()
 		for _, configGenericExecutor := range executorsMap[config.AgentConfigKind] {
 			configExecutor, ok := configGenericExecutor.(deployagentconfig.AgentConfigExecutor)
 			if !ok {
@@ -177,16 +215,24 @@ func Execute(opt *Options) (err error) {
 				Host: &host,
 			}
 			if util.IsLocalHost(host) { // Set de default local config to interior standalone
+				isSystem := true
+				deploymentType := "container"
 				upstreamRouters := []string{}
 				routerMode := "interior"
-				edgeRouterPort := 56721
-				interRouterPort := 56722
+				edgeRouterPort := 45671
+				interRouterPort := 55671
+				agentConfig.IsSystem = &isSystem
+				agentConfig.DeploymentType = &deploymentType
 				agentConfig.UpstreamRouters = &upstreamRouters
 				agentConfig.RouterConfig = client.RouterConfig{
 					RouterMode:      &routerMode,
 					EdgeRouterPort:  &edgeRouterPort,
 					InterRouterPort: &interRouterPort,
 				}
+			} else {
+				// For remote agents, use the configuration from the agent executor
+				agentConfig = deployConfig.AgentConfiguration
+				agentConfig.Host = &host
 			}
 			executorsMap[config.AgentConfigKind] = append(executorsMap[config.AgentConfigKind], deployagentconfig.NewRemoteExecutor(
 				agentExecutor.GetName(),

@@ -99,6 +99,9 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 		"UPTIME",
 		"VERSION",
 		"ADDR",
+		"MODE",
+		"TYPE",
+		"ENGINE",
 	}
 	table[0] = append(table[0], headers...)
 	// Populate rows
@@ -113,6 +116,8 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				"-",
 				"-",
 				agent.IPAddressExternal,
+				"-",
+				"-",
 			}
 			table[idx+1] = append(table[idx+1], row...)
 		} else {
@@ -121,6 +126,12 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				age = backendAge
 			}
 			uptime := time.Duration(agent.UptimeMs) * time.Millisecond
+			var mode string
+			if agent.IsSystem {
+				mode = "System"
+			} else {
+				mode = "Node"
+			}
 			row := []string{
 				agent.Name,
 				agent.DaemonStatus,
@@ -128,6 +139,9 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				util.FormatDuration(uptime),
 				agent.Version,
 				agent.Host,
+				mode,
+				agent.DeploymentType,
+				agent.ContainerEngine,
 			}
 			table[idx+1] = append(table[idx+1], row...)
 		}

@@ -27,10 +27,10 @@ env:
   port_manager_image: 'ghcr.io/datasance/port-manager:latest'
   router_image: 'ghcr.io/datasance/router:latest'
   router_arm_image: 'ghcr.io/datasance/router:latest'
-  proxy_image: 'ghcr.io/datasance/proxy:latest'
-  proxy_arm_image: 'ghcr.io/datasance/proxy:latest'
-  iofog_agent_version: '3.2.0'
-  controller_version: '3.4.0'
+  # proxy_image: 'ghcr.io/datasance/proxy:latest'
+  # proxy_arm_image: 'ghcr.io/datasance/proxy:latest'
+  iofog_agent_version: '3.5.0'
+  controller_version: '3.5.0'
   version:
   agent_vm_list:
   controller_vm:

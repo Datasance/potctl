@@ -15,7 +15,7 @@ package install
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -173,14 +173,14 @@ func (agent *RemoteAgent) CustomizeProcedures(dir string, procs *AgentProcedures
 	}
 
 	// Load script files into memory
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}
 	for _, file := range files {
 		if !file.IsDir() {
 			procs.scriptNames = append(procs.scriptNames, file.Name())
-			content, err := ioutil.ReadFile(filepath.Join(dir, file.Name()))
+			content, err := os.ReadFile(filepath.Join(dir, file.Name()))
 			if err != nil {
 				return err
 			}
@@ -411,6 +411,18 @@ func (agent *RemoteAgent) SetInitialConfig(
 	}
 	if agentConfig.DockerPruningFrequency != nil {
 		configOptions["-pf"] = strconv.FormatFloat(*agentConfig.DockerPruningFrequency, 'f', -1, 64)
+	}
+	if agentConfig.GpsDevice != nil && *agentConfig.GpsDevice != "" {
+		configOptions["-gpsd"] = *agentConfig.GpsDevice
+	}
+	if agentConfig.GpsMode != nil && *agentConfig.GpsMode != "" {
+		configOptions["-gps"] = *agentConfig.GpsMode
+	}
+	if agentConfig.GpsScanFrequency != nil {
+		configOptions["-gpsf"] = strconv.FormatFloat(*agentConfig.GpsScanFrequency, 'f', -1, 64)
+	}
+	if agentConfig.EdgeGuardFrequency != nil {
+		configOptions["-egf"] = strconv.FormatFloat(*agentConfig.EdgeGuardFrequency, 'f', -1, 64)
 	}
 	if agentConfig.TimeZone != "" {
 		configOptions["-tz"] = agentConfig.TimeZone

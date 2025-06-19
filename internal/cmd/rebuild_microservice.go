@@ -14,7 +14,7 @@
 package cmd
 
 import (
-	rebuildmicroservice "github.com/datasance/potctl/internal/rebuild"
+	rebuildmicroservice "github.com/datasance/potctl/internal/rebuild/microservice"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,7 @@ func newRebuildMicroserviceCommand() *cobra.Command {
 		Short:   "Rebuilds a microservice",
 		Long:    "Rebuilds a microservice",
 		Example: `potctl rebuild microservice AppNAME/MscvNAME`,
-		Args:    cobra.ExactValidArgs(1),
+		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
 			if len(args) == 0 {

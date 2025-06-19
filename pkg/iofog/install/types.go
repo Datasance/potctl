@@ -47,7 +47,7 @@ type Pod struct {
 	Status string
 }
 
-type ControllerConfig struct {
+type K8SControllerConfig struct {
 	// User          IofogUser
 	Replicas      int32
 	Database      Database

@@ -35,7 +35,12 @@ func newDeployCommand() *cobra.Command {
           edge-resource.yaml
           catalog.yaml
           volume.yaml
-          route.yaml`,
+          route.yaml
+          secret.yaml
+          configmap.yaml
+          service.yaml
+          volume-mount.yaml`,
+
 		Args:  cobra.ExactArgs(0),
 		Short: "Deploy Edge Compute Network components on existing infrastructure",
 		Long: `Deploy Edge Compute Network components on existing infrastructure.

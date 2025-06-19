@@ -24,26 +24,22 @@ var (
 
 	repo = "undefined"
 
-	controllerTag  = "undefined"
-	agentTag       = "undefined"
-	operatorTag    = "undefined"
-	routerTag      = "undefined"
-	portManagerTag = "undefined"
-	proxyTag       = "undefined"
-
+	controllerTag     = "undefined"
+	agentTag          = "undefined"
+	operatorTag       = "undefined"
+	routerTag         = "undefined"
+	routerAdaptorTag  = "undefined"
 	controllerVersion = "undefined"
 	agentVersion      = "undefined"
 )
 
 const (
-	controllerImage  = "controller"
-	agentImage       = "agent"
-	operatorImage    = "operator"
-	portManagerImage = "port-manager"
-	proxyImage       = "proxy"
-	proxyARMImage    = "proxy"
-	routerImage      = "router"
-	routerARMImage   = "router"
+	controllerImage    = "controller"
+	agentImage         = "agent"
+	operatorImage      = "operator"
+	routerAdaptorImage = "router-adaptor"
+	routerImage        = "router"
+	routerARMImage     = "router"
 )
 
 type Version struct {
@@ -72,8 +68,6 @@ func GetAgentImage() string     { return fmt.Sprintf("%s/%s:%s", repo, agentImag
 func GetOperatorImage() string  { return fmt.Sprintf("%s/%s:%s", repo, operatorImage, operatorTag) }
 func GetRouterImage() string    { return fmt.Sprintf("%s/%s:%s", repo, routerImage, routerTag) }
 func GetRouterARMImage() string { return fmt.Sprintf("%s/%s:%s", repo, routerARMImage, routerTag) }
-func GetPortManagerImage() string {
-	return fmt.Sprintf("%s/%s:%s", repo, portManagerImage, portManagerTag)
+func GetRouterAdaptorImage() string {
+	return fmt.Sprintf("%s/%s:%s", repo, routerAdaptorImage, routerAdaptorTag)
 }
-func GetProxyImage() string    { return fmt.Sprintf("%s/%s:%s", repo, proxyImage, proxyTag) }
-func GetProxyARMImage() string { return fmt.Sprintf("%s/%s:%s", repo, proxyARMImage, proxyTag) }

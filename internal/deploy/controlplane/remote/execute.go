@@ -25,7 +25,8 @@ import (
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
 	iutil "github.com/datasance/potctl/internal/util"
-	clientutil "github.com/datasance/potctl/internal/util/client"
+
+	// clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -47,7 +48,13 @@ type remoteControlPlaneExecutor struct {
 
 func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent rsc.Package) (err error) {
 	// Deploy system agent to host internal router
-	install.Verbose("Deploying system agent")
+	install.Verbose("Deploying system agent for controller " + ctrl.Name)
+	var deploymentType string
+	if systemAgent.Container.Image != "" {
+		deploymentType = "container"
+	} else {
+		deploymentType = "native"
+	}
 	agent := rsc.RemoteAgent{
 		Name:    iofog.VanillaRemoteAgentName,
 		Host:    ctrl.Host,
@@ -57,9 +64,9 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	// Configure agent to be system agent with default router
 	RouterConfig := client.RouterConfig{
 		RouterMode:      iutil.MakeStrPtr("interior"),
-		MessagingPort:   iutil.MakeIntPtr(5672),
-		EdgeRouterPort:  iutil.MakeIntPtr(56721),
-		InterRouterPort: iutil.MakeIntPtr(56722),
+		MessagingPort:   iutil.MakeIntPtr(5671),
+		EdgeRouterPort:  iutil.MakeIntPtr(45671),
+		InterRouterPort: iutil.MakeIntPtr(55671),
 	}
 
 	upstreamRouters := []string{}
@@ -68,7 +75,60 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		Name:    iofog.VanillaRemoteAgentName,
 		FogType: iutil.MakeStrPtr("auto"),
 		AgentConfiguration: client.AgentConfiguration{
+			IsSystem:        iutil.MakeBoolPtr(true),
+			DeploymentType:  iutil.MakeStrPtr(deploymentType),
+			Host:            &ctrl.Host,
+			RouterConfig:    RouterConfig,
+			UpstreamRouters: &upstreamRouters,
+		},
+	}
+
+	// Get Agentconfig executor
+	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRemoteAgentName, &deployAgentConfig, namespace, nil)
+	// If there already is a system fog, ignore error
+	if err := deployAgentConfigExecutor.Execute(); err != nil {
+		return err
+	}
+	agent.UUID = deployAgentConfigExecutor.GetAgentUUID()
+	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, false)
+	if err != nil {
+		return err
+	}
+	return agentDeployExecutor.Execute()
+}
+
+func deployNonSystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent rsc.Package) (err error) {
+	// Deploy system agent to host internal router
+	install.Verbose("Deploying non-system agent for controller " + ctrl.Name)
+	nonSystemAgentName := fmt.Sprintf("%s-controller", ctrl.Name)
+	var deploymentType string
+	if systemAgent.Container.Image != "" {
+		deploymentType = "container"
+	} else {
+		deploymentType = "native"
+	}
+	agent := rsc.RemoteAgent{
+		Name:    nonSystemAgentName,
+		Host:    ctrl.Host,
+		SSH:     ctrl.SSH,
+		Package: systemAgent,
+	}
+	// Configure agent to be system agent with default router
+	RouterConfig := client.RouterConfig{
+		RouterMode:      iutil.MakeStrPtr("interior"),
+		MessagingPort:   iutil.MakeIntPtr(5671),
+		EdgeRouterPort:  iutil.MakeIntPtr(45671),
+		InterRouterPort: iutil.MakeIntPtr(55671),
+	}
+
+	upstreamRouters := []string{"default-router"}
+
+	deployAgentConfig := rsc.AgentConfiguration{
+		Name:    nonSystemAgentName,
+		FogType: iutil.MakeStrPtr("auto"),
+		AgentConfiguration: client.AgentConfiguration{
 			IsSystem:        iutil.MakeBoolPtr(false),
+			DeploymentType:  iutil.MakeStrPtr(deploymentType),
 			Host:            &ctrl.Host,
 			RouterConfig:    RouterConfig,
 			UpstreamRouters: &upstreamRouters,
@@ -122,33 +182,10 @@ func tagControllerImage(ctrl *rsc.RemoteController, image string) (err error) {
 	return
 }
 
-func createDefaultRouter(namespace string, ctrl *rsc.RemoteController) (err error) {
-	// Check controller is reachable
-	clt, err := clientutil.NewControllerClient(namespace)
-	if err != nil {
-		return err
-	}
-
-	routerConfig := client.Router{
-		Host: ctrl.Host,
-		RouterConfig: client.RouterConfig{
-			RouterMode:      iutil.MakeStrPtr("interior"),
-			MessagingPort:   iutil.MakeIntPtr(5672),
-			EdgeRouterPort:  iutil.MakeIntPtr(56721),
-			InterRouterPort: iutil.MakeIntPtr(56722),
-		},
-	}
-
-	if err := clt.PutDefaultRouter(routerConfig); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
-	// Look for a Vanilla controller
 	controllers := exe.controlPlane.GetControllers()
-	for _, baseController := range controllers {
+	// Deploy agents for each controller
+	for idx, baseController := range controllers {
 		controller, ok := baseController.(*rsc.RemoteController)
 		if !ok {
 			return util.NewInternalError("Could not convert Controller to Remote Controller")
@@ -157,14 +194,20 @@ func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 		if !ok {
 			return util.NewInternalError("Could not convert ControlPlane to Remote ControlPlane")
 		}
-		if err := createDefaultRouter(exe.ns.Name, controller); err != nil {
-			return err
+		// First controller gets system agent, others get non-system agents
+		if idx == 0 {
+			if err := deploySystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
+				return fmt.Errorf("failed to deploy system agent for first controller: %v", err)
+			}
+		} else {
+			if err := deployNonSystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
+				return fmt.Errorf("failed to deploy non-system agent for controller %d: %v", idx, err)
+			}
 		}
-		if err := deploySystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
-			return err
-		}
+
+		// Tag controller image for all controllers
 		if err := tagControllerImage(controller, remoteControlPlane.Package.Container.Image); err != nil {
-			return err
+			return fmt.Errorf("failed to tag controller image for controller %d: %v", idx, err)
 		}
 	}
 	return nil
@@ -228,6 +271,109 @@ func newControlPlaneExecutor(executors []execute.Executor, namespace *rsc.Namesp
 	}
 }
 
+// Validates database configuration for multi-controller setup
+func validateMultiControllerDatabase(controlPlane *rsc.RemoteControlPlane) error {
+	if len(controlPlane.Controllers) > 1 {
+		db := controlPlane.Database
+		if db.Provider == "" || db.Host == "" || db.DatabaseName == "" ||
+			db.Password == "" || db.Port == 0 || db.User == "" {
+			return util.NewInputError("When deploying multiple controllers, you must specify an external database configuration with all required fields (host, user, password, provider, databaseName, port)")
+		}
+	}
+	return nil
+}
+
+// Validates HTTPS configuration for a single controller
+func validateControllerHTTPS(controller *rsc.RemoteController) error {
+	if controller.Https != nil && controller.Https.Enabled != nil && *controller.Https.Enabled {
+		// HTTPS is enabled, validate required fields
+		if controller.Https.TLSCert == "" || controller.Https.TLSKey == "" {
+			return util.NewInputError("When HTTPS is enabled, you must provide TLS certificate and key")
+		}
+	}
+	return nil
+}
+
+// Validates CA configuration for a controller
+func validateControllerRouterCA(controller *rsc.RemoteController) error {
+	if controller.SiteCA != nil {
+		if controller.SiteCA.TLSCert == "" || controller.SiteCA.TLSKey == "" {
+			return util.NewInputError("When SiteCA is configured, you must provide both TLS certificate and key")
+		}
+	}
+	if controller.LocalCA != nil {
+		if controller.LocalCA.TLSCert == "" || controller.LocalCA.TLSKey == "" {
+			return util.NewInputError("When LocalCA is configured, you must provide both TLS certificate and key")
+		}
+	}
+	return nil
+}
+
+// Validates HTTPS configuration across all controllers
+func validateMultiControllerHTTPS(controlPlane *rsc.RemoteControlPlane) error {
+	controllers := controlPlane.Controllers
+	if len(controllers) <= 1 {
+		return nil
+	}
+
+	// Check first controller's HTTPS config
+	firstController := controllers[0]
+	if firstController.Https != nil && firstController.Https.Enabled != nil && *firstController.Https.Enabled {
+		// First controller has HTTPS enabled, validate all controllers
+		for idx, controller := range controllers {
+			if err := validateControllerHTTPS(&controller); err != nil {
+				return fmt.Errorf("controller %d (%s): %v", idx, controller.Name, err)
+			}
+		}
+	}
+	return nil
+}
+
+// Validates CA configuration across all controllers
+func validateMultiControllerRouterCA(controlPlane *rsc.RemoteControlPlane) error {
+	controllers := controlPlane.Controllers
+	if len(controllers) <= 1 {
+		return nil
+	}
+
+	// Only first controller should have CA configuration
+	firstController := controllers[0]
+	if firstController.SiteCA != nil || firstController.LocalCA != nil {
+		// Validate first controller's CA config
+		if err := validateControllerRouterCA(&firstController); err != nil {
+			return fmt.Errorf("first controller (%s): %v", firstController.Name, err)
+		}
+
+		// Check that other controllers don't have CA config
+		for idx, controller := range controllers[1:] {
+			if controller.SiteCA != nil || controller.LocalCA != nil {
+				return fmt.Errorf("controller %d (%s): CA configuration should only be specified for the first controller", idx+1, controller.Name)
+			}
+		}
+	}
+	return nil
+}
+
+// Main validation function that orchestrates all validations
+func validateMultiControllerConfig(controlPlane *rsc.RemoteControlPlane) error {
+	// Validate database configuration
+	if err := validateMultiControllerDatabase(controlPlane); err != nil {
+		return err
+	}
+
+	// Validate HTTPS configuration
+	if err := validateMultiControllerHTTPS(controlPlane); err != nil {
+		return err
+	}
+
+	// Validate CA configuration
+	if err := validateMultiControllerRouterCA(controlPlane); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func NewExecutor(opt Options) (exe execute.Executor, err error) {
 	// Check the namespace exists
 	ns, err := config.GetNamespace(opt.Namespace)
@@ -239,6 +385,11 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 	controlPlane, err := rsc.UnmarshallRemoteControlPlane(opt.Yaml)
 	if err != nil {
 		return
+	}
+
+	// Validate control plane for multiple controllers
+	if err := validateMultiControllerConfig(&controlPlane); err != nil {
+		return nil, err
 	}
 
 	// Create exe Controllers
