@@ -19,7 +19,6 @@ import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
 )
 
 type systemApplicationExecutor struct {
@@ -92,9 +91,9 @@ func (exe *systemApplicationExecutor) init() (err error) {
 		// Filter System microservices
 		for idx := range listMsvcs.Microservices {
 			msvc := &listMsvcs.Microservices[idx]
-			if util.IsSystemMsvc(msvc) {
-				continue
-			}
+			// if util.IsSystemMsvc(msvc) {
+			// 	continue
+			// }
 			exe.msvcsPerApplication[application.ID] = append(exe.msvcsPerApplication[application.ID], msvc)
 		}
 	}

@@ -20,7 +20,7 @@ import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
-func GetControllerEndpoint(host string) (endpoint string, err error) {
+func GetControllerEndpoint(host string, useHTTPS ...bool) (endpoint string, err error) {
 	// Generate controller endpoint
 	u, err := url.Parse(host)
 	if err != nil || u.Host == "" {
@@ -34,7 +34,12 @@ func GetControllerEndpoint(host string) (endpoint string, err error) {
 		}
 	}
 	if u.Scheme == "" {
-		u.Scheme = "http"
+		// Check if HTTPS should be used
+		if len(useHTTPS) > 0 && useHTTPS[0] {
+			u.Scheme = "https"
+		} else {
+			u.Scheme = "http"
+		}
 	}
 	return u.String(), nil
 }

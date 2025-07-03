@@ -26,7 +26,7 @@ func newDescribeControllerCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "controller NAME",
-		Short:   "Get detailed information about a  Controller",
+		Short:   "Get detailed information about a Controller",
 		Long:    `Get detailed information about a named Controller.`,
 		Example: `potctl describe controller NAME`,
 		Args:    cobra.ExactArgs(1),

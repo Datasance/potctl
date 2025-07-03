@@ -14,12 +14,15 @@
 package describe
 
 import (
-	// "fmt"
+	"fmt"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 
 	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
+	rsc "github.com/datasance/potctl/internal/resource"
+	"github.com/datasance/potctl/pkg/util"
 	// "github.com/datasance/potctl/pkg/iofog"
 	// "github.com/datasance/potctl/pkg/util"
 )
@@ -75,6 +78,52 @@ func MapClientMicroserviceToDeployMicroservice(msvc *client.MicroserviceInfo, cl
 
 // 	return msvcStatus, msvcExecStatus, nil
 // }
+
+// FormatMicroserviceStatus formats microservice status for human-readable output
+func FormatMicroserviceStatus(status *apps.MicroserviceStatusInfo) map[string]interface{} {
+	formatted := make(map[string]interface{})
+
+	// Core status fields
+	formatted["status"] = status.Status
+	formatted["containerId"] = status.ContainerID
+	formatted["percentage"] = status.Percentage
+	formatted["errorMessage"] = status.ErrorMessage
+	formatted["ipAddress"] = status.IPAddress
+	formatted["execSessionIds"] = status.ExecSessionIDs
+
+	// Format startTime as RFC3339 timestamp
+	if status.StartTime > 0 {
+		formatted["startTime"] = time.Unix(status.StartTime/1000, (status.StartTime%1000)*1000000).Format(time.RFC3339)
+	}
+
+	// Format operatingDuration as human-readable duration
+	if status.OperatingDuration > 0 {
+		duration := time.Duration(status.OperatingDuration) * time.Millisecond
+		formatted["operatingDuration"] = util.FormatDuration(duration)
+	}
+
+	// Format memory usage
+	if status.MemoryUsage > 0 {
+		formatted["memoryUsage"] = formatBytesAuto(status.MemoryUsage)
+	}
+
+	// Format CPU usage
+	if status.CPUUsage > 0 {
+		formatted["cpuUsage"] = fmt.Sprintf("%.2f %%", status.CPUUsage)
+	}
+
+	return formatted
+}
+
+// FormatMicroserviceExecStatus formats microservice exec status for human-readable output
+func FormatMicroserviceExecStatus(execStatus *apps.MicroserviceExecStatusInfo) map[string]interface{} {
+	formatted := make(map[string]interface{})
+
+	formatted["status"] = execStatus.Status
+	formatted["execSessionId"] = execStatus.ExecSessionID
+
+	return formatted
+}
 
 func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName string, catalogItem *client.CatalogItemInfo) (msvc *apps.Microservice, status *apps.MicroserviceStatusInfo, execStatus *apps.MicroserviceExecStatusInfo, err error) {
 	msvc = new(apps.Microservice)
@@ -214,4 +263,123 @@ func mapExtraHosts(in []client.MicroserviceExtraHost) (out []apps.MicroserviceEx
 		out = append(out, apps.MicroserviceExtraHost(eH))
 	}
 	return
+}
+
+// FormatAgentStatus formats agent status for human-readable output
+func FormatAgentStatus(status rsc.AgentStatus) map[string]interface{} {
+	// Use ordered map to ensure consistent output order
+	formatted := make(map[string]interface{})
+
+	// Core status fields (ordered for consistent output)
+	formatted["daemonStatus"] = status.DaemonStatus
+	formatted["securityStatus"] = status.SecurityStatus
+	formatted["warningMessage"] = status.WarningMessage
+	formatted["securityViolationInfo"] = status.SecurityViolationInfo
+
+	// Format timestamps
+	if status.LastActive > 0 {
+		formatted["lastActive"] = time.Unix(status.LastActive/1000, (status.LastActive%1000)*1000000).Format(time.RFC3339)
+	}
+
+	// Format uptime as duration
+	if status.UptimeMs > 0 {
+		uptime := time.Duration(status.UptimeMs) * time.Millisecond
+		formatted["uptime"] = util.FormatDuration(uptime)
+	}
+
+	// Format usage - Memory/Disk are already in MiB, CPU is percentage
+	if status.MemoryUsage > 0 {
+		// Convert from MiB to bytes for auto-scaling
+		memoryBytes := status.MemoryUsage * 1024 * 1024
+		formatted["memoryUsage"] = formatBytesAuto(memoryBytes)
+	}
+	if status.DiskUsage > 0 {
+		// Convert from MiB to bytes for auto-scaling
+		diskBytes := status.DiskUsage * 1024 * 1024
+		formatted["diskUsage"] = formatBytesAuto(diskBytes)
+	}
+	if status.CPUUsage > 0 {
+		formatted["cpuUsage"] = fmt.Sprintf("%.2f %%", status.CPUUsage)
+	}
+
+	// Format system available resources
+	if status.SystemAvailableMemory > 0 {
+		// Convert from KB to bytes for auto-scaling
+		memoryBytes := status.SystemAvailableMemory
+		formatted["systemAvailableMemory"] = formatBytesAuto(memoryBytes)
+	}
+	if status.SystemAvailableDisk > 0 {
+		// Convert from bytes to bytes for auto-scaling (already in bytes)
+		formatted["systemAvailableDisk"] = formatBytesAuto(float64(status.SystemAvailableDisk))
+	}
+
+	// Add system total CPU (placeholder since not available from SDK)
+	if status.SystemTotalCPU > 0 {
+		formatted["systemTotalCPU"] = fmt.Sprintf("%.2f %%", status.SystemTotalCPU)
+	}
+
+	formatted["memoryViolation"] = status.MemoryViolation
+	formatted["diskViolation"] = status.DiskViolation
+	formatted["cpuViolation"] = status.CPUViolation
+	formatted["repositoryStatus"] = status.RepositoryStatus
+
+	// Format last status time
+	if status.LastStatusTimeMsUTC > 0 {
+		formatted["lastStatusTime"] = time.Unix(status.LastStatusTimeMsUTC/1000, (status.LastStatusTimeMsUTC%1000)*1000000).Format(time.RFC3339)
+	}
+
+	formatted["ipAddress"] = status.IPAddress
+	formatted["ipAddressExternal"] = status.IPAddressExternal
+
+	// Format processed messages
+	if status.ProcessedMessaged > 0 {
+		formatted["processedMessages"] = formatNumber(status.ProcessedMessaged)
+	}
+
+	// Format message speed
+	if status.MessageSpeed > 0 {
+		formatted["messageSpeed"] = fmt.Sprintf("%.1f msg/s", status.MessageSpeed)
+	}
+
+	// Format last command time
+	if status.LastCommandTimeMsUTC > 0 {
+		formatted["lastCommandTime"] = time.Unix(status.LastCommandTimeMsUTC/1000, (status.LastCommandTimeMsUTC%1000)*1000000).Format(time.RFC3339)
+	} else {
+		formatted["lastCommandTime"] = "Never"
+	}
+
+	formatted["version"] = status.Version
+	formatted["isReadyToUpgrade"] = status.IsReadyToUpgrade
+	formatted["isReadyToRollback"] = status.IsReadyToRollback
+	formatted["tunnel"] = status.Tunnel
+	formatted["volumeMounts"] = status.VolumeMounts
+
+	return formatted
+}
+
+// formatBytesAuto formats bytes with automatic unit scaling (B, KB, MB, GB, etc.)
+func formatBytesAuto(bytes float64) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%.0f B", bytes)
+	}
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", bytes/float64(div), "KMGTPE"[exp])
+}
+
+func formatNumber(num int64) string {
+	if num < 1000 {
+		return fmt.Sprintf("%d", num)
+	}
+	if num < 1000000 {
+		return fmt.Sprintf("%.1fK", float64(num)/1000)
+	}
+	if num < 1000000000 {
+		return fmt.Sprintf("%.1fM", float64(num)/1000000)
+	}
+	return fmt.Sprintf("%.1fB", float64(num)/1000000000)
 }

@@ -151,14 +151,17 @@ func updateAgentConfiguration(agentConfig *rsc.AgentConfiguration, tags *[]strin
 		updateAgentConfigRequest := getAgentUpdateRequestFromAgentConfig(agentConfig, tags)
 		updateAgentConfigRequest.UUID = uuid
 
-		// Get current agent info to preserve host value
+		// Get current agent info to preserve host value only if not explicitly set in config
 		agentInfo, getErr := clt.GetAgentByID(uuid)
 		if getErr != nil {
 			return getErr
 		}
-		// Preserve the original host value
-		host := agentInfo.Host
-		updateAgentConfigRequest.Host = &host
+
+		// Only preserve the original host value if the config doesn't explicitly set a host
+		if agentConfig.Host == nil {
+			host := agentInfo.Host
+			updateAgentConfigRequest.Host = &host
+		}
 
 		if _, err = clt.UpdateAgent(&updateAgentConfigRequest); err != nil {
 			return

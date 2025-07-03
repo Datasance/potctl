@@ -81,6 +81,7 @@ type LocalControllerConfig struct {
 	PidBaseDir    string
 	EcnViewerPort int
 	EcnViewerURL  string
+	LogLevel      string
 	Auth          Auth
 }
 
@@ -173,6 +174,8 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 			"DB_PASSWORD=" + db.Password,
 			"DB_PORT=" + strconv.Itoa(db.Port),
 			"DB_NAME=" + db.DatabaseName,
+			"DB_USE_SSL=" + strconv.FormatBool(*db.SSL),
+			"DB_SSL_CA=" + *db.CA,
 			"KC_URL=" + auth.URL,
 			"KC_REALM=" + auth.Realm,
 			"KC_SSL_REQ=" + auth.SSL,

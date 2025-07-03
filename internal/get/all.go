@@ -29,6 +29,7 @@ var (
 		getVolumeTable,
 		getRouteTable,
 		getServiceTable,
+		getVolumeMountTable,
 	}
 )
 
@@ -160,5 +161,13 @@ func getServiceTable(namespace string, tableChan tableChannel) {
 	}
 	tableChan <- tableQuery{
 		table: table,
+	}
+}
+
+func getVolumeMountTable(namespace string, tableChan tableChannel) {
+	table, err := generateVolumeMountsOutput(namespace)
+	tableChan <- tableQuery{
+		table: table,
+		err:   err,
 	}
 }

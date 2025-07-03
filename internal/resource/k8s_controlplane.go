@@ -68,6 +68,24 @@ func (cp *KubernetesControlPlane) GetController(name string) (ret Controller, er
 }
 
 func (cp *KubernetesControlPlane) GetEndpoint() (string, error) {
+	// If HTTPS is enabled in the controller configuration, regenerate the endpoint with HTTPS
+	if cp.Controller.Https != nil && *cp.Controller.Https {
+		// Extract host and port from the existing endpoint
+		// The endpoint format is typically "http://host:port" or "https://host:port"
+		// We need to change the scheme to https
+		if cp.Endpoint != "" {
+			// Use the util.GetControllerEndpoint function to regenerate with HTTPS
+			// First, extract the host part (remove the scheme)
+			host := cp.Endpoint
+			if len(host) > 7 && host[:7] == "http://" {
+				host = host[7:]
+			} else if len(host) > 8 && host[:8] == "https://" {
+				host = host[8:]
+			}
+			// Regenerate with HTTPS
+			return util.GetControllerEndpoint(host, true)
+		}
+	}
 	return cp.Endpoint, nil
 }
 

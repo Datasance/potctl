@@ -40,6 +40,8 @@ type Database struct {
 	User         string
 	Password     string
 	DatabaseName string
+	SSL          *bool
+	CA           *string
 }
 
 type Pod struct {
@@ -54,6 +56,7 @@ type K8SControllerConfig struct {
 	PidBaseDir    string
 	EcnViewerPort int
 	EcnViewerURL  string
+	LogLevel      string
 	Auth          Auth
 	Https         *bool
 	SecretName    string

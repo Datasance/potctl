@@ -14,6 +14,7 @@
 package websocket
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"sync"
@@ -46,6 +47,9 @@ func NewClient(microserviceUUID string) *Client {
 // Connect establishes a WebSocket connection to the server
 func (c *Client) Connect(url string, headers http.Header) error {
 	dialer := websocket.Dialer{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
 		HandshakeTimeout: 45 * time.Second,
 		ReadBufferSize:   1024,
 		WriteBufferSize:  1024,

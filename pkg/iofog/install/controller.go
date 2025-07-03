@@ -45,6 +45,7 @@ type ControllerOptions struct {
 	SystemMicroservices RemoteSystemMicroservices
 	PidBaseDir          string
 	EcnViewerPort       int
+	LogLevel            string
 	Https               *Https
 	SiteCA              *SiteCertificate
 	LocalCA             *SiteCertificate
@@ -69,6 +70,8 @@ type database struct {
 	user         string
 	password     string
 	port         int
+	ssl          *bool
+	ca           *string
 }
 
 type auth struct {
@@ -109,7 +112,7 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 	}, nil
 }
 
-func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int) {
+func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int, ssl *bool, ca *string) {
 
 	ctrl.db = database{
 		databaseName: databaseName,
@@ -118,6 +121,8 @@ func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, prov
 		user:         user,
 		password:     password,
 		port:         port,
+		ssl:          ssl,
+		ca:           ca,
 	}
 }
 
@@ -224,12 +229,12 @@ func (ctrl *Controller) Install() (err error) {
 	// Encode environment variables
 	env := []string{}
 	env = append(env, "CONTROL_PLANE=Remote")
-	if ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
 		env = append(env, fmt.Sprintf("\"SERVER_DEV_MODE=%t\"", "false"))
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_CERT=%s\"", ctrl.Https.TLSCert))
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_KEY=%s\"", ctrl.Https.TLSKey))
 	}
-	if ctrl.Https.CACert != "" {
+	if ctrl.Https != nil && ctrl.Https.CACert != "" {
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_INTERMEDIATE_CERT=%s\"", ctrl.Https.CACert))
 	}
 	if ctrl.db.host != "" {
@@ -240,6 +245,12 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"DB_PASSWORD=%s"`, ctrl.db.password),
 			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
 			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
+	}
+	if ctrl.db.ssl != nil {
+		env = append(env, fmt.Sprintf(`"DB_USE_SSL=%t"`, *ctrl.db.ssl))
+	}
+	if ctrl.db.ca != nil {
+		env = append(env, fmt.Sprintf(`"DB_SSL_CA=%s"`, *ctrl.db.ca))
 	}
 	if ctrl.auth.url != "" {
 		env = append(env,
@@ -263,6 +274,9 @@ func (ctrl *Controller) Install() (err error) {
 	}
 	if ctrl.SystemMicroservices.Router.ARM != "" {
 		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
+	}
+	if ctrl.LogLevel != "" {
+		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
 	}
 
 	envString := strings.Join(env, " ")
@@ -308,7 +322,7 @@ func (ctrl *Controller) Install() (err error) {
 	// Increase timeout or retry attempts
 	maxRetries := 15
 	var protocol string
-	if ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
 		protocol = "https"
 	} else {
 		protocol = "http"

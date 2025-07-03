@@ -26,7 +26,7 @@ func newDescribeNamespaceCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "namespace NAME",
-		Short:   "Get detailed information about a  Namespace",
+		Short:   "Get detailed information about a Namespace",
 		Long:    `Get detailed information about a Namespace.`,
 		Example: `potctl describe namespace NAME`,
 		Args:    cobra.ExactArgs(1),

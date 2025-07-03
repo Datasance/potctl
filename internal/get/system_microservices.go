@@ -21,7 +21,6 @@ import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
-	"github.com/datasance/potctl/pkg/util"
 )
 
 type systemMicroserviceExecutor struct {
@@ -88,9 +87,9 @@ func (exe *systemMicroserviceExecutor) generateMicroserviceOutput() (table [][]s
 	// Populate rows
 	count := 0
 	for _, ms := range exe.msvcPerID {
-		if util.IsSystemMsvc(ms) {
-			continue
-		}
+		// if util.IsSystemMsvc(ms) {
+		// 	continue
+		// }
 
 		volumes := ""
 		for idx, volume := range ms.Volumes {

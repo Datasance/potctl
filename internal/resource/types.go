@@ -89,12 +89,14 @@ type Auth struct {
 }
 
 type Database struct {
-	Provider     string `yaml:"provider,omitempty"`
-	Host         string `yaml:"host,omitempty"`
-	Port         int    `yaml:"port,omitempty"`
-	User         string `yaml:"user,omitempty"`
-	Password     string `yaml:"password,omitempty"`
-	DatabaseName string `yaml:"databaseName,omitempty"`
+	Provider     string  `yaml:"provider,omitempty"`
+	Host         string  `yaml:"host,omitempty"`
+	Port         int     `yaml:"port,omitempty"`
+	User         string  `yaml:"user,omitempty"`
+	Password     string  `yaml:"password,omitempty"`
+	DatabaseName string  `yaml:"databaseName,omitempty"`
+	SSL          *bool   `yaml:"ssl,omitempty"`
+	CA           *string `yaml:"ca,omitempty"`
 }
 
 type Registry struct {
@@ -125,6 +127,41 @@ type AgentConfiguration struct {
 	Description               string  `json:"description,omitempty" yaml:"description"`
 	FogType                   *string `json:"fogType,omitempty" yaml:"agentType"`
 	client.AgentConfiguration `yaml:",inline"`
+}
+
+type AgentInfo struct {
+	AgentConfiguration
+	AgentStatus
+}
+
+type AgentStatus struct {
+	LastActive            int64   `json:"lastActive" yaml:"lastActive"`
+	DaemonStatus          string  `json:"daemonStatus" yaml:"daemonStatus"`
+	SecurityStatus        string  `json:"securityStatus" yaml:"securityStatus"`
+	SecurityViolationInfo string  `json:"securityViolationInfo" yaml:"securityViolationInfo"`
+	WarningMessage        string  `json:"warningMessage" yaml:"warningMessage"`
+	UptimeMs              int64   `json:"daemonOperatingDuration" yaml:"uptime"`
+	MemoryUsage           float64 `json:"memoryUsage" yaml:"memoryUsage"`
+	DiskUsage             float64 `json:"diskUsage" yaml:"diskUsage"`
+	CPUUsage              float64 `json:"cpuUsage" yaml:"cpuUsage"`
+	SystemAvailableMemory float64 `json:"systemAvailableMemory" yaml:"systemAvailableMemory"`
+	SystemAvailableDisk   float64 `json:"systemAvailableDisk" yaml:"systemAvailableDisk"`
+	SystemTotalCPU        float64 `json:"systemTotalCPU" yaml:"systemTotalCPU"`
+	MemoryViolation       string  `json:"memoryViolation" yaml:"memoryViolation"`
+	DiskViolation         string  `json:"diskViolation" yaml:"diskViolation"`
+	CPUViolation          string  `json:"cpuViolation" yaml:"cpuViolation"`
+	RepositoryStatus      string  `json:"repositoryStatus" yaml:"repositoryStatus"`
+	LastStatusTimeMsUTC   int64   `json:"lastStatusTime" yaml:"lastStatusTime"`
+	IPAddress             string  `json:"ipAddress" yaml:"ipAddress"`
+	IPAddressExternal     string  `json:"ipAddressExternal" yaml:"ipAddressExternal"`
+	ProcessedMessaged     int64   `json:"processedMessages" yaml:"ProcessedMessages"`
+	MessageSpeed          float64 `json:"messageSpeed" yaml:"messageSpeed"`
+	LastCommandTimeMsUTC  int64   `json:"lastCommandTime" yaml:"lastCommandTime"`
+	Version               string  `json:"version" yaml:"version"`
+	IsReadyToUpgrade      bool    `json:"isReadyToUpgrade" yaml:"isReadyToUpgrade"`
+	IsReadyToRollback     bool    `json:"isReadyToRollback" yaml:"isReadyToRollback"`
+	Tunnel                string  `json:"tunnel" yaml:"tunnel"`
+	VolumeMounts          []VolumeMount
 }
 
 type EdgeResource struct {
@@ -161,6 +198,7 @@ type K8SControllerConfig struct {
 	PidBaseDir    string `yaml:"pidBaseDir,omitempty"`
 	EcnViewerPort int    `yaml:"ecnViewerPort,omitempty"`
 	EcnViewerURL  string `yaml:"ecnViewerUrl,omitempty"`
+	LogLevel      string `yaml:"logLevel,omitempty"`
 	Https         *bool  `yaml:"https,omitempty"`
 	SecretName    string `yaml:"secretName,omitempty"`
 }
@@ -169,6 +207,7 @@ type RemoteControllerConfig struct {
 	PidBaseDir    string           `yaml:"pidBaseDir,omitempty"`
 	EcnViewerPort int              `yaml:"ecnViewerPort,omitempty"`
 	EcnViewerURL  string           `yaml:"ecnViewerUrl,omitempty"`
+	LogLevel      string           `yaml:"logLevel,omitempty"`
 	Https         *Https           `yaml:"https,omitempty"`
 	SiteCA        *SiteCertificate `yaml:"siteCA,omitempty"`  // router site CA
 	LocalCA       *SiteCertificate `yaml:"localCA,omitempty"` // router local CA

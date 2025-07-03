@@ -115,6 +115,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 		PidBaseDir:    exe.controlPlane.Controller.PidBaseDir,
 		EcnViewerPort: exe.controlPlane.Controller.EcnViewerPort,
 		EcnViewerURL:  exe.controlPlane.Controller.EcnViewerURL,
+		LogLevel:      exe.controlPlane.Controller.LogLevel,
 		Https:         exe.controlPlane.Controller.Https,
 		SecretName:    exe.controlPlane.Controller.SecretName,
 	}

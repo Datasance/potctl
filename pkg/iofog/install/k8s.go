@@ -57,6 +57,7 @@ type Kubernetes struct {
 	services      cpv3.Services
 	images        cpv3.Images
 	ingresses     cpv3.Ingresses
+	httpsEnabled  *bool // Store HTTPS configuration
 	// router        cpv3.Router
 }
 
@@ -124,6 +125,10 @@ func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 		k8s.images.PullSecret = pullSecret
 		k8s.operator.imagePullSecret = pullSecret
 	}
+}
+
+func (k8s *Kubernetes) SetHttpsEnabled(enabled *bool) {
+	k8s.httpsEnabled = enabled
 }
 
 func (k8s *Kubernetes) enableCustomResources() error {
@@ -235,9 +240,13 @@ func (k8s *Kubernetes) CreateControlPlane(conf *K8SControllerConfig) (endpoint s
 	// cp.Spec.Router = k8s.router
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
+	cp.Spec.Controller.LogLevel = conf.LogLevel
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
 	cp.Spec.Controller.Https = conf.Https
 	cp.Spec.Controller.SecretName = conf.SecretName
+
+	// Store HTTPS configuration for endpoint generation
+	k8s.SetHttpsEnabled(conf.Https)
 
 	// Create or update Control Plane
 	if found {
@@ -731,14 +740,19 @@ func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, error) {
 	// Ensure protocol
 	if !strings.Contains(endpoint, "://") {
-		endpoint = fmt.Sprintf("http://%s", endpoint)
+		// Check if HTTPS should be used
+		if k8s.httpsEnabled != nil && *k8s.httpsEnabled {
+			endpoint = fmt.Sprintf("https://%s", endpoint)
+		} else {
+			endpoint = fmt.Sprintf("http://%s", endpoint)
+		}
 	}
 	URL, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	// Ensure port for http
-	if !strings.Contains(URL.Host, ":") && URL.Scheme != "https" {
+	// Ensure port is added if not present
+	if !strings.Contains(URL.Host, ":") {
 		URL.Host += fmt.Sprintf(":%d", port)
 	}
 	return URL, nil
@@ -755,7 +769,14 @@ func (k8s *Kubernetes) GetControllerEndpoint() (endpoint string, err error) {
 		return "", err
 	}
 	endpoint = formattedURL.String()
-	return util.GetControllerEndpoint(endpoint)
+
+	// Check if HTTPS is enabled
+	useHTTPS := false
+	if k8s.httpsEnabled != nil && *k8s.httpsEnabled {
+		useHTTPS = true
+	}
+
+	return util.GetControllerEndpoint(endpoint, useHTTPS)
 }
 
 func (k8s *Kubernetes) GetControllerPods() (podNames []Pod, err error) {

@@ -1,6 +1,6 @@
 ## potctl describe namespace
 
-Get detailed information about a  Namespace
+Get detailed information about a Namespace
 
 ### Synopsis
 

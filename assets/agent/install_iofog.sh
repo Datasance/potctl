@@ -46,11 +46,11 @@ do_install_iofog() {
 	case "$lsb_dist" in
 		fedora|rhel|ol|centos)
 			$sh_c "yum update -y"
-			$sh_c "yum install -y iofog-agent-$agent_version-1.noarch"
+			$sh_c "yum install -y iofog-agent-podman-$agent_version-1.noarch"
 			;;
 		sles|opensuse)
 			$sh_c "zypper refresh"
-			$sh_c "zypper install -y iofog-agent=$agent_version"
+			$sh_c "zypper install -y iofog-agent-podman=$agent_version"
 			;;
 		*)
 			$sh_c "apt update -qy"
@@ -73,7 +73,7 @@ do_start_iofog(){
 	local ITER=0
 	while [ "$STATUS" != "RUNNING" ] ; do
     ITER=$((ITER+1))
-    if [ "$ITER" -gt 60 ]; then
+    if [ "$ITER" -gt 600 ]; then
       echo 'Timed out waiting for Agent to be RUNNING'
       exit 1;
     fi

@@ -26,7 +26,7 @@ func newDescribeVolumeCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "volume NAME",
-		Short:   "Get detailed information about a  Volume",
+		Short:   "Get detailed information about a Volume",
 		Long:    `Get detailed information about a Volume.`,
 		Example: `potctl describe volume NAME`,
 		Args:    cobra.ExactArgs(1),

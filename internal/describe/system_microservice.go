@@ -79,8 +79,8 @@ func (exe *systemMicroserviceExecutor) Execute() error {
 		},
 		Spec: yamlMsvc,
 		Status: map[string]interface{}{
-			"status":     status,
-			"execStatus": execStatus,
+			"status":     FormatMicroserviceStatus(status),
+			"execStatus": FormatMicroserviceExecStatus(execStatus),
 		},
 	}
 

@@ -1,6 +1,6 @@
 ## potctl describe route
 
-Get detailed information about a  Route
+Get detailed information about a Route
 
 ### Synopsis
 

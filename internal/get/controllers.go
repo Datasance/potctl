@@ -15,13 +15,14 @@ package get
 
 import (
 	// "fmt"
+	"time"
+
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"time"
 )
 
 type controllerExecutor struct {
@@ -179,6 +180,12 @@ func updateControllerPods(controlPlane *rsc.KubernetesControlPlane, namespace st
 	if err != nil {
 		return
 	}
+
+	// Set HTTPS configuration if present in the control plane
+	if controlPlane.Controller.Https != nil {
+		installer.SetHttpsEnabled(controlPlane.Controller.Https)
+	}
+
 	pods, err := installer.GetControllerPods()
 	if err != nil {
 		return

@@ -231,8 +231,15 @@ func Execute(opt *Options) (err error) {
 				}
 			} else {
 				// For remote agents, use the configuration from the agent executor
-				agentConfig = deployConfig.AgentConfiguration
-				agentConfig.Host = &host
+				if deployConfig == nil || deployConfig.AgentConfiguration == (client.AgentConfiguration{}) {
+					// Initialize default remote agent configuration
+					agentConfig = client.AgentConfiguration{
+						Host: &host,
+					}
+				} else {
+					agentConfig = deployConfig.AgentConfiguration
+					agentConfig.Host = &host
+				}
 			}
 			executorsMap[config.AgentConfigKind] = append(executorsMap[config.AgentConfigKind], deployagentconfig.NewRemoteExecutor(
 				agentExecutor.GetName(),

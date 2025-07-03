@@ -65,10 +65,11 @@ func (exe *agentExecutor) Execute() (err error) {
 
 	var tags *[]string
 	var agentConfig rsc.AgentConfiguration
+	var agentStatus rsc.AgentStatus
 	// Detached Agents don't have a UUID
 	if agent.GetUUID() != "" {
 		// Get Agent configuration
-		agentConfig, tags, err = clientutil.GetAgentConfig(exe.name, exe.namespace)
+		agentConfig, tags, agentStatus, err = clientutil.GetAgentConfig(exe.name, exe.namespace)
 		if err != nil {
 			return err
 		}
@@ -82,6 +83,10 @@ func (exe *agentExecutor) Execute() (err error) {
 	case *rsc.RemoteAgent:
 		kind = config.RemoteAgentKind
 	}
+
+	// Format agent status for human-readable output
+	formattedStatus := FormatAgentStatus(agentStatus)
+
 	header := config.Header{
 		APIVersion: config.LatestAPIVersion,
 		Kind:       kind,
@@ -90,7 +95,8 @@ func (exe *agentExecutor) Execute() (err error) {
 			Name:      exe.name,
 			Tags:      tags,
 		},
-		Spec: agent,
+		Spec:   agent,
+		Status: formattedStatus,
 	}
 
 	if exe.filename == "" {

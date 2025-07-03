@@ -104,7 +104,9 @@ func (exe *remoteExecutor) Execute() (err error) {
 	if err = exe.controller.ValidateSSH(); err != nil {
 		return
 	}
-
+	if exe.controller.LogLevel == "" {
+		exe.controller.LogLevel = "info"
+	}
 	// Instantiate deployer
 	controllerOptions := &install.ControllerOptions{
 		User:            exe.controller.SSH.User,
@@ -113,26 +115,40 @@ func (exe *remoteExecutor) Execute() (err error) {
 		PrivKeyFilename: exe.controller.SSH.KeyFile,
 		PidBaseDir:      exe.controller.PidBaseDir,
 		EcnViewerPort:   exe.controller.EcnViewerPort,
+		LogLevel:        exe.controller.LogLevel,
 		Version:         exe.controlPlane.Package.Version,
 		Image:           exe.controlPlane.Package.Container.Image,
 		// Repo:                exe.controlPlane.Package.Repo,
 		// Token:               exe.controlPlane.Package.Token,
 		SystemMicroservices: exe.controlPlane.SystemMicroservices,
-		Https: &install.Https{
+	}
+
+	// Add HTTPS configuration if present
+	if exe.controller.Https != nil {
+		controllerOptions.Https = &install.Https{
 			Enabled: exe.controller.Https.Enabled,
 			CACert:  exe.controller.Https.CACert,
 			TLSCert: exe.controller.Https.TLSCert,
 			TLSKey:  exe.controller.Https.TLSKey,
-		},
-		SiteCA: &install.SiteCertificate{
+		}
+	}
+
+	// Add SiteCA configuration if present
+	if exe.controller.SiteCA != nil {
+		controllerOptions.SiteCA = &install.SiteCertificate{
 			TLSCert: exe.controller.SiteCA.TLSCert,
 			TLSKey:  exe.controller.SiteCA.TLSKey,
-		},
-		LocalCA: &install.SiteCertificate{
+		}
+	}
+
+	// Add LocalCA configuration if present
+	if exe.controller.LocalCA != nil {
+		controllerOptions.LocalCA = &install.SiteCertificate{
 			TLSCert: exe.controller.LocalCA.TLSCert,
 			TLSKey:  exe.controller.LocalCA.TLSKey,
-		},
+		}
 	}
+
 	deployer, err := install.NewController(controllerOptions)
 	if err != nil {
 		return err
@@ -141,7 +157,7 @@ func (exe *remoteExecutor) Execute() (err error) {
 	// Set database configuration
 	if exe.controlPlane.Database.Host != "" {
 		db := exe.controlPlane.Database
-		deployer.SetControllerExternalDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port)
+		deployer.SetControllerExternalDatabase(db.Host, db.User, db.Password, db.Provider, db.DatabaseName, db.Port, db.SSL, db.CA)
 	}
 
 	if exe.controlPlane.Auth.URL != "" {
@@ -154,7 +170,11 @@ func (exe *remoteExecutor) Execute() (err error) {
 		return
 	}
 	// Update controller
-	exe.controller.Endpoint, err = util.GetControllerEndpoint(exe.controller.Host)
+	useHTTPS := false
+	if exe.controller.Https != nil && exe.controller.Https.Enabled != nil && *exe.controller.Https.Enabled {
+		useHTTPS = true
+	}
+	exe.controller.Endpoint, err = util.GetControllerEndpoint(exe.controller.Host, useHTTPS)
 	if err != nil {
 		return err
 	}
