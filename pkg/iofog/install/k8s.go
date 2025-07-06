@@ -58,6 +58,7 @@ type Kubernetes struct {
 	images        cpv3.Images
 	ingresses     cpv3.Ingresses
 	httpsEnabled  *bool // Store HTTPS configuration
+	isViewerDns   *bool // Store isViewerDns configuration
 	// router        cpv3.Router
 }
 
@@ -129,6 +130,10 @@ func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 
 func (k8s *Kubernetes) SetHttpsEnabled(enabled *bool) {
 	k8s.httpsEnabled = enabled
+}
+
+func (k8s *Kubernetes) SetIsViewerDns(enabled *bool) {
+	k8s.isViewerDns = enabled
 }
 
 func (k8s *Kubernetes) enableCustomResources() error {
@@ -737,7 +742,7 @@ func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	return util.NewError("Could not find Controller Service in Kubernetes namespace " + namespace)
 }
 
-func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, error) {
+func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32, isViewerDns ...bool) (*url.URL, error) {
 	// Ensure protocol
 	if !strings.Contains(endpoint, "://") {
 		// Check if HTTPS should be used
@@ -752,7 +757,10 @@ func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, er
 		return nil, err
 	}
 	// Ensure port is added if not present
-	if !strings.Contains(URL.Host, ":") {
+	// if !strings.Contains(URL.Host, ":") {
+	// Ensure port for http
+	if !strings.Contains(URL.Host, ":") && (URL.Scheme != "https" || !isViewerDns[0]) {
+
 		URL.Host += fmt.Sprintf(":%d", port)
 	}
 	return URL, nil
@@ -764,7 +772,11 @@ func (k8s *Kubernetes) GetControllerEndpoint() (endpoint string, err error) {
 	if err != nil {
 		return "", err
 	}
-	formattedURL, err := k8s.formatEndpoint(ip, port)
+	isViewerDns := false
+	if k8s.isViewerDns != nil && *k8s.isViewerDns {
+		isViewerDns = true
+	}
+	formattedURL, err := k8s.formatEndpoint(ip, port, isViewerDns)
 	if err != nil {
 		return "", err
 	}

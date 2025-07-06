@@ -77,6 +77,11 @@ func (exe *kubernetesExecutor) Execute() (err error) {
 		k8s.SetHttpsEnabled(exe.controlPlane.Controller.Https)
 	}
 
+	if exe.controlPlane.Controller.EcnViewerURL != "" {
+		viewerDns := true
+		k8s.SetIsViewerDns(&viewerDns)
+	}
+
 	// Check the resources exist in K8s namespace
 	if err = k8s.ExistsInNamespace(exe.namespace); err != nil {
 		return
