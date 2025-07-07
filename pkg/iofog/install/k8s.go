@@ -759,7 +759,7 @@ func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32, isViewerDns .
 	// Ensure port is added if not present
 	// if !strings.Contains(URL.Host, ":") {
 	// Ensure port for http
-	if !strings.Contains(URL.Host, ":") && (URL.Scheme != "https" || !isViewerDns[0]) {
+	if !strings.Contains(URL.Host, ":") && (URL.Scheme != "https" && !isViewerDns[0]) {
 
 		URL.Host += fmt.Sprintf(":%d", port)
 	}
