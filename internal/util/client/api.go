@@ -264,6 +264,7 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 		IsReadyToRollback:     agentInfo.IsReadyToRollback,
 		Tunnel:                agentInfo.Tunnel,
 		VolumeMounts:          convertVolumeMounts(agentInfo.VolumeMounts),
+		GpsStatus:             agentInfo.GpsStatus,
 	}
 
 	return agentConfig, tags, agentStatus, err

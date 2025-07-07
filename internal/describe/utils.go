@@ -353,6 +353,7 @@ func FormatAgentStatus(status rsc.AgentStatus) map[string]interface{} {
 	formatted["isReadyToRollback"] = status.IsReadyToRollback
 	formatted["tunnel"] = status.Tunnel
 	formatted["volumeMounts"] = status.VolumeMounts
+	formatted["gpsStatus"] = status.GpsStatus
 
 	return formatted
 }

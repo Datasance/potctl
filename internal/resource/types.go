@@ -162,6 +162,7 @@ type AgentStatus struct {
 	IsReadyToRollback     bool    `json:"isReadyToRollback" yaml:"isReadyToRollback"`
 	Tunnel                string  `json:"tunnel" yaml:"tunnel"`
 	VolumeMounts          []VolumeMount
+	GpsStatus             string `json:"gpsStatus" yaml:"gpsStatus"`
 }
 
 type EdgeResource struct {
