@@ -1,5 +1,5 @@
-//go:build !windows
-// +build !windows
+//go:build windows
+// +build windows
 
 /*
  *  *******************************************************************************
@@ -20,12 +20,10 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/signal"
 	"sync"
 	"time"
 
 	ws "github.com/datasance/potctl/internal/util/websocket"
-	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -68,56 +66,6 @@ func (t *Terminal) writeToStdout(data []byte) {
 	os.Stdout.Write(data)
 	os.Stdout.Sync()
 }
-
-// func (t *Terminal) detectEditorMode(cmd string) {
-// 	editors := []string{"vim", "vi", "nano", "emacs"}
-// 	for _, editor := range editors {
-// 		if strings.Contains(cmd, editor) {
-// 			t.isEditorMode = true
-// 			return
-// 		}
-// 	}
-// 	t.isEditorMode = false
-// }
-
-// // Add new function to detect editor mode from output
-// func (t *Terminal) checkOutputForEditorMode(output string) {
-// 	// Common editor prompts/indicators
-// 	editorIndicators := []string{
-// 		"~",            // Vim's empty line indicator
-// 		"-- INSERT --", // Vim's insert mode
-// 		"-- NORMAL --", // Vim's normal mode
-// 		"GNU nano",     // Nano's header
-// 		"File Edit",    // Nano's menu
-// 		"Emacs",        // Emacs indicator
-// 	}
-
-// 	// Check for editor exit indicators
-// 	exitIndicators := []string{
-// 		"E325: ATTENTION", // Vim swap file message
-// 		"File written",    // Nano save message
-// 		"File saved",      // Nano save message
-// 		"Wrote",           // Vim write message
-// 		"Quit",            // Common exit message
-// 		"exit",            // Common exit message
-// 	}
-
-// 	// First check for exit indicators
-// 	for _, indicator := range exitIndicators {
-// 		if strings.Contains(output, indicator) {
-// 			t.isEditorMode = false
-// 			return
-// 		}
-// 	}
-
-// 	// Then check for editor indicators
-// 	for _, indicator := range editorIndicators {
-// 		if strings.Contains(output, indicator) {
-// 			t.isEditorMode = true
-// 			return
-// 		}
-// 	}
-// }
 
 func (t *Terminal) handleInput(data []byte) bool {
 	if len(data) == 0 {
@@ -179,65 +127,6 @@ func (t *Terminal) redrawInputLine() {
 	os.Stdout.Sync()
 }
 
-// func (t *Terminal) moveCursor(n int) {
-// 	t.stdoutMutex.Lock()
-// 	defer t.stdoutMutex.Unlock()
-// 	if n > 0 {
-// 		os.Stdout.Write([]byte(fmt.Sprintf("\x1b[%dC", n)))
-// 	} else if n < 0 {
-// 		os.Stdout.Write([]byte(fmt.Sprintf("\x1b[%dD", -n)))
-// 	}
-// 	os.Stdout.Sync()
-// }
-
-// func (t *Terminal) moveCursorTo(pos int) {
-// 	t.stdoutMutex.Lock()
-// 	defer t.stdoutMutex.Unlock()
-
-// 	// Calculate the absolute position including prompt length (only add once)
-// 	promptLen := len([]rune(t.prompt))
-// 	absPos := promptLen + pos
-
-// 	// Move cursor to the beginning of the line
-// 	os.Stdout.Write([]byte("\r"))
-
-// 	// Move cursor to the correct position
-// 	if absPos > 0 {
-// 		os.Stdout.Write([]byte(fmt.Sprintf("\x1b[%dC", absPos)))
-// 	}
-
-// 	t.cursorPos = pos
-// 	os.Stdout.Sync()
-// }
-
-// func (t *Terminal) replaceInputLine(newLine string) {
-// 	t.stdoutMutex.Lock()
-// 	defer t.stdoutMutex.Unlock()
-
-// 	// Clear the current line and move to start
-// 	os.Stdout.Write([]byte("\r\x1b[K"))
-
-// 	// Update the buffer
-// 	t.inputBuffer = []rune(newLine)
-
-// 	// Redraw the prompt and input
-// 	if t.prompt != "" {
-// 		os.Stdout.Write([]byte(t.prompt))
-// 	}
-// 	os.Stdout.Write([]byte(string(t.inputBuffer)))
-
-// 	// Move cursor to end of input
-// 	t.cursorPos = len(t.inputBuffer)
-// 	os.Stdout.Write([]byte("\r")) // Move to start of line first
-// 	if t.prompt != "" {
-// 		os.Stdout.Write([]byte(t.prompt)) // Move past prompt
-// 	}
-// 	if t.cursorPos > 0 {
-// 		os.Stdout.Write([]byte(fmt.Sprintf("\x1b[%dC", t.cursorPos))) // Move to cursor position
-// 	}
-// 	os.Stdout.Sync()
-// }
-
 func (t *Terminal) cleanup() {
 	t.cleanupOnce.Do(func() {
 		if t.wsClient != nil {
@@ -258,9 +147,9 @@ func (t *Terminal) Start() error {
 	}
 	defer t.cleanup()
 
-	// Set up signal handling for window resize
-	signal.Notify(t.resizeCh, unix.SIGWINCH)
-	go t.handleResize()
+	// Windows doesn't support SIGWINCH, so we skip resize handling
+	// signal.Notify(t.resizeCh, syscall.SIGWINCH)
+	// go t.handleResize()
 
 	// Create error channel to coordinate exit
 	errCh := make(chan error, 1)
@@ -332,11 +221,12 @@ func (t *Terminal) Start() error {
 	}
 }
 
-func (t *Terminal) handleResize() {
-	for range t.resizeCh {
-		// Local resize only; no forwarding
-	}
-}
+// func (t *Terminal) handleResize() {
+// 	// Windows doesn't support SIGWINCH, so this function is empty
+// 	for range t.resizeCh {
+// 		// No-op on Windows
+// 	}
+// }
 
 func (t *Terminal) Stop() {
 	t.cancel()
