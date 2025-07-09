@@ -101,6 +101,12 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetRouterIngress(exe.controlPlane.Ingresses.Router.Address, exe.controlPlane.Ingresses.Router.MessagePort, exe.controlPlane.Ingresses.Router.InteriorPort, exe.controlPlane.Ingresses.Router.EdgePort)
 	// installer.SetRouterConfig(exe.controlPlane.Router.InternalSecret, exe.controlPlane.Router.AmqpsSecret, exe.controlPlane.Router.RequireSsl, exe.controlPlane.Router.SaslMechanisms, exe.controlPlane.Router.AuthenticatePeer)
 
+	// Set isViewerDns based on EcnViewerURL presence
+	if exe.controlPlane.Controller.EcnViewerURL != "" {
+		viewerDns := true
+		installer.SetIsViewerDns(&viewerDns)
+	}
+
 	replicas := int32(1)
 	if exe.controlPlane.Replicas.Controller != 0 {
 		replicas = exe.controlPlane.Replicas.Controller

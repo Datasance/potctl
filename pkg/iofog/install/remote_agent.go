@@ -334,9 +334,9 @@ func (agent *RemoteAgent) Configure(controllerEndpoint string, user IofogUser) (
 }
 
 func (agent *RemoteAgent) SetInitialConfig(
-	name, location string,
-	latitude, longitude float64,
-	description, fogType string,
+	name, fogType string,
+	// latitude, longitude float64,
+	// description, fogType string,
 	agentConfig client.AgentConfiguration,
 ) error {
 	// Prepare the base commands for agent configuration
@@ -354,16 +354,16 @@ func (agent *RemoteAgent) SetInitialConfig(
 		watchdogEnabled = "on"
 	}
 
-	// Format GPS coordinates (Latitude and Longitude)
-	gpsCoordinates := ""
-	if latitude != 0 || longitude != 0 {
-		gpsCoordinates = fmt.Sprintf("%f,%f", latitude, longitude)
-	}
+	// // Format GPS coordinates (Latitude and Longitude)
+	// gpsCoordinates := ""
+	// if latitude != 0 || longitude != 0 {
+	// 	gpsCoordinates = fmt.Sprintf("%f,%f", latitude, longitude)
+	// }
 
 	// Extract values from agentConfig and construct options
 	configOptions := map[string]string{
-		"-ft":  fogTypeValue,
-		"-gps": gpsCoordinates,
+		"-ft": fogTypeValue,
+		// "-gps": gpsCoordinates,
 	}
 
 	// Add values from agentConfig to configOptions, properly handling pointers
@@ -412,18 +412,18 @@ func (agent *RemoteAgent) SetInitialConfig(
 	if agentConfig.DockerPruningFrequency != nil {
 		configOptions["-pf"] = strconv.FormatFloat(*agentConfig.DockerPruningFrequency, 'f', -1, 64)
 	}
-	if agentConfig.GpsDevice != nil && *agentConfig.GpsDevice != "" {
-		configOptions["-gpsd"] = *agentConfig.GpsDevice
-	}
-	if agentConfig.GpsMode != nil && *agentConfig.GpsMode != "" {
-		configOptions["-gps"] = *agentConfig.GpsMode
-	}
-	if agentConfig.GpsScanFrequency != nil {
-		configOptions["-gpsf"] = strconv.FormatFloat(*agentConfig.GpsScanFrequency, 'f', -1, 64)
-	}
-	if agentConfig.EdgeGuardFrequency != nil {
-		configOptions["-egf"] = strconv.FormatFloat(*agentConfig.EdgeGuardFrequency, 'f', -1, 64)
-	}
+	// if agentConfig.GpsDevice != nil && *agentConfig.GpsDevice != "" {
+	// 	configOptions["-gpsd"] = *agentConfig.GpsDevice
+	// }
+	// if agentConfig.GpsMode != nil && *agentConfig.GpsMode != "" {
+	// 	configOptions["-gps"] = *agentConfig.GpsMode
+	// }
+	// if agentConfig.GpsScanFrequency != nil {
+	// 	configOptions["-gpsf"] = strconv.FormatFloat(*agentConfig.GpsScanFrequency, 'f', -1, 64)
+	// }
+	// if agentConfig.EdgeGuardFrequency != nil {
+	// 	configOptions["-egf"] = strconv.FormatFloat(*agentConfig.EdgeGuardFrequency, 'f', -1, 64)
+	// }
 	if agentConfig.TimeZone != "" {
 		configOptions["-tz"] = agentConfig.TimeZone
 	}

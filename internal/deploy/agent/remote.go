@@ -109,10 +109,10 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 		}
 		err = agent.SetInitialConfig(
 			agentConfig.Name,
-			agentConfig.Location,
-			agentConfig.Latitude,
-			agentConfig.Longitude,
-			agentConfig.Description,
+			// agentConfig.Location,
+			// agentConfig.Latitude,
+			// agentConfig.Longitude,
+			// agentConfig.Description,
 			*fogType,
 			agentConfig.AgentConfiguration, // Pass the embedded client.AgentConfiguration
 		)
