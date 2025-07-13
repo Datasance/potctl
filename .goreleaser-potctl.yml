@@ -38,9 +38,9 @@ builds:
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerAdaptorTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
 
   - id: build_linux
@@ -65,9 +65,9 @@ builds:
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerAdaptorTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
 
     flags:
@@ -90,9 +90,9 @@ builds:
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerAdaptorTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.5.0"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.5.0"
-      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.1"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.0.3"
       - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
 
 

@@ -21,11 +21,11 @@ LDFLAGS += -X $(PREFIX).operatorTag=3.5.0
 LDFLAGS += -X $(PREFIX).routerAdaptorTag=3.5.0
 LDFLAGS += -X $(PREFIX).routerTag=3.5.0
 LDFLAGS += -X $(PREFIX).controllerTag=3.5.0
-LDFLAGS += -X $(PREFIX).agentTag=3.5.0.1
+LDFLAGS += -X $(PREFIX).agentTag=3.5.0.3
 LDFLAGS += -X $(PREFIX).controllerVersion=3.5.0
-LDFLAGS += -X $(PREFIX).agentVersion=3.5.0.1
+LDFLAGS += -X $(PREFIX).agentVersion=3.5.0.3
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
-GO_SDK_MODULE = iofog-go-sdk/v3@v3.5.0
+GO_SDK_MODULE = iofog-go-sdk/v3@v3.5.0.3
 OPERATOR_MODULE = iofog-operator/v3@v3.5.0
 REPORTS_DIR ?= reports
 TEST_RESULTS ?= TEST-potctl.txt
