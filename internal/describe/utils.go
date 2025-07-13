@@ -90,6 +90,7 @@ func FormatMicroserviceStatus(status *apps.MicroserviceStatusInfo) map[string]in
 	formatted["errorMessage"] = status.ErrorMessage
 	formatted["ipAddress"] = status.IPAddress
 	formatted["execSessionIds"] = status.ExecSessionIDs
+	formatted["healthStatus"] = status.HealthStatus
 
 	// Format startTime as RFC3339 timestamp
 	if status.StartTime > 0 {
@@ -182,6 +183,33 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	if err := jsoniter.Unmarshal([]byte(msvcInfo.Annotations), &jsonAnnotations); err != nil {
 		return msvc, nil, nil, err
 	}
+	var healthCheck apps.MicroserviceHealthCheck
+	var hasHealthCheck bool
+	// Fix 1: Check if HealthCheck has a Test field (assuming it's a struct, not pointer)
+	if msvcInfo.HealthCheck.Test != nil {
+		hasHealthCheck = false
+		if msvcInfo.HealthCheck.Test != nil {
+			healthCheck.Test = msvcInfo.HealthCheck.Test
+			hasHealthCheck = true
+		}
+
+		// Only set fields that were present in the original JSON
+		if msvcInfo.HealthCheck.Interval != nil {
+			healthCheck.Interval = msvcInfo.HealthCheck.Interval
+		}
+		if msvcInfo.HealthCheck.Timeout != nil {
+			healthCheck.Timeout = msvcInfo.HealthCheck.Timeout
+		}
+		if msvcInfo.HealthCheck.Retries != nil {
+			healthCheck.Retries = msvcInfo.HealthCheck.Retries
+		}
+		if msvcInfo.HealthCheck.StartPeriod != nil {
+			healthCheck.StartPeriod = msvcInfo.HealthCheck.StartPeriod
+		}
+		if msvcInfo.HealthCheck.StartInterval != nil {
+			healthCheck.StartInterval = msvcInfo.HealthCheck.StartInterval
+		}
+	}
 	msvc.Config = jsonConfig
 	msvc.Container.Annotations = jsonAnnotations
 	msvc.Container.RootHostAccess = msvcInfo.RootHostAccess
@@ -198,6 +226,11 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	msvc.Container.Volumes = &volumes
 	msvc.Container.Env = &envs
 	msvc.Container.ExtraHosts = &extraHosts
+	msvc.Container.CpuSetCpus = msvcInfo.CpuSetCpus
+	msvc.Container.MemoryLimit = &msvcInfo.MemoryLimit
+	if hasHealthCheck {
+		msvc.Container.HealthCheck = &healthCheck
+	}
 	msvc.MsRoutes = apps.MsRoutes{
 		PubTags: msvcInfo.PubTags,
 		SubTags: msvcInfo.SubTags,
@@ -216,6 +249,7 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	status.ErrorMessage = msvcInfo.Status.ErrorMessage
 	status.IPAddress = msvcInfo.Status.IPAddress
 	status.ExecSessionIDs = msvcInfo.Status.ExecSessionIDs
+	status.HealthStatus = msvcInfo.Status.HealthStatus
 	execStatus = new(apps.MicroserviceExecStatusInfo)
 	execStatus.Status = msvcInfo.ExecStatus.Status
 	execStatus.ExecSessionID = msvcInfo.ExecStatus.ExecSessionID

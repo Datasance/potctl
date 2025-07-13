@@ -14,7 +14,7 @@ do_check_install() {
 
 do_stop_iofog() {
 	if command_exists iofog-agent; then
-		sudo service iofog-agent stop
+		sudo systemctl stop iofog-agent
 	fi
 }
 
@@ -24,9 +24,9 @@ do_stop_iofog() {
 #     $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
 
 #     echo "# Restarting iofog-agent service"
-#     $sh_c "service iofog-agent stop"
+#     $sh_c "systemctl stop iofog-agent"
 #     sleep 3
-#     $sh_c "service iofog-agent start"
+#     $sh_c "systemctl start iofog-agent"
 #  fi
 # }
 
@@ -46,11 +46,11 @@ do_install_iofog() {
 	case "$lsb_dist" in
 		fedora|rhel|ol|centos)
 			$sh_c "yum update -y"
-			$sh_c "yum install -y iofog-agent-podman-$agent_version-1.noarch"
+			$sh_c "yum install -y iofog-agent-$agent_version-1.noarch"
 			;;
 		sles|opensuse)
 			$sh_c "zypper refresh"
-			$sh_c "zypper install -y iofog-agent-podman=$agent_version"
+			$sh_c "zypper install -y iofog-agent=$agent_version"
 			;;
 		*)
 			$sh_c "apt update -qy"
@@ -68,7 +68,7 @@ do_install_iofog() {
 
 do_start_iofog(){
 
-	sudo service iofog-agent start > /dev/null 2&>1 &
+	sudo systemctl start iofog-agent > /dev/null 2&>1 &
 	local STATUS=""
 	local ITER=0
 	while [ "$STATUS" != "RUNNING" ] ; do
