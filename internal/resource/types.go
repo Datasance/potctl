@@ -282,22 +282,23 @@ type VolumeMount struct {
 	UUID          string `yaml:"uuid,omitempty"`
 	ConfigMapName string `yaml:"configMapName,omitempty"`
 	SecretName    string `yaml:"secretName,omitempty"`
-	Version       int    `yaml:"version,omitempty"	`
+	Version       int    `yaml:"version,omitempty"`
 }
 
 type CertificateInfo struct {
 	// Name             string                 `json:"name"`
-	Subject          string                 `json:"subject" yaml:"subject"`
-	Hosts            string                 `json:"hosts" yaml:"hosts"`
-	IsCA             bool                   `json:"isCA" yaml:"isCA"`
-	ValidFrom        time.Time              `json:"validFrom" yaml:"validFrom"`
-	ValidTo          time.Time              `json:"validTo" yaml:"validTo"`
-	SerialNumber     string                 `json:"serialNumber" yaml:"serialNumber"`
-	CAName           *string                `json:"caName" yaml:"caName"`
-	CertificateChain []CertificateChainItem `json:"certificateChain" yaml:"certificateChain"`
-	DaysRemaining    int                    `json:"daysRemaining" yaml:"daysRemaining"`
-	IsExpired        bool                   `json:"isExpired" yaml:"isExpired"`
-	Data             CertificateData        `json:"data" yaml:"data"`
+	Subject      string    `json:"subject" yaml:"subject"`
+	Hosts        string    `json:"hosts" yaml:"hosts"`
+	IsCA         bool      `json:"isCA" yaml:"isCA"`
+	ValidFrom    time.Time `json:"validFrom" yaml:"validFrom"`
+	ValidTo      time.Time `json:"validTo" yaml:"validTo"`
+	SerialNumber string    `json:"serialNumber" yaml:"serialNumber"`
+	CAName       *string   `json:"caName" yaml:"caName"`
+	// CertificateChain []CertificateChainItem `json:"certificateChain" yaml:"certificateChain"`
+	DaysRemaining int    `json:"daysRemaining" yaml:"daysRemaining"`
+	IsExpired     bool   `json:"isExpired" yaml:"isExpired"`
+	Certificate   string `json:"certificate" yaml:"certificate"`
+	PrivateKey    string `json:"privateKey" yaml:"privateKey"`
 }
 
 type CertificateChainItem struct {
@@ -307,12 +308,13 @@ type CertificateChainItem struct {
 
 type CAInfo struct {
 	// Name         string          `json:"name"`
-	Subject      string          `json:"subject" yaml:"subject"`
-	IsCA         bool            `json:"isCA" yaml:"isCA"`
-	ValidFrom    time.Time       `json:"validFrom" yaml:"validFrom"`
-	ValidTo      time.Time       `json:"validTo" yaml:"validTo"`
-	SerialNumber string          `json:"serialNumber" yaml:"serialNumber"`
-	Data         CertificateData `json:"data" yaml:"data"`
+	Subject      string    `json:"subject" yaml:"subject"`
+	IsCA         bool      `json:"isCA" yaml:"isCA"`
+	ValidFrom    time.Time `json:"validFrom" yaml:"validFrom"`
+	ValidTo      time.Time `json:"validTo" yaml:"validTo"`
+	SerialNumber string    `json:"serialNumber" yaml:"serialNumber"`
+	Certificate  string    `json:"certificate" yaml:"certificate"`
+	PrivateKey   string    `json:"privateKey" yaml:"privateKey"`
 }
 
 type CertificateData struct {

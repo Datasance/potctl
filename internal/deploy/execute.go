@@ -47,22 +47,22 @@ import (
 )
 
 var kindOrder = []config.Kind{
+	config.SecretKind,
+	config.CertificateAuthorityKind,
+	config.CertificateKind,
+	config.ConfigMapKind,
 	config.RemoteAgentKind,
 	config.LocalAgentKind,
 	config.EdgeResourceKind,
 	config.ApplicationTemplateKind,
 	config.VolumeKind,
+	config.VolumeMountKind,
 	config.RegistryKind,
 	config.CatalogItemKind,
 	config.ApplicationKind,
 	config.MicroserviceKind,
 	config.RouteKind,
-	config.SecretKind,
-	config.ConfigMapKind,
 	config.ServiceKind,
-	config.VolumeMountKind,
-	config.CertificateAuthorityKind,
-	config.CertificateKind,
 }
 
 type Options struct {

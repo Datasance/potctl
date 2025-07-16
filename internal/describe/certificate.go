@@ -52,6 +52,7 @@ func (exe *certificateExecutor) Execute() error {
 	}
 
 	var headerKind string
+	var headerSpec interface{}
 	var headerData interface{}
 
 	if certificate.IsCA {
@@ -62,10 +63,8 @@ func (exe *certificateExecutor) Execute() error {
 			ValidFrom:    certificate.ValidFrom,
 			ValidTo:      certificate.ValidTo,
 			SerialNumber: certificate.SerialNumber,
-			Data: rsc.CertificateData{
-				Certificate: certificate.Data.Certificate,
-				PrivateKey:  certificate.Data.PrivateKey,
-			},
+			Certificate:  certificate.Data.Certificate,
+			PrivateKey:   certificate.Data.PrivateKey,
 		}
 	} else {
 		headerKind = string(config.CertificateKind)
@@ -79,20 +78,17 @@ func (exe *certificateExecutor) Execute() error {
 		}
 
 		headerData = rsc.CertificateInfo{
-			Subject:          certificate.Subject,
-			Hosts:            certificate.Hosts,
-			IsCA:             certificate.IsCA,
-			ValidFrom:        certificate.ValidFrom,
-			ValidTo:          certificate.ValidTo,
-			SerialNumber:     certificate.SerialNumber,
-			CAName:           certificate.CAName,
-			CertificateChain: certChain,
-			DaysRemaining:    certificate.DaysRemaining,
-			IsExpired:        certificate.IsExpired,
-			Data: rsc.CertificateData{
-				Certificate: certificate.Data.Certificate,
-				PrivateKey:  certificate.Data.PrivateKey,
-			},
+			Subject:       certificate.Subject,
+			Hosts:         certificate.Hosts,
+			IsCA:          certificate.IsCA,
+			ValidFrom:     certificate.ValidFrom,
+			ValidTo:       certificate.ValidTo,
+			SerialNumber:  certificate.SerialNumber,
+			CAName:        certificate.CAName,
+			DaysRemaining: certificate.DaysRemaining,
+			IsExpired:     certificate.IsExpired,
+			Certificate:   certificate.Data.Certificate,
+			PrivateKey:    certificate.Data.PrivateKey,
 		}
 	}
 
@@ -103,6 +99,7 @@ func (exe *certificateExecutor) Execute() error {
 			Namespace: exe.namespace,
 			Name:      exe.name,
 		},
+		Spec: headerSpec,
 		Data: headerData,
 	}
 

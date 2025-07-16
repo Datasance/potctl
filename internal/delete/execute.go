@@ -44,23 +44,23 @@ type Options struct {
 
 var kindOrder = []config.Kind{
 	config.CatalogItemKind,
+	config.ServiceKind,
 	config.MicroserviceKind,
 	config.ApplicationKind,
 	config.RegistryKind,
+	config.VolumeMountKind,
 	config.RemoteAgentKind,
 	config.LocalAgentKind,
+	config.SecretKind,
+	config.CertificateAuthorityKind,
+	config.CertificateKind,
+	config.ConfigMapKind,
 	config.RemoteControllerKind,
 	config.LocalControllerKind,
 	config.KubernetesControlPlaneKind,
 	config.RemoteControlPlaneKind,
 	config.LocalControlPlaneKind,
 	config.VolumeKind,
-	config.SecretKind,
-	config.ConfigMapKind,
-	config.ServiceKind,
-	config.VolumeMountKind,
-	config.CertificateKind,
-	config.CertificateAuthorityKind,
 }
 
 var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error){
