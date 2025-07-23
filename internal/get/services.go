@@ -62,11 +62,11 @@ func generateServicesOutput(namespace string) ([][]string, error) {
 		"TYPE",
 		"RESOURCE",
 		"TARGET PORT",
-		"SERVICE PORT",
-		"K8S TYPE",
+		// "SERVICE PORT",
+		// "K8S TYPE",
 		"BRIDGE PORT",
-		"DEFAULT BRIDGE",
-		"SERVICE ENDPOINT",
+		// "DEFAULT BRIDGE",
+		// "SERVICE ENDPOINT",
 		"STATUS",
 	}
 	table[0] = append(table[0], headers...)
@@ -74,31 +74,31 @@ func generateServicesOutput(namespace string) ([][]string, error) {
 	// Populate rows
 	for idx, service := range serviceList.Services {
 		// Handle empty values
-		servicePort := ""
-		if service.ServicePort != 0 {
-			servicePort = strconv.Itoa(service.ServicePort)
-		}
+		// servicePort := ""
+		// if service.ServicePort != 0 {
+		// 	servicePort = strconv.Itoa(service.ServicePort)
+		// }
 
-		k8sType := ""
-		if service.K8sType != "" {
-			k8sType = service.K8sType
-		}
+		// k8sType := ""
+		// if service.K8sType != "" {
+		// 	k8sType = service.K8sType
+		// }
 
-		serviceEndpoint := ""
-		if service.ServiceEndpoint != "" {
-			serviceEndpoint = service.ServiceEndpoint
-		}
+		// serviceEndpoint := ""
+		// if service.ServiceEndpoint != "" {
+		// 	serviceEndpoint = service.ServiceEndpoint
+		// }
 
 		row := []string{
 			service.Name,
 			service.Type,
 			service.Resource,
 			strconv.Itoa(service.TargetPort),
-			servicePort,
-			k8sType,
+			// servicePort,
+			// k8sType,
 			strconv.Itoa(service.BridgePort),
-			service.DefaultBridge,
-			serviceEndpoint,
+			// service.DefaultBridge,
+			// serviceEndpoint,
 			service.ProvisioningStatus,
 		}
 		table[idx+1] = append(table[idx+1], row...)

@@ -266,15 +266,15 @@ type ConfigMap struct {
 
 type ClusterService struct {
 	Name            string   `yaml:"name,omitempty"`
+	Tags            []string `yaml:"tags,omitempty"`
 	Type            string   `yaml:"type,omitempty"`
 	Resource        string   `yaml:"resource,omitempty"`
 	TargetPort      int      `yaml:"targetPort,omitempty"`
-	ServicePort     int      `yaml:"servicePort,omitempty"`
-	K8sType         string   `yaml:"k8sType,omitempty"`
 	BridgePort      int      `yaml:"bridgePort,omitempty"`
 	DefaultBridge   string   `yaml:"defaultBridge,omitempty"`
+	K8sType         string   `yaml:"k8sType,omitempty"`
 	ServiceEndpoint string   `yaml:"serviceEndpoint,omitempty"`
-	Tags            []string `yaml:"tags,omitempty"`
+	ServicePort     int      `yaml:"servicePort,omitempty"`
 }
 
 type VolumeMount struct {

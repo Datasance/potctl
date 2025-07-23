@@ -129,9 +129,7 @@ After=docker.service
 Requires=docker.service
 
 [Service]
-TimeoutStartSec=0
 Restart=always
-ExecStartPre=/usr/bin/docker pull ${agent_image} 
 ExecStartPre=-/usr/bin/docker rm -f ${AGENT_CONTAINER_NAME}
 ExecStart=/usr/bin/docker run --rm --name ${AGENT_CONTAINER_NAME} \\
 --env-file ${ETC_DIR}/iofog-agent.env \\

@@ -59,7 +59,6 @@ func generateVolumeMountsOutput(namespace string) ([][]string, error) {
 	table := make([][]string, len(volumeMountList.VolumeMounts)+1)
 	headers := []string{
 		"VOLUME MOUNT",
-		"UUID",
 		"CONFIG MAP",
 		"SECRET",
 		"VERSION",
@@ -82,7 +81,6 @@ func generateVolumeMountsOutput(namespace string) ([][]string, error) {
 
 		row := []string{
 			volumeMount.Name,
-			volumeMount.UUID,
 			configMap,
 			secret,
 			strconv.Itoa(volumeMount.Version),

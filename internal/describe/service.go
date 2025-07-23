@@ -69,11 +69,11 @@ func (exe *serviceExecutor) Execute() error {
 			Type:            service.Type,
 			Resource:        service.Resource,
 			TargetPort:      service.TargetPort,
-			ServicePort:     service.ServicePort,
-			K8sType:         service.K8sType,
 			BridgePort:      service.BridgePort,
 			DefaultBridge:   service.DefaultBridge,
+			K8sType:         service.K8sType,
 			ServiceEndpoint: service.ServiceEndpoint,
+			ServicePort:     service.ServicePort,
 		},
 	}
 
