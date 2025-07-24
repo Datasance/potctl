@@ -23,8 +23,8 @@ import (
 	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
-	iutil "github.com/datasance/potctl/internal/util"
-	clientutil "github.com/datasance/potctl/internal/util/client"
+	// iutil "github.com/datasance/potctl/internal/util"
+	// clientutil "github.com/datasance/potctl/internal/util/client"
 	// "github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -43,30 +43,30 @@ type localControlPlaneExecutor struct {
 	name                string
 }
 
-func createDefaultRouter(clt *client.Client) (err error) {
-	routerConfig := client.Router{
-		Host: "localhost",
-		RouterConfig: client.RouterConfig{
-			RouterMode:      iutil.MakeStrPtr("interior"),
-			MessagingPort:   iutil.MakeIntPtr(5672),
-			EdgeRouterPort:  iutil.MakeIntPtr(56721),
-			InterRouterPort: iutil.MakeIntPtr(56722),
-		},
-	}
+// func createDefaultRouter(clt *client.Client) (err error) {
+// 	routerConfig := client.Router{
+// 		Host: "localhost",
+// 		RouterConfig: client.RouterConfig{
+// 			RouterMode:      iutil.MakeStrPtr("interior"),
+// 			MessagingPort:   iutil.MakeIntPtr(5671),
+// 			EdgeRouterPort:  iutil.MakeIntPtr(45671),
+// 			InterRouterPort: iutil.MakeIntPtr(55671),
+// 		},
+// 	}
 
-	return clt.PutDefaultRouter(routerConfig)
-}
+// 	return clt.PutDefaultRouter(routerConfig)
+// }
 
 func (exe localControlPlaneExecutor) postDeploy() (err error) {
 	// Check controller is reachable
-	clt, err := clientutil.NewControllerClient(exe.namespace)
-	if err != nil {
-		return err
-	}
+	// clt, err := clientutil.NewControllerClient(exe.namespace)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err := createDefaultRouter(clt); err != nil {
-		return err
-	}
+	// if err := createDefaultRouter(clt); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

@@ -26,7 +26,7 @@ func newDescribeControlPlaneCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "controlplane",
-		Short:   "Get detailed information about a  Control Plane",
+		Short:   "Get detailed information about a Control Plane",
 		Long:    `Get detailed information about the Control Plane in a single Namespace.`,
 		Example: `potctl describe controlplane`,
 		Args:    cobra.ExactArgs(0),

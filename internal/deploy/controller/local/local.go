@@ -120,6 +120,8 @@ func newExecutor(namespace string, controlPlane *rsc.LocalControlPlane, ctrl *rs
 			User:         controlPlane.Database.User,
 			Password:     controlPlane.Database.Password,
 			DatabaseName: controlPlane.Database.DatabaseName,
+			SSL:          controlPlane.Database.SSL,
+			CA:           controlPlane.Database.CA,
 		}),
 		iofogUser: controlPlane.GetUser(),
 		ctrlPlane: controlPlane,
@@ -182,7 +184,8 @@ func (exe *localExecutor) Execute() error {
 
 	// Update controller (its a pointer, this is returned to caller)
 	controllerContainerConfig := exe.localControllerConfig
-	endpoint, err := util.GetControllerEndpoint(fmt.Sprintf("%s:%s", controllerContainerConfig.Host, controllerContainerConfig.Ports[0].Host))
+	// Local controllers typically use HTTP by default
+	endpoint, err := util.GetControllerEndpoint(fmt.Sprintf("%s:%s", controllerContainerConfig.Host, controllerContainerConfig.Ports[0].Host), false)
 	if err != nil {
 		return err
 	}

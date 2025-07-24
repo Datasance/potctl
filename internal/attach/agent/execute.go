@@ -55,7 +55,8 @@ func (exe *executor) fail(inErr error) error {
 	if err != nil {
 		return fmt.Errorf("%s\nFailed to create Controller API client: %s", inErr.Error(), err.Error())
 	}
-	agent, err := iofogclient.GetAgentByName(exe.opt.Name, false)
+	// agent, err := iofogclient.GetAgentByName(exe.opt.Name, false)
+	agent, err := iofogclient.GetAgentByName(exe.opt.Name)
 	if err != nil {
 		msg := "%s\nFailed to get newly created Agent by name: %s"
 		return fmt.Errorf(msg, inErr.Error(), err.Error())

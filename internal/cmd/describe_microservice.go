@@ -26,7 +26,7 @@ func newDescribeMicroserviceCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "microservice NAME",
-		Short:   "Get detailed information about a  Microservice",
+		Short:   "Get detailed information about a Microservice",
 		Long:    `Get detailed information about a Microservice.`,
 		Example: `potctl describe microservice NAME`,
 		Args:    cobra.ExactArgs(1),

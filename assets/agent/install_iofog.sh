@@ -14,7 +14,7 @@ do_check_install() {
 
 do_stop_iofog() {
 	if command_exists iofog-agent; then
-		sudo service iofog-agent stop
+		sudo systemctl stop iofog-agent
 	fi
 }
 
@@ -24,16 +24,15 @@ do_stop_iofog() {
 #     $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
 
 #     echo "# Restarting iofog-agent service"
-#     $sh_c "service iofog-agent stop"
+#     $sh_c "systemctl stop iofog-agent"
 #     sleep 3
-#     $sh_c "service iofog-agent start"
+#     $sh_c "systemctl start iofog-agent"
 #  fi
 # }
 
 do_install_iofog() {
 	AGENT_CONFIG_FOLDER=/etc/iofog-agent
 	SAVED_AGENT_CONFIG_FOLDER=/tmp/agent-config-save
-	# PACKAGE_CLOUD_SCRIPT=package_cloud.sh
 	echo "# Installing ioFog agent..."
 
 	# Save iofog-agent config
@@ -43,17 +42,21 @@ do_install_iofog() {
 		sudo cp -r ${AGENT_CONFIG_FOLDER}/* ${SAVED_AGENT_CONFIG_FOLDER}/
 	fi
 
-	#prefix=$([ -z "$token" ] && echo "" || echo "$token:@")
 	echo $lsb_dist
-	if [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "centos" ]; then
-
-		$sh_c "yum update"
-		$sh_c "yum install -y iofog-agent-$agent_version-1.noarch"
-	else
-    $sh_c "apt update -qy"
-    $sh_c "apt install --allow-downgrades iofog-agent=$agent_version -qy"
-	fi
-	# do_check_iofog_on_arm
+	case "$lsb_dist" in
+		fedora|rhel|ol|centos)
+			$sh_c "yum update -y"
+			$sh_c "yum install -y iofog-agent-$agent_version-1.noarch"
+			;;
+		sles|opensuse)
+			$sh_c "zypper refresh"
+			$sh_c "zypper install -y iofog-agent=$agent_version"
+			;;
+		*)
+			$sh_c "apt update -qy"
+			$sh_c "apt install --allow-downgrades iofog-agent=$agent_version -qy"
+			;;
+	esac
 
 	# Restore iofog-agent config
 	if [ -d ${SAVED_AGENT_CONFIG_FOLDER} ]; then
@@ -64,13 +67,13 @@ do_install_iofog() {
 }
 
 do_start_iofog(){
-	# shellcheck disable=SC2261
-	sudo service iofog-agent start > /dev/null 2&>1 &
+
+	sudo systemctl start iofog-agent > /dev/null 2&>1 &
 	local STATUS=""
 	local ITER=0
 	while [ "$STATUS" != "RUNNING" ] ; do
     ITER=$((ITER+1))
-    if [ "$ITER" -gt 60 ]; then
+    if [ "$ITER" -gt 600 ]; then
       echo 'Timed out waiting for Agent to be RUNNING'
       exit 1;
     fi

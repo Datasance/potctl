@@ -39,10 +39,14 @@ func (exe *agentConfigExecutor) GetName() string {
 }
 
 func (exe *agentConfigExecutor) Execute() error {
-	agentConfig, tags, err := clientutil.GetAgentConfig(exe.name, exe.namespace)
+	agentConfig, tags, agentStatus, err := clientutil.GetAgentConfig(exe.name, exe.namespace)
 	if err != nil {
 		return err
 	}
+
+	// Format agent status for human-readable output
+	formattedStatus := FormatAgentStatus(agentStatus)
+
 	header := config.Header{
 		APIVersion: config.LatestAPIVersion,
 		Kind:       config.AgentConfigKind,
@@ -51,7 +55,8 @@ func (exe *agentConfigExecutor) Execute() error {
 			Name:      exe.name,
 			Tags:      tags,
 		},
-		Spec: agentConfig,
+		Spec:   agentConfig,
+		Status: formattedStatus,
 	}
 
 	if exe.filename == "" {

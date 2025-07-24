@@ -113,7 +113,7 @@ func isOverridingSystemAgent(controllerHost, agentHost, agentName string) (err e
 			return err
 		}
 	}
-	if agentURL.Hostname() == controllerURL.Hostname() && agentName != iofog.VanillaRemoteAgentName {
+	if agentURL.Hostname() == controllerURL.Hostname() && agentName != iofog.VanillaRemoteAgentName && agentName != iofog.VanillaLocalAgentName {
 		return util.NewConflictError("Cannot deploy an agent on the same host than the Controller\n")
 	}
 	return nil
@@ -221,7 +221,8 @@ func (exe *RemoteExecutor) Execute() error {
 	}
 
 	// Get the Agent in question
-	agent, err := clt.GetAgentByName(exe.name, isSystem)
+	// agent, err := clt.GetAgentByName(exe.name, isSystem)
+	agent, err := clt.GetAgentByName(exe.name)
 	// TODO: replace this check with built-in IsNewNotFound() func from go-sdk
 	if err != nil && !strings.Contains(err.Error(), "not find agent") {
 		return err

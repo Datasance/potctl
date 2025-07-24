@@ -92,19 +92,20 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	// Configure deploy
 	installer.SetOperatorImage(exe.controlPlane.Images.Operator)
 	installer.SetPullSecret(exe.controlPlane.Images.PullSecret)
-	installer.SetPortManagerImage(exe.controlPlane.Images.PortManager)
 	installer.SetRouterImage(exe.controlPlane.Images.Router)
-	installer.SetProxyImage(exe.controlPlane.Images.Proxy)
+	installer.SetRouterAdaptorImage(exe.controlPlane.Images.RouterAdaptor)
 	installer.SetControllerImage(exe.controlPlane.Images.Controller)
 	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.Address, exe.controlPlane.Services.Controller.Annotations)
 	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations)
-	installer.SetProxyService(exe.controlPlane.Services.Proxy.Type, exe.controlPlane.Services.Proxy.Address, exe.controlPlane.Services.Proxy.Annotations)
 	installer.SetControllerIngress(exe.controlPlane.Ingresses.Controller.Annotations, exe.controlPlane.Ingresses.Controller.IngressClassName, exe.controlPlane.Ingresses.Controller.Host, exe.controlPlane.Ingresses.Controller.SecretName)
 	installer.SetRouterIngress(exe.controlPlane.Ingresses.Router.Address, exe.controlPlane.Ingresses.Router.MessagePort, exe.controlPlane.Ingresses.Router.InteriorPort, exe.controlPlane.Ingresses.Router.EdgePort)
-	installer.SetHttpProxyIngress(exe.controlPlane.Ingresses.HTTPProxy.Address)
-	installer.SetTcpProxyIngress(exe.controlPlane.Ingresses.TCPProxy.Address)
-	installer.SetRouterConfig(exe.controlPlane.Router.InternalSecret, exe.controlPlane.Router.AmqpsSecret, exe.controlPlane.Router.RequireSsl, exe.controlPlane.Router.SaslMechanisms, exe.controlPlane.Router.AuthenticatePeer)
-	installer.SetProxyConfig(exe.controlPlane.Proxy.ServerName, exe.controlPlane.Proxy.Transport)
+	// installer.SetRouterConfig(exe.controlPlane.Router.InternalSecret, exe.controlPlane.Router.AmqpsSecret, exe.controlPlane.Router.RequireSsl, exe.controlPlane.Router.SaslMechanisms, exe.controlPlane.Router.AuthenticatePeer)
+
+	// Set isViewerDns based on EcnViewerURL presence
+	if exe.controlPlane.Controller.EcnViewerURL != "" {
+		viewerDns := true
+		installer.SetIsViewerDns(&viewerDns)
+	}
 
 	replicas := int32(1)
 	if exe.controlPlane.Replicas.Controller != 0 {
@@ -112,7 +113,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	}
 	// Create controller on cluster
 	// user := install.IofogUser(exe.controlPlane.IofogUser)
-	conf := install.ControllerConfig{
+	conf := install.K8SControllerConfig{
 		// User:          user,
 		Replicas:      replicas,
 		Auth:          install.Auth(exe.controlPlane.Auth),
@@ -120,6 +121,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 		PidBaseDir:    exe.controlPlane.Controller.PidBaseDir,
 		EcnViewerPort: exe.controlPlane.Controller.EcnViewerPort,
 		EcnViewerURL:  exe.controlPlane.Controller.EcnViewerURL,
+		LogLevel:      exe.controlPlane.Controller.LogLevel,
 		Https:         exe.controlPlane.Controller.Https,
 		SecretName:    exe.controlPlane.Controller.SecretName,
 	}
@@ -186,15 +188,6 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	if routerService.Type == clusterIP {
 		if routerIngress.Address == "" || routerIngress.MessagePort == 0 || routerIngress.InteriorPort == 0 || routerIngress.EdgePort == 0 {
 			return util.NewInputError("When Router service type is ClusterIP, You must provide Ingress configuration for Default-Router")
-		}
-	}
-	// Validate proxy services and ingress
-	proxyService := controlPlane.Services.Proxy
-	httpIngress := controlPlane.Ingresses.HTTPProxy
-	tcpIngress := controlPlane.Ingresses.TCPProxy
-	if proxyService.Type == clusterIP {
-		if httpIngress.Address == "" || tcpIngress.Address == "" {
-			return util.NewInputError("When Proxy service type is ClusterIP, You must provide Ingress configuration for HTTP and TCP Proxy")
 		}
 	}
 	return

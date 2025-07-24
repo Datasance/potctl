@@ -37,11 +37,17 @@ Most resources require a working Controller in the Namespace in order to be desc
 		newDescribeRegistryCommand(),
 		newDescribeAgentConfigCommand(),
 		newDescribeMicroserviceCommand(),
+		newDescribeSystemMicroserviceCommand(),
 		newDescribeApplicationCommand(),
 		newDescribeApplicationTemplateCommand(),
 		newDescribeVolumeCommand(),
 		newDescribeRouteCommand(),
 		newDescribeEdgeResourceCommand(),
+		newDescribeSecretCommand(),
+		newDescribeConfigMapCommand(),
+		newDescribeServiceCommand(),
+		newDescribeVolumeMountCommand(),
+		newDescribeCertificateCommand(),
 	)
 
 	// Register Flags

@@ -50,7 +50,7 @@ func (agent *LocalAgent) Configure(controllerEndpoint string, user IofogUser) (s
 		controllerEndpoint = localControllerEndpoint
 	}
 
-	key, err := agent.getProvisionKey(provisioningEndpoint, user)
+	key, caCert, err := agent.getProvisionKey(provisioningEndpoint, user)
 	if err != nil {
 		return "", err
 	}
@@ -63,9 +63,15 @@ func (agent *LocalAgent) Configure(controllerEndpoint string, user IofogUser) (s
 	cmds := [][]string{
 		{"iofog-agent", "config", "-idc", "off"},
 		{"iofog-agent", "config", "-a", controllerBaseURL.String()},
-		{"iofog-agent", "provision", key},
-		{"iofog-agent", "config", "-sf", "10", "-cf", "10"},
 	}
+
+	// Only add cert command if caCert is not empty
+	if caCert != "" {
+		cmds = append(cmds, []string{"iofog-agent", "cert", caCert})
+	}
+
+	cmds = append(cmds, []string{"iofog-agent", "provision", key})
+	cmds = append(cmds, []string{"iofog-agent", "config", "-sf", "10", "-cf", "10"})
 
 	// Execute commands
 	for _, cmd := range cmds {

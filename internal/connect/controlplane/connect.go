@@ -12,11 +12,12 @@ func Connect(ctrlPlane rsc.ControlPlane, endpoint string, ns *rsc.Namespace) err
 	if err != nil {
 		return err
 	}
+	util.SpinHandlePrompt()
 	ctrl, err := client.NewAndLogin(client.Options{BaseURL: baseURL}, ctrlPlane.GetUser().Email, ctrlPlane.GetUser().GetRawPassword())
 	if err != nil {
 		return err
 	}
-
+	util.SpinHandlePromptComplete()
 	// Get Agents
 	listAgentsResponse, err := ctrl.ListAgents(client.ListAgentsRequest{})
 	if err != nil {

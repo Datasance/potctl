@@ -99,6 +99,10 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 		"UPTIME",
 		"VERSION",
 		"ADDR",
+		"MODE",
+		"TYPE",
+		"ENGINE",
+		// "VOLUME-MOUNTS",
 	}
 	table[0] = append(table[0], headers...)
 	// Populate rows
@@ -113,6 +117,8 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				"-",
 				"-",
 				agent.IPAddressExternal,
+				"-",
+				"-",
 			}
 			table[idx+1] = append(table[idx+1], row...)
 		} else {
@@ -121,6 +127,12 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				age = backendAge
 			}
 			uptime := time.Duration(agent.UptimeMs) * time.Millisecond
+			var mode string
+			if agent.IsSystem {
+				mode = "System"
+			} else {
+				mode = "Node"
+			}
 			row := []string{
 				agent.Name,
 				agent.DaemonStatus,
@@ -128,12 +140,28 @@ func tabulateAgents(agentInfos []client.AgentInfo) (table [][]string, err error)
 				util.FormatDuration(uptime),
 				agent.Version,
 				agent.Host,
+				mode,
+				agent.DeploymentType,
+				agent.ContainerEngine,
+				// formatVolumeMounts(agent.VolumeMounts),
 			}
 			table[idx+1] = append(table[idx+1], row...)
 		}
 	}
 	return table, err
 }
+
+// func formatVolumeMounts(volumeMounts []client.VolumeMountInfo) string {
+// 	if len(volumeMounts) == 0 {
+// 		return "-"
+// 	}
+
+// 	var names []string
+// 	for _, vm := range volumeMounts {
+// 		names = append(names, vm.Name)
+// 	}
+// 	return strings.Join(names, ", ")
+// }
 
 func printDetached() {
 	fmt.Printf("DETACHED RESOURCES\n\n")

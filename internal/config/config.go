@@ -16,7 +16,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -193,7 +192,7 @@ func flushNamespaces() error {
 			return err
 		}
 		// Overwrite the file
-		err = ioutil.WriteFile(getNamespaceFile(ns.Name), marshal, 0644)
+		err = os.WriteFile(getNamespaceFile(ns.Name), marshal, 0644)
 		if err != nil {
 			return err
 		}
@@ -208,7 +207,7 @@ func flushShared() error {
 		return nil
 	}
 	// Overwrite the file
-	err = ioutil.WriteFile(configFilename, marshal, 0644)
+	err = os.WriteFile(configFilename, marshal, 0644)
 	if err != nil {
 		return nil
 	}

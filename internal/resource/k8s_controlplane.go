@@ -27,10 +27,9 @@ type KubernetesControlPlane struct {
 	Replicas       Replicas               `yaml:"replicas,omitempty"`
 	Images         KubeImages             `yaml:"images,omitempty"`
 	Endpoint       string                 `yaml:"endpoint,omitempty"`
-	Controller     ControllerConfig       `yaml:"controller,omitempty"`
+	Controller     K8SControllerConfig    `yaml:"controller,omitempty"`
 	Ingresses      Ingresses              `yaml:"ingresses,omitempty"`
-	Router         RouterConfig           `yaml:"router,omitempty"`
-	Proxy          ProxyConfig            `yaml:"proxy,omitempty"`
+	// Router         RouterConfig           `yaml:"router,omitempty"`
 }
 
 func (cp *KubernetesControlPlane) GetUser() IofogUser {
@@ -69,6 +68,24 @@ func (cp *KubernetesControlPlane) GetController(name string) (ret Controller, er
 }
 
 func (cp *KubernetesControlPlane) GetEndpoint() (string, error) {
+	// If HTTPS is enabled in the controller configuration, regenerate the endpoint with HTTPS
+	if cp.Controller.Https != nil && *cp.Controller.Https {
+		// Extract host and port from the existing endpoint
+		// The endpoint format is typically "http://host:port" or "https://host:port"
+		// We need to change the scheme to https
+		if cp.Endpoint != "" {
+			// Use the util.GetControllerEndpoint function to regenerate with HTTPS
+			// First, extract the host part (remove the scheme)
+			host := cp.Endpoint
+			if len(host) > 7 && host[:7] == "http://" {
+				host = host[7:]
+			} else if len(host) > 8 && host[:8] == "https://" {
+				host = host[8:]
+			}
+			// Regenerate with HTTPS
+			return util.GetControllerEndpoint(host, true)
+		}
+	}
 	return cp.Endpoint, nil
 }
 
@@ -130,14 +147,13 @@ func (cp *KubernetesControlPlane) Clone() ControlPlane {
 	controllerPods := make([]KubernetesController, len(cp.ControllerPods))
 	copy(controllerPods, cp.ControllerPods)
 	return &KubernetesControlPlane{
-		KubeConfig:     cp.KubeConfig,
-		IofogUser:      cp.IofogUser,
-		Auth:           cp.Auth,
-		Database:       cp.Database,
-		Services:       cp.Services,
-		Ingresses:      cp.Ingresses,
-		Router:         cp.Router,
-		Proxy:          cp.Proxy,
+		KubeConfig: cp.KubeConfig,
+		IofogUser:  cp.IofogUser,
+		Auth:       cp.Auth,
+		Database:   cp.Database,
+		Services:   cp.Services,
+		Ingresses:  cp.Ingresses,
+		// Router:         cp.Router,
 		Replicas:       cp.Replicas,
 		Images:         cp.Images,
 		Endpoint:       cp.Endpoint,

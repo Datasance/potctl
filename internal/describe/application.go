@@ -107,7 +107,7 @@ func (exe *applicationExecutor) Execute() error {
 	yamlRoutes := []rsc.Route{}
 
 	for idx := range exe.msvcs {
-		yamlMsvc, err := MapClientMicroserviceToDeployMicroservice(exe.msvcs[idx], exe.client)
+		yamlMsvc, _, _, err := MapClientMicroserviceToDeployMicroservice(exe.msvcs[idx], exe.client)
 		if err != nil {
 			return err
 		}

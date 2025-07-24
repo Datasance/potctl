@@ -51,7 +51,8 @@ func (exe executor) Execute() error {
 	}
 
 	// Get Agent UUID
-	agentInfo, err := clt.GetAgentByName(exe.Agent, false)
+	// agentInfo, err := clt.GetAgentByName(exe.Agent, false)
+	agentInfo, err := clt.GetAgentByName(exe.Agent)
 	if err != nil {
 		return err
 	}

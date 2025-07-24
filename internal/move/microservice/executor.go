@@ -49,7 +49,8 @@ func Execute(namespace, name, agent string) error {
 		return err
 	}
 
-	destAgent, err := clt.GetAgentByName(agent, false)
+	// destAgent, err := clt.GetAgentByName(agent, false)
+	destAgent, err := clt.GetAgentByName(agent)
 	if err != nil {
 		return err
 	}
@@ -57,7 +58,7 @@ func Execute(namespace, name, agent string) error {
 	// Move
 	msvc.AgentUUID = destAgent.UUID
 
-	yamlMsvc, err := describe.MapClientMicroserviceToDeployMicroservice(msvc, clt)
+	yamlMsvc, _, _, err := describe.MapClientMicroserviceToDeployMicroservice(msvc, clt)
 	if err != nil {
 		return err
 	}

@@ -15,13 +15,14 @@ package get
 
 import (
 	// "fmt"
+	"time"
+
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	clientutil "github.com/datasance/potctl/internal/util/client"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
-	"time"
 )
 
 type controllerExecutor struct {
@@ -89,7 +90,8 @@ func generateControllerOutput(namespace string) (table [][]string, err error) {
 
 	// Generate table and headers
 	table = make([][]string, len(controllers)+1)
-	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "SUBSCRIPTION EXPIRY DATE", "MAX AGENT SEATS"}
+	// headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT", "SUBSCRIPTION EXPIRY DATE", "MAX AGENT SEATS"}
+	headers := []string{"CONTROLLER", "STATUS", "AGE", "UPTIME", "VERSION", "ADDR", "PORT"}
 	table[0] = append(table[0], headers...)
 
 	// Populate rows
@@ -178,6 +180,17 @@ func updateControllerPods(controlPlane *rsc.KubernetesControlPlane, namespace st
 	if err != nil {
 		return
 	}
+
+	// Set HTTPS configuration if present in the control plane
+	if controlPlane.Controller.Https != nil {
+		installer.SetHttpsEnabled(controlPlane.Controller.Https)
+	}
+
+	if controlPlane.Controller.EcnViewerURL != "" {
+		viewerDns := true
+		installer.SetIsViewerDns(&viewerDns)
+	}
+
 	pods, err := installer.GetControllerPods()
 	if err != nil {
 		return

@@ -30,10 +30,14 @@ func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Exe
 		return newAgentExecutor(namespace, showDetached), nil
 	case "microservices":
 		return newMicroserviceExecutor(namespace), nil
+	case "system-microservices":
+		return newSystemMicroserviceExecutor(namespace), nil
 	case "application-templates":
 		return newApplicationTemplateExecutor(namespace), nil
 	case "applications":
 		return newApplicationExecutor(namespace), nil
+	case "system-applications":
+		return newSystemApplicationExecutor(namespace), nil
 	case "catalog":
 		return newCatalogExecutor(namespace), nil
 	case "registries":
@@ -44,6 +48,16 @@ func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Exe
 		return newRouteExecutor(namespace), nil
 	case "edge-resources":
 		return newEdgeResourceExecutor(namespace), nil
+	case "secrets":
+		return newSecretExecutor(namespace), nil
+	case "configmaps":
+		return newConfigmapExecutor(namespace), nil
+	case "services":
+		return newServiceExecutor(namespace), nil
+	case "volume-mounts":
+		return newVolumeMountExecutor(namespace), nil
+	case "certificates":
+		return newCertificateExecutor(namespace), nil
 	default:
 		msg := "Unknown resource: '" + resourceType + "'"
 		return nil, util.NewInputError(msg)

@@ -118,33 +118,43 @@ func GetMicroserviceUUID(namespace, appName, name string) (uuid string, err erro
 	return
 }
 
-func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfiguration, tags *[]string, err error) {
-	ns, err := config.GetNamespace(namespace)
-	if err != nil {
-		return
-	}
-	// Get config
-	agent, err := ns.GetAgent(agentName)
-	if err != nil {
-		return
-	}
-
-	// Connect to controller
+func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfiguration, tags *[]string, agentStatus rsc.AgentStatus, err error) {
+	// Connect to controller first
 	ctrl, err := NewControllerClient(namespace)
 	if err != nil {
 		return
 	}
 
-	agentInfo, err := ctrl.GetAgentByID(agent.GetUUID())
+	// Try to get agent info directly from controller by name
+	agentInfo, err := ctrl.GetAgentByName(agentName)
 	if err != nil {
-		// The agents might not be provisioned with Controller
-		// TODO: Standardize error check and error message here
-		if strings.Contains(err.Error(), "NotFoundError") {
-			err = util.NewInputError("Cannot describe an Agent that is not provisioned with the Controller in Namespace " + namespace)
+		// If agent not found in controller, try local cache approach
+		ns, err2 := config.GetNamespace(namespace)
+		if err2 != nil {
+			err = err2
 			return
 		}
-		return
+		// Get config from local cache
+		agent, err2 := ns.GetAgent(agentName)
+		if err2 != nil {
+			err = err2
+			return
+		}
+
+		// Try to get agent info by UUID
+		agentInfo, err2 = ctrl.GetAgentByID(agent.GetUUID())
+		if err2 != nil {
+			// The agents might not be provisioned with Controller
+			// TODO: Standardize error check and error message here
+			if strings.Contains(err2.Error(), "NotFoundError") {
+				err = util.NewInputError("Cannot describe an Agent that is not provisioned with the Controller in Namespace " + namespace)
+				return
+			}
+			err = err2
+			return
+		}
 	}
+
 	tags = agentInfo.Tags
 
 	// Get all agents for mapping uuid to name if required
@@ -197,6 +207,8 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 		AgentConfiguration: client.AgentConfiguration{
 			NetworkInterface:          &agentInfo.NetworkInterface,
 			DockerURL:                 &agentInfo.DockerURL,
+			ContainerEngine:           &agentInfo.ContainerEngine,
+			DeploymentType:            &agentInfo.DeploymentType,
 			DiskLimit:                 &agentInfo.DiskLimit,
 			DiskDirectory:             &agentInfo.DiskDirectory,
 			MemoryLimit:               &agentInfo.MemoryLimit,
@@ -209,6 +221,10 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 			DeviceScanFrequency:       &agentInfo.DeviceScanFrequency,
 			BluetoothEnabled:          &agentInfo.BluetoothEnabled,
 			WatchdogEnabled:           &agentInfo.WatchdogEnabled,
+			GpsMode:                   &agentInfo.GpsMode,
+			GpsScanFrequency:          &agentInfo.GpsScanFrequency,
+			GpsDevice:                 &agentInfo.GpsDevice,
+			EdgeGuardFrequency:        &agentInfo.EdgeGuardFrequency,
 			AbstractedHardwareEnabled: &agentInfo.AbstractedHardwareEnabled,
 			LogLevel:                  agentInfo.LogLevel,
 			DockerPruningFrequency:    agentInfo.DockerPruningFrequency,
@@ -220,5 +236,50 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 		},
 	}
 
-	return agentConfig, tags, err
+	agentStatus = rsc.AgentStatus{
+		LastActive:            agentInfo.LastActive,
+		DaemonStatus:          agentInfo.DaemonStatus,
+		SecurityStatus:        agentInfo.SecurityStatus,
+		SecurityViolationInfo: agentInfo.SecurityViolationInfo,
+		WarningMessage:        agentInfo.WarningMessage,
+		UptimeMs:              agentInfo.UptimeMs,
+		MemoryUsage:           agentInfo.MemoryUsage,
+		DiskUsage:             agentInfo.DiskUsage,
+		CPUUsage:              agentInfo.CPUUsage,
+		SystemAvailableMemory: agentInfo.SystemAvailableMemory,
+		SystemAvailableDisk:   agentInfo.SystemAvailableDisk,
+		SystemTotalCPU:        agentInfo.SystemTotalCPU,
+		MemoryViolation:       agentInfo.MemoryViolation,
+		DiskViolation:         agentInfo.DiskViolation,
+		CPUViolation:          agentInfo.CPUViolation,
+		RepositoryStatus:      agentInfo.RepositoryStatus,
+		LastStatusTimeMsUTC:   agentInfo.LastStatusTimeMsUTC,
+		IPAddress:             agentInfo.IPAddress,
+		IPAddressExternal:     agentInfo.IPAddressExternal,
+		ProcessedMessaged:     agentInfo.ProcessedMessaged,
+		MessageSpeed:          agentInfo.MessageSpeed,
+		LastCommandTimeMsUTC:  agentInfo.LastCommandTimeMsUTC,
+		Version:               agentInfo.Version,
+		IsReadyToUpgrade:      agentInfo.IsReadyToUpgrade,
+		IsReadyToRollback:     agentInfo.IsReadyToRollback,
+		Tunnel:                agentInfo.Tunnel,
+		VolumeMounts:          convertVolumeMounts(agentInfo.VolumeMounts),
+		GpsStatus:             agentInfo.GpsStatus,
+	}
+
+	return agentConfig, tags, agentStatus, err
+}
+
+func convertVolumeMounts(volumeMountInfos []client.VolumeMountInfo) []rsc.VolumeMount {
+	var volumeMounts []rsc.VolumeMount
+	for _, vm := range volumeMountInfos {
+		volumeMounts = append(volumeMounts, rsc.VolumeMount{
+			Name:          vm.Name,
+			UUID:          vm.UUID,
+			ConfigMapName: vm.ConfigMapName,
+			SecretName:    vm.SecretName,
+			Version:       vm.Version,
+		})
+	}
+	return volumeMounts
 }

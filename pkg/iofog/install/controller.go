@@ -31,7 +31,6 @@ type RemoteSystemImages struct {
 
 type RemoteSystemMicroservices struct {
 	Router RemoteSystemImages `yaml:"router,omitempty"`
-	Proxy  RemoteSystemImages `yaml:"proxy,omitempty"`
 }
 
 type ControllerOptions struct {
@@ -46,6 +45,22 @@ type ControllerOptions struct {
 	SystemMicroservices RemoteSystemMicroservices
 	PidBaseDir          string
 	EcnViewerPort       int
+	LogLevel            string
+	Https               *Https
+	SiteCA              *SiteCertificate
+	LocalCA             *SiteCertificate
+}
+
+type Https struct {
+	Enabled *bool
+	CACert  string
+	TLSCert string
+	TLSKey  string
+}
+
+type SiteCertificate struct {
+	TLSCert string
+	TLSKey  string
 }
 
 type database struct {
@@ -55,6 +70,8 @@ type database struct {
 	user         string
 	password     string
 	port         int
+	ssl          *bool
+	ca           *string
 }
 
 type auth struct {
@@ -95,13 +112,8 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 	}, nil
 }
 
-func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int) {
-	// if provider == "" {
-	// 	provider = "mysql"
-	// }
-	// if databaseName == "" {
-	// 	databaseName = "potcontroller"
-	// }
+func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int, ssl *bool, ca *string) {
+
 	ctrl.db = database{
 		databaseName: databaseName,
 		provider:     provider,
@@ -109,6 +121,8 @@ func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, prov
 		user:         user,
 		password:     password,
 		port:         port,
+		ssl:          ssl,
+		ca:           ca,
 	}
 }
 
@@ -214,6 +228,15 @@ func (ctrl *Controller) Install() (err error) {
 
 	// Encode environment variables
 	env := []string{}
+	env = append(env, "CONTROL_PLANE=Remote")
+	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+		env = append(env, fmt.Sprintf("\"SERVER_DEV_MODE=%t\"", "false"))
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_CERT=%s\"", ctrl.Https.TLSCert))
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_KEY=%s\"", ctrl.Https.TLSKey))
+	}
+	if ctrl.Https != nil && ctrl.Https.CACert != "" {
+		env = append(env, fmt.Sprintf("\"SSL_BASE64_INTERMEDIATE_CERT=%s\"", ctrl.Https.CACert))
+	}
 	if ctrl.db.host != "" {
 		env = append(env,
 			fmt.Sprintf(`"DB_PROVIDER=%s"`, ctrl.db.provider),
@@ -222,6 +245,12 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"DB_PASSWORD=%s"`, ctrl.db.password),
 			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
 			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
+	}
+	if ctrl.db.ssl != nil {
+		env = append(env, fmt.Sprintf(`"DB_USE_SSL=%t"`, *ctrl.db.ssl))
+	}
+	if ctrl.db.ca != nil {
+		env = append(env, fmt.Sprintf(`"DB_SSL_CA=%s"`, *ctrl.db.ca))
 	}
 	if ctrl.auth.url != "" {
 		env = append(env,
@@ -240,17 +269,14 @@ func (ctrl *Controller) Install() (err error) {
 	if ctrl.EcnViewerPort != 0 {
 		env = append(env, fmt.Sprintf("\"VIEWER_PORT=%d\"", ctrl.EcnViewerPort))
 	}
-	if ctrl.SystemMicroservices.Proxy.X86 != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Proxy_1=%s\"", ctrl.SystemMicroservices.Proxy.X86))
-	}
-	if ctrl.SystemMicroservices.Proxy.ARM != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Proxy_2=%s\"", ctrl.SystemMicroservices.Proxy.ARM))
-	}
 	if ctrl.SystemMicroservices.Router.X86 != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Router_1=%s\"", ctrl.SystemMicroservices.Router.X86))
+		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_1=%s\"", ctrl.SystemMicroservices.Router.X86))
 	}
 	if ctrl.SystemMicroservices.Router.ARM != "" {
-		env = append(env, fmt.Sprintf("\"SystemImages_Router_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
+		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
+	}
+	if ctrl.LogLevel != "" {
+		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
 	}
 
 	envString := strings.Join(env, " ")
@@ -288,20 +314,50 @@ func (ctrl *Controller) Install() (err error) {
 	ignoredErrors := []string{
 		"Process exited with status 7", // curl: (7) Failed to connect to localhost port 8080: Connection refused
 	}
-	// Wait for Controller
+
+	// Add a small delay before checking
+	time.Sleep(5 * time.Second)
+
 	Verbose("Waiting for Controller " + ctrl.Host)
-	if err = ctrl.ssh.RunUntil(
-		regexp.MustCompile("\"status\":\"online\""),
-		fmt.Sprintf("curl --request GET --url http://localhost:%s/api/v3/status", iofog.ControllerPortString),
-		ignoredErrors,
-	); err != nil {
+	// Increase timeout or retry attempts
+	maxRetries := 15
+	var protocol string
+	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
+		protocol = "https"
+	} else {
+		protocol = "http"
+	}
+	for i := 0; i < maxRetries; i++ {
+		Verbose(fmt.Sprintf("Try %d of %d", i+1, maxRetries))
+		err = ctrl.ssh.RunUntil(
+			regexp.MustCompile("\"status\":\"online\""),
+			fmt.Sprintf("curl --request GET --url %s://localhost:%s/api/v3/status", protocol, iofog.ControllerPortString),
+			ignoredErrors,
+		)
+		if err == nil {
+			break
+		}
+		time.Sleep(2 * time.Second * time.Duration(i+1)) // Exponential backoff
+	}
+	if err != nil {
 		return
 	}
 
 	// Wait for API
-	endpoint := fmt.Sprintf("%s:%s", ctrl.Host, iofog.ControllerPortString)
+	endpoint := fmt.Sprintf("%s://%s:%s", protocol, ctrl.Host, iofog.ControllerPortString)
 	if err = WaitForControllerAPI(endpoint); err != nil {
 		return
+	}
+	// Deploy router secrets
+	if ctrl.SiteCA != nil {
+		if err = DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
+			return
+		}
+	}
+	if ctrl.LocalCA != nil {
+		if err = DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
+			return
+		}
 	}
 
 	return nil
@@ -351,4 +407,26 @@ func WaitForControllerAPI(endpoint string) (err error) {
 
 	// Return last error
 	return
+}
+
+func DeployRouterSecrets(endpoint, secretName string, TLSCert, TLSKey string) (err error) {
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		return err
+	}
+	ctrlClient := client.New(client.Options{BaseURL: baseURL})
+
+	request := client.SecretCreateRequest{
+		Name: secretName,
+		Type: "tls",
+		Data: map[string]string{
+			"TLSCert": TLSCert,
+			"TLSKey":  TLSKey,
+		},
+	}
+
+	if err = ctrlClient.CreateSecret(&request); err != nil {
+		return err
+	}
+	return nil
 }

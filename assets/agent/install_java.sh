@@ -24,20 +24,20 @@ do_install_java() {
 		is_arm="-arm"
 	fi
 	case "$lsb_dist" in
-		ubuntu)
+		ubuntu|debian|raspbian|mendel)
 			$sh_c "apt-get update -y"
 			$sh_c "apt install -y openjdk-17-jdk"
 		;;
-		debian|mendel)
-			$sh_c "apt-get update"
-			$sh_c "apt install -y openjdk-17-jdk"
-		;;
-		raspbian)
-		  $sh_c "apt-get update"
-		  $sh_c "apt-get install openjdk-17-jdk -y"
-		;;
-		fedora|centos)
+		fedora|centos|rhel|ol)
 			$sh_c "yum install -y java-17-openjdk"
+		;;
+		sles|opensuse*)
+			$sh_c "zypper refresh"
+			$sh_c "zypper install -y java-17-openjdk"
+		;;
+		*)
+			echo "Unsupported distribution: $lsb_dist"
+			exit 1
 		;;
 	esac
 }
@@ -45,11 +45,18 @@ do_install_java() {
 do_install_deps() {
 	local installer=""
 	case "$lsb_dist" in
-		ubuntu|debian|raspbian)
+		ubuntu|debian|raspbian|mendel)
 			installer="apt"
 		;;
-		fedora|centos)
+		fedora|centos|rhel|ol)
 			installer="yum"
+		;;
+		sles|opensuse*)
+			installer="zypper"
+		;;
+		*)
+			echo "Unsupported distribution: $lsb_dist"
+			exit 1
 		;;
 	esac
 

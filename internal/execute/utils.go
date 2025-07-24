@@ -17,7 +17,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/pkg/util"
@@ -61,6 +61,11 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 		return exe, err
 	}
 
+	dataYamlBytes, err := yaml.Marshal(header.Data)
+	if err != nil {
+		return exe, err
+	}
+
 	createExecutorFunc, found := kindHandlers[header.Kind]
 	if !found {
 		util.PrintNotify(fmt.Sprintf("Could not handle kind %s. Skipping document\n", header.Kind))
@@ -72,6 +77,7 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 		Namespace: namespace,
 		Name:      header.Metadata.Name,
 		YAML:      subYamlBytes,
+		Data:      dataYamlBytes,
 		Tags:      header.Metadata.Tags,
 	})
 }
@@ -81,11 +87,12 @@ type KindHandlerOpt struct {
 	Namespace string
 	Name      string
 	YAML      []byte
+	Data      []byte
 	Tags      *[]string
 }
 
 func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.Kind]func(*KindHandlerOpt) (Executor, error)) (executorsMap map[config.Kind][]Executor, err error) {
-	yamlFile, err := ioutil.ReadFile(inputFile)
+	yamlFile, err := os.ReadFile(inputFile)
 	if err != nil {
 		return
 	}
@@ -99,6 +106,8 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 	header = config.Header{
 		Spec:     raw,
 		Metadata: config.HeaderMetadata{},
+		Data:     raw,
+		Status:   raw,
 	}
 
 	// Generate all executors
@@ -119,6 +128,8 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 		header = config.Header{
 			Spec:     raw,
 			Metadata: config.HeaderMetadata{},
+			Data:     raw,
+			Status:   raw,
 		}
 
 		decodeErr = dec.Decode(&header)

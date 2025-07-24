@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -82,6 +81,7 @@ type LocalControllerConfig struct {
 	PidBaseDir    string
 	EcnViewerPort int
 	EcnViewerURL  string
+	LogLevel      string
 	Auth          Auth
 }
 
@@ -137,7 +137,7 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 				"iofog-agent-log:/var/log/iofog-agent:rw",
 				"iofog-agent-backup:/var/backups/iofog-agent:rw",
 				"iofog-agent-version:/usr/share/iofog-agent:rw",
-				"iofog-agent-iomessage:/var/lib/iofog-agent:rw",
+				"iofog-agent-directory:/var/lib/iofog-agent:rw",
 				// "/sbin/shutdown:/sbin/shutdown",
 			},
 			Envs:        []string{},
@@ -167,12 +167,15 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 			"iofog-controller-logs:/var/log/iofog-controller:rw",
 		},
 		Envs: []string{
+			"CONTROL_PLANE=Remote",
 			"DB_PROVIDER=" + db.Provider,
 			"DB_HOST=" + db.Host,
 			"DB_USERNAME=" + db.User,
 			"DB_PASSWORD=" + db.Password,
 			"DB_PORT=" + strconv.Itoa(db.Port),
 			"DB_NAME=" + db.DatabaseName,
+			"DB_USE_SSL=" + strconv.FormatBool(*db.SSL),
+			"DB_SSL_CA=" + *db.CA,
 			"KC_URL=" + auth.URL,
 			"KC_REALM=" + auth.Realm,
 			"KC_SSL_REQ=" + auth.SSL,
@@ -385,7 +388,7 @@ func (lc *LocalContainer) DeployContainer(containerConfig *LocalContainerConfig)
 		}
 	} else {
 		defer reader.Close()
-		_, err := ioutil.ReadAll(reader)
+		_, err := io.ReadAll(reader)
 		if err != nil {
 			return "", err
 		}
@@ -494,11 +497,11 @@ func (lc *LocalContainer) ExecuteCmd(name string, cmd []string) (execResult Exec
 		return execResult, ctx.Err()
 	}
 
-	stdout, err := ioutil.ReadAll(&outBuf)
+	stdout, err := io.ReadAll(&outBuf)
 	if err != nil {
 		return execResult, err
 	}
-	stderr, err := ioutil.ReadAll(&errBuf)
+	stderr, err := io.ReadAll(&errBuf)
 	if err != nil {
 		return execResult, err
 	}

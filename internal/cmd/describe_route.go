@@ -26,7 +26,7 @@ func newDescribeRouteCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "route NAME",
-		Short:   "Get detailed information about a  Route",
+		Short:   "Get detailed information about a Route",
 		Long:    `Get detailed information about a Route.`,
 		Example: `potctl describe route NAME`,
 		Args:    cobra.ExactArgs(1),

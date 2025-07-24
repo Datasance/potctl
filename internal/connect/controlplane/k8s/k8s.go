@@ -72,6 +72,16 @@ func (exe *kubernetesExecutor) Execute() (err error) {
 		return
 	}
 
+	// Set HTTPS configuration if present in the control plane
+	if exe.controlPlane.Controller.Https != nil {
+		k8s.SetHttpsEnabled(exe.controlPlane.Controller.Https)
+	}
+
+	if exe.controlPlane.Controller.EcnViewerURL != "" {
+		viewerDns := true
+		k8s.SetIsViewerDns(&viewerDns)
+	}
+
 	// Check the resources exist in K8s namespace
 	if err = k8s.ExistsInNamespace(exe.namespace); err != nil {
 		return

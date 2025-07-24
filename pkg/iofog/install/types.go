@@ -40,6 +40,8 @@ type Database struct {
 	User         string
 	Password     string
 	DatabaseName string
+	SSL          *bool
+	CA           *string
 }
 
 type Pod struct {
@@ -47,13 +49,14 @@ type Pod struct {
 	Status string
 }
 
-type ControllerConfig struct {
+type K8SControllerConfig struct {
 	// User          IofogUser
 	Replicas      int32
 	Database      Database
 	PidBaseDir    string
 	EcnViewerPort int
 	EcnViewerURL  string
+	LogLevel      string
 	Auth          Auth
 	Https         *bool
 	SecretName    string

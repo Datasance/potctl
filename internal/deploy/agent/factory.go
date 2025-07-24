@@ -27,6 +27,7 @@ type AgentDeployExecutor interface {
 	execute.Executor
 	GetHost() string
 	GetTags() *[]string
+	GetConfig() *rsc.AgentConfiguration
 }
 
 type facadeExecutor struct {
@@ -43,6 +44,10 @@ func (facade *facadeExecutor) GetHost() string {
 
 func (facade *facadeExecutor) GetTags() *[]string {
 	return facade.tags
+}
+
+func (facade *facadeExecutor) GetConfig() *rsc.AgentConfiguration {
+	return facade.agent.GetConfig()
 }
 
 func (facade *facadeExecutor) Execute() (err error) {

@@ -18,7 +18,7 @@ import (
 )
 
 type RemoteController struct {
-	ControllerConfig
+	RemoteControllerConfig
 	Name     string `yaml:"name"`
 	Host     string `yaml:"host"`
 	SSH      SSH    `yaml:"ssh,omitempty"`

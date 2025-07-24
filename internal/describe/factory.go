@@ -45,6 +45,8 @@ func NewExecutor(opt *Options) (execute.Executor, error) {
 		return newAgentConfigExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	case "microservice":
 		return newMicroserviceExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "system-microservice":
+		return newSystemMicroserviceExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	case "application-template":
 		return newApplicationTemplateExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	case "application":
@@ -55,6 +57,16 @@ func NewExecutor(opt *Options) (execute.Executor, error) {
 		return newRouteExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	case "edge-resource":
 		return newEdgeResourceExecutor(opt.Namespace, opt.Name, opt.Version, opt.Filename), nil
+	case "secret":
+		return newSecretExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "configmap":
+		return newConfigMapExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "service":
+		return newServiceExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "volume-mount":
+		return newVolumeMountExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "certificate":
+		return newCertificateExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	default:
 		return nil, util.NewInputError(fmt.Sprintf("Unknown resources: %s", opt.Resource))
 	}

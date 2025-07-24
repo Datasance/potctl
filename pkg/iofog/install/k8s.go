@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
@@ -56,8 +57,9 @@ type Kubernetes struct {
 	services      cpv3.Services
 	images        cpv3.Images
 	ingresses     cpv3.Ingresses
-	router        cpv3.Router
-	proxy         cpv3.Proxy
+	httpsEnabled  *bool // Store HTTPS configuration
+	isViewerDns   *bool // Store isViewerDns configuration
+	// router        cpv3.Router
 }
 
 // NewKubernetes constructs an object to manage cluster
@@ -95,14 +97,6 @@ func (k8s *Kubernetes) SetOperatorImage(image string) {
 	}
 }
 
-func (k8s *Kubernetes) SetPortManagerImage(image string) {
-	if image != "" {
-		k8s.images.PortManager = image
-	} else {
-		k8s.images.PortManager = util.GetPortManagerImage()
-	}
-}
-
 func (k8s *Kubernetes) SetRouterImage(image string) {
 	if image != "" {
 		k8s.images.Router = image
@@ -111,11 +105,11 @@ func (k8s *Kubernetes) SetRouterImage(image string) {
 	}
 }
 
-func (k8s *Kubernetes) SetProxyImage(image string) {
+func (k8s *Kubernetes) SetRouterAdaptorImage(image string) {
 	if image != "" {
-		k8s.images.Proxy = image
+		k8s.images.RouterAdaptor = image
 	} else {
-		k8s.images.Proxy = util.GetProxyImage()
+		k8s.images.RouterAdaptor = util.GetRouterAdaptorImage()
 	}
 }
 
@@ -134,6 +128,14 @@ func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 	}
 }
 
+func (k8s *Kubernetes) SetHttpsEnabled(enabled *bool) {
+	k8s.httpsEnabled = enabled
+}
+
+func (k8s *Kubernetes) SetIsViewerDns(enabled *bool) {
+	k8s.isViewerDns = enabled
+}
+
 func (k8s *Kubernetes) enableCustomResources() error {
 	ctx := context.Background()
 	// Control Plane and App
@@ -148,8 +150,18 @@ func (k8s *Kubernetes) enableCustomResources() error {
 			if err != nil {
 				return err
 			}
-			if !iofogv3.IsSupportedCustomResource(existingCRD) {
+
+			// Always update the CRD if:
+			// 1. The CRD is not supported (major version mismatch)
+			// 2. The versions array is different (new features/types added)
+			shouldUpdate := !iofogv3.IsSupportedCustomResource(existingCRD) ||
+				!reflect.DeepEqual(existingCRD.Spec.Versions, crd.Spec.Versions)
+
+			if shouldUpdate {
+				// Preserve the existing status
 				existingCRD.Spec.Versions = crd.Spec.Versions
+
+				// Update the CRD
 				if _, err := k8s.extsClientset.ApiextensionsV1().CustomResourceDefinitions().Update(ctx, existingCRD, metav1.UpdateOptions{}); err != nil {
 					return err
 				}
@@ -180,7 +192,7 @@ func (k8s *Kubernetes) enableOperatorClient() (err error) {
 }
 
 // CreateController on cluster
-func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint string, err error) {
+func (k8s *Kubernetes) CreateControlPlane(conf *K8SControllerConfig) (endpoint string, err error) {
 	// Create namespace if required
 	Verbose("Creating namespace " + k8s.ns)
 	ns := &corev1.Namespace{
@@ -230,13 +242,16 @@ func (k8s *Kubernetes) CreateControlPlane(conf *ControllerConfig) (endpoint stri
 	cp.Spec.Services = k8s.services
 	cp.Spec.Ingresses = k8s.ingresses
 	cp.Spec.Images = k8s.images
-	cp.Spec.Router = k8s.router
-	cp.Spec.Proxy = k8s.proxy
+	// cp.Spec.Router = k8s.router
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
+	cp.Spec.Controller.LogLevel = conf.LogLevel
 	cp.Spec.Controller.PidBaseDir = conf.PidBaseDir
 	cp.Spec.Controller.Https = conf.Https
 	cp.Spec.Controller.SecretName = conf.SecretName
+
+	// Store HTTPS configuration for endpoint generation
+	k8s.SetHttpsEnabled(conf.Https)
 
 	// Create or update Control Plane
 	if found {
@@ -681,16 +696,6 @@ func (k8s *Kubernetes) SetRouterService(svcType, address string, annotations map
 	k8s.services.Router.Annotations = annotations
 }
 
-func (k8s *Kubernetes) SetProxyService(svcType, address string, annotations map[string]string) {
-	if svcType != "" {
-		k8s.services.Proxy.Type = svcType
-	} else {
-		k8s.services.Proxy.Type = string(corev1.ServiceTypeLoadBalancer)
-	}
-	k8s.services.Proxy.Address = address
-	k8s.services.Proxy.Annotations = annotations
-}
-
 func (k8s *Kubernetes) SetControllerIngress(annotations map[string]string, ingressClassName string, host string, secretName string) {
 	k8s.ingresses.Controller.Annotations = annotations
 	k8s.ingresses.Controller.IngressClassName = ingressClassName
@@ -705,26 +710,13 @@ func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interio
 	k8s.ingresses.Router.EdgePort = edgePort
 }
 
-func (k8s *Kubernetes) SetHttpProxyIngress(address string) {
-	k8s.ingresses.HTTPProxy.Address = address
-}
-
-func (k8s *Kubernetes) SetTcpProxyIngress(address string) {
-	k8s.ingresses.TCPProxy.Address = address
-}
-
-func (k8s *Kubernetes) SetRouterConfig(internalSecret, amqpsSecret, requireSsl, saslMechanisms, authenticatePeer string) {
-	k8s.router.InternalSecret = internalSecret
-	k8s.router.AmqpsSecret = amqpsSecret
-	k8s.router.RequireSsl = requireSsl
-	k8s.router.SaslMechanisms = saslMechanisms
-	k8s.router.AuthenticatePeer = authenticatePeer
-}
-
-func (k8s *Kubernetes) SetProxyConfig(serverName, transport string) {
-	k8s.proxy.ServerName = serverName
-	k8s.proxy.Transport = transport
-}
+// func (k8s *Kubernetes) SetRouterConfig(internalSecret, amqpsSecret, requireSsl, saslMechanisms, authenticatePeer string) {
+// 	k8s.router.InternalSecret = internalSecret
+// 	k8s.router.AmqpsSecret = amqpsSecret
+// 	k8s.router.RequireSsl = requireSsl
+// 	k8s.router.SaslMechanisms = saslMechanisms
+// 	k8s.router.AuthenticatePeer = authenticatePeer
+// }
 
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	ctx := context.Background()
@@ -750,17 +742,25 @@ func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {
 	return util.NewError("Could not find Controller Service in Kubernetes namespace " + namespace)
 }
 
-func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32) (*url.URL, error) {
+func (k8s *Kubernetes) formatEndpoint(endpoint string, port int32, isViewerDns ...bool) (*url.URL, error) {
 	// Ensure protocol
 	if !strings.Contains(endpoint, "://") {
-		endpoint = fmt.Sprintf("http://%s", endpoint)
+		// Check if HTTPS should be used
+		if k8s.httpsEnabled != nil && *k8s.httpsEnabled {
+			endpoint = fmt.Sprintf("https://%s", endpoint)
+		} else {
+			endpoint = fmt.Sprintf("http://%s", endpoint)
+		}
 	}
 	URL, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
-	// Ensure port for http
-	if !strings.Contains(URL.Host, ":") && URL.Scheme != "https" {
+	// Ensure port is added if not present
+	// if !strings.Contains(URL.Host, ":") {
+	// Ensure port when scheme is not HTTPS OR when isViewerDns is false
+	if !strings.Contains(URL.Host, ":") && ((URL.Scheme != "https") || (len(isViewerDns) > 0 && !isViewerDns[0])) {
+
 		URL.Host += fmt.Sprintf(":%d", port)
 	}
 	return URL, nil
@@ -772,12 +772,23 @@ func (k8s *Kubernetes) GetControllerEndpoint() (endpoint string, err error) {
 	if err != nil {
 		return "", err
 	}
-	formattedURL, err := k8s.formatEndpoint(ip, port)
+	isViewerDns := false
+	if k8s.isViewerDns != nil && *k8s.isViewerDns {
+		isViewerDns = true
+	}
+	formattedURL, err := k8s.formatEndpoint(ip, port, isViewerDns)
 	if err != nil {
 		return "", err
 	}
 	endpoint = formattedURL.String()
-	return util.GetControllerEndpoint(endpoint)
+
+	// Check if HTTPS is enabled
+	useHTTPS := false
+	if k8s.httpsEnabled != nil && *k8s.httpsEnabled {
+		useHTTPS = true
+	}
+
+	return util.GetControllerEndpoint(endpoint, useHTTPS)
 }
 
 func (k8s *Kubernetes) GetControllerPods() (podNames []Pod, err error) {
@@ -789,7 +800,7 @@ func (k8s *Kubernetes) GetControllerPods() (podNames []Pod, err error) {
 	}
 	// Find Controller pods
 	for idx := range pods.Items {
-		if pods.Items[idx].Labels["name"] == controller {
+		if pods.Items[idx].Labels["datasance.com/component"] == controller {
 			podNames = append(podNames, Pod{
 				Name:   pods.Items[idx].Name,
 				Status: string(pods.Items[idx].Status.Phase),

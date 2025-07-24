@@ -26,6 +26,12 @@ const (
 	ApplicationKind            Kind = Kind(apps.ApplicationKind)
 	ApplicationTemplateKind    Kind = Kind(apps.ApplicationTemplateKind)
 	RouteKind                  Kind = Kind(apps.RouteKind)
+	SecretKind                 Kind = "Secret"
+	ConfigMapKind              Kind = "ConfigMap"
+	ServiceKind                Kind = "Service"
+	VolumeMountKind            Kind = "VolumeMount"
+	CertificateKind            Kind = "Certificate"
+	CertificateAuthorityKind   Kind = "CertificateAuthority"
 )
 
 // Header contains k8s yaml header
@@ -33,7 +39,9 @@ type Header struct {
 	APIVersion string         `yaml:"apiVersion" json:"apiVersion"`
 	Kind       Kind           `yaml:"kind" json:"kind"`
 	Metadata   HeaderMetadata `yaml:"metadata" json:"metadata"`
-	Spec       interface{}    `yaml:"spec" json:"spec"`
+	Spec       interface{}    `yaml:"spec,omitempty" json:"spec,omitempty"`
+	Data       interface{}    `yaml:"data,omitempty" json:"data,omitempty"`
+	Status     interface{}    `yaml:"status,omitempty" json:"status,omitempty"`
 }
 
 // Configuration contains the unmarshalled configuration file

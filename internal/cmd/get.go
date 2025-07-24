@@ -31,11 +31,18 @@ func newGetCommand() *cobra.Command {
 		"edge-resources",
 		"application-templates",
 		"applications",
+		"system-applications",
 		"microservices",
+		"system-microservices",
 		"catalog",
 		"registries",
 		"volumes",
 		"routes",
+		"secrets",
+		"configmaps",
+		"services",
+		"volume-mounts",
+		"certificates",
 	}
 	cmd := &cobra.Command{
 		Use:   "get RESOURCE",
@@ -50,13 +57,20 @@ Resources like Agents will require a working Controller in the namespace to disp
              edge-resources
              application-templates
              applications
+             system-applications
              microservices
+             system-microservices
              catalog
              registries
              volumes
-             routes`,
+             routes
+             secrets
+             configmaps
+             services
+             volume-mounts
+             certificates`,
 		ValidArgs: validResources,
-		Args:      cobra.ExactValidArgs(1),
+		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			// Get resource type arg
 			resource := args[0]

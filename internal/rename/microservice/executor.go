@@ -50,7 +50,7 @@ func Execute(namespace, name, newName string) error {
 	// Move
 	msvc.Name = newName
 
-	yamlMsvc, err := describe.MapClientMicroserviceToDeployMicroservice(msvc, clt)
+	yamlMsvc, _, _, err := describe.MapClientMicroserviceToDeployMicroservice(msvc, clt)
 	if err != nil {
 		return err
 	}

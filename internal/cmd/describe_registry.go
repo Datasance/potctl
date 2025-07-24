@@ -26,7 +26,7 @@ func newDescribeRegistryCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "registry NAME",
-		Short:   "Get detailed information about a  Microservice Registry",
+		Short:   "Get detailed information about a Microservice Registry",
 		Long:    `Get detailed information about a Microservice Registry.`,
 		Example: `potctl describe registry NAME`,
 		Args:    cobra.ExactArgs(1),
