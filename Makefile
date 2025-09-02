@@ -19,10 +19,10 @@ PREFIX = github.com/datasance/potctl/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
 LDFLAGS += -X $(PREFIX).operatorTag=3.5.0
 LDFLAGS += -X $(PREFIX).routerAdaptorTag=3.5.0
-LDFLAGS += -X $(PREFIX).routerTag=3.5.0
-LDFLAGS += -X $(PREFIX).controllerTag=3.5.0
+LDFLAGS += -X $(PREFIX).routerTag=3.5.1
+LDFLAGS += -X $(PREFIX).controllerTag=3.5.3
 LDFLAGS += -X $(PREFIX).agentTag=3.5.1
-LDFLAGS += -X $(PREFIX).controllerVersion=3.5.0
+LDFLAGS += -X $(PREFIX).controllerVersion=3.5.3
 LDFLAGS += -X $(PREFIX).agentVersion=3.5.1
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.5.0.3

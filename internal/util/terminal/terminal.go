@@ -274,12 +274,19 @@ func (t *Terminal) Start() error {
 			default:
 				msg, err := t.wsClient.ReadMessage()
 				if err != nil {
-					t.writeToStdout([]byte(fmt.Sprintf("\n✘ WebSocket error: %v\n", err)))
+					// Check if this is a normal closure
+					if t.wsClient.IsNormalClosure(err) {
+						// Normal closure - don't report as error, just exit gracefully
+						t.cancel()
+						return
+					}
+					// This is an actual error - pass it to exec layer for handling
 					errCh <- err
 					t.cancel()
 					return
 				}
 				if msg == nil {
+					// Normal termination (no error, no message)
 					t.cancel()
 					return
 				}
@@ -291,7 +298,13 @@ func (t *Terminal) Start() error {
 
 	// Check for initial WebSocket errors
 	if err := t.wsClient.GetError(); err != nil {
-		t.writeToStdout([]byte(fmt.Sprintf("\n✘ WebSocket error: %v\n", err)))
+		// Check if this is a normal closure
+		if t.wsClient.IsNormalClosure(err) {
+			// Normal closure - don't report as error
+			t.cancel()
+			return nil
+		}
+		// This is an actual error - pass it to exec layer for handling
 		t.cancel()
 		return err
 	}
