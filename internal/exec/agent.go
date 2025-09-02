@@ -102,21 +102,25 @@ func (exe *agentExecutor) Execute() error {
 	// Check for initial connection error
 	if err := wsClient.GetError(); err != nil {
 		util.SpinHandlePromptComplete()
-		return util.NewError(fmt.Sprintf("WebSocket error: %v", err))
+		formattedErr := formatWebSocketError(err)
+		return util.NewError(formattedErr)
 	}
 
 	if err := term.Start(); err != nil {
 		util.SpinHandlePromptComplete()
-		return util.NewError(fmt.Sprintf("failed to start terminal: %v", err))
+		formattedErr := formatWebSocketError(err)
+		return util.NewError(formattedErr)
 	}
 
 	// Wait for terminal to finish
 	<-wsClient.GetDone()
-	util.SpinHandlePromptComplete()
+	msg := fmt.Sprintf("Successfully closed Agent %s Exec Session", exe.name)
+	util.PrintSuccess(msg)
 
 	// Check if there was an error
 	if err := wsClient.GetError(); err != nil {
-		return util.NewError(fmt.Sprintf("WebSocket error: %v", err))
+		formattedErr := formatWebSocketError(err)
+		return util.NewError(formattedErr)
 	}
 
 	return nil
