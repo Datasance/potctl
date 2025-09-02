@@ -17,6 +17,23 @@ import (
 	"strings"
 )
 
+// Error message constants to avoid duplication
+const (
+	ErrMsgAnotherUserConnected    = "Another user is already connected to this microservice. Only one user can connect at a time."
+	ErrMsgTimeoutWaitingForAgent  = "Timeout waiting for agent connection. Please ensure the microservice/agent is running and try again."
+	ErrMsgAuthenticationFailed    = "Authentication failed. Please check your credentials and try again."
+	ErrMsgMicroserviceNotRunning  = "Microservice is not running. Please start the microservice first."
+	ErrMsgExecNotEnabled          = "Microservice exec is not enabled. Please enable exec for this microservice."
+	ErrMsgNoAvailableExecSession  = "No available exec session for this agent or microservice. Be sure to attach/link exec session to the agent or microservice first. If you already attached/linked exec session to the agent or microservice, please wait for the exec session to be ready."
+	ErrMsgInsufficientPermissions = "Insufficient permissions. Required roles: SRE for Node Exec or Developer for Microservice Exec."
+	ErrMsgOnlySREAccess           = "Only SRE can access system microservices. Please contact your administrator."
+	ErrMsgConnectionLost          = "Connection lost unexpectedly"
+	ErrMsgMessageTooLarge         = "Message too large"
+	ErrMsgServerError             = "Server error occurred"
+	ErrMsgFailedToConnect         = "Failed to connect to server"
+	ErrMsgConnectionClosed        = "Connection was closed"
+)
+
 // formatWebSocketError formats WebSocket errors for better user experience
 func formatWebSocketError(err error) string {
 	if err == nil {
@@ -30,94 +47,62 @@ func formatWebSocketError(err error) string {
 		// Extract the reason from the error message
 		reason := extractCloseReason(errStr)
 
-		// Debug: Check if we're getting the right reason
-		if reason == "" {
-			// If extraction failed, try direct string matching
-			if strings.Contains(errStr, "No available exec session") {
-				return "No available exec session for this agent or microservice. Be sure to attach/link exec session to the agent or microservice first. If you already attached/linked exec session to the agent or microservice, please wait for the exec session to be ready."
-			}
-			if strings.Contains(errStr, "Microservice has already active exec session") {
-				return "Another user is already connected to this microservice. Only one user can connect at a time."
-			}
-			if strings.Contains(errStr, "Timeout waiting for agent connection") {
-				return "Timeout waiting for agent connection. Please ensure the microservice/agent is running and try again."
-			}
-			if strings.Contains(errStr, "Authentication failed") {
-				return "Authentication failed. Please check your credentials and try again."
-			}
-			if strings.Contains(errStr, "Microservice is not running") {
-				return "Microservice is not running. Please start the microservice first."
-			}
-			if strings.Contains(errStr, "Microservice exec is not enabled") {
-				return "Microservice exec is not enabled. Please enable exec for this microservice."
-			}
-			if strings.Contains(errStr, "Microservice already has an active session") {
-				return "Microservice already has an active session. Please wait for the current session to end."
-			}
-			if strings.Contains(errStr, "Insufficient permissions") {
-				return "Insufficient permissions. Required roles: SRE for Node Exec or Developer for Microservice Exec."
-			}
-			if strings.Contains(errStr, "Only SRE can access system microservices") {
-				return "Only SRE can access system microservices. Please contact your administrator."
-			}
+		// Try direct string matching first (more reliable)
+		if strings.Contains(errStr, "No available exec session") {
+			return ErrMsgNoAvailableExecSession
+		}
+		if strings.Contains(errStr, "Microservice has already active exec session") {
+			return ErrMsgAnotherUserConnected
+		}
+		if strings.Contains(errStr, "Timeout waiting for agent connection") {
+			return ErrMsgTimeoutWaitingForAgent
+		}
+		if strings.Contains(errStr, "Authentication failed") {
+			return ErrMsgAuthenticationFailed
+		}
+		if strings.Contains(errStr, "Microservice is not running") {
+			return ErrMsgMicroserviceNotRunning
+		}
+		if strings.Contains(errStr, "Microservice exec is not enabled") {
+			return ErrMsgExecNotEnabled
+		}
+		if strings.Contains(errStr, "Microservice already has an active session") {
+			return ErrMsgAnotherUserConnected
+		}
+		if strings.Contains(errStr, "Insufficient permissions") {
+			return ErrMsgInsufficientPermissions
+		}
+		if strings.Contains(errStr, "Only SRE can access system microservices") {
+			return ErrMsgOnlySREAccess
 		}
 
-		// Handle specific 1008 error reasons based on controller logic
-		switch {
-		case strings.Contains(reason, "Microservice has already active exec session"):
-			return "Another user is already connected to this microservice. Only one user can connect at a time."
-
-		case strings.Contains(reason, "Timeout waiting for agent connection"):
-			return "Timeout waiting for agent connection. Please ensure the microservice/agent is running and try again."
-
-		case strings.Contains(reason, "Authentication failed"):
-			return "Authentication failed. Please check your credentials and try again."
-
-		case strings.Contains(reason, "Microservice is not running"):
-			return "Microservice is not running. Please start the microservice first."
-
-		case strings.Contains(reason, "Microservice exec is not enabled"):
-			return "Microservice exec is not enabled. Please enable exec for this microservice."
-
-		case strings.Contains(reason, "Microservice already has an active session"):
-			return "Another user is already connected to this microservice. Only one user can connect at a time."
-
-		case strings.Contains(reason, "No available exec session"):
-			return "No available exec session for this agent or microservice. Be sure to attach/link exec session to the agent or microservice first. If you already attached/linked exec session to the agent or microservice, please wait for the exec session to be ready."
-
-		case strings.Contains(reason, "Insufficient permissions"):
-			return "Insufficient permissions. Required roles: SRE for Node Exec or Developer for Microservice Exec."
-
-		case strings.Contains(reason, "Only SRE can access system microservices"):
-			return "Only SRE can access system microservices. Please contact your administrator."
-
-		default:
-			// For any other 1008 error, return the specific reason
-			if reason != "" {
-				return reason
-			}
-			return "Policy violation: Access denied"
+		// If no direct match found, try the extracted reason
+		if reason != "" {
+			return reason
 		}
+
+		// Default fallback for unknown 1008 errors
+		return "Policy violation: Access denied"
 	}
 
 	if strings.Contains(errStr, "close 1006") {
-		return "Connection lost unexpectedly"
+		return ErrMsgConnectionLost
 	}
 
 	if strings.Contains(errStr, "close 1009") {
-		return "Message too large"
+		return ErrMsgMessageTooLarge
 	}
 
 	if strings.Contains(errStr, "close 1011") {
-		return "Server error occurred"
+		return ErrMsgServerError
 	}
 
 	if strings.Contains(errStr, "failed to connect") {
-		return "Failed to connect to server"
+		return ErrMsgFailedToConnect
 	}
 
 	if strings.Contains(errStr, "use of closed network connection") {
-		return "Connection was closed"
+		return ErrMsgConnectionClosed
 	}
 
 	// Default case - return the original error but clean it up
