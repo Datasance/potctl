@@ -251,7 +251,7 @@ determine_container_engine() {
 }
 
 # Source init.sh to get distribution info
-. /etc/iofog/agent/init.sh
+. /etc/iofog/controller/init.sh
 init
 
 # Configure container engine based on distribution

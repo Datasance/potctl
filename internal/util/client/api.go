@@ -64,13 +64,13 @@ func IsEdgeResourceCapable(namespace string) error {
 	return nil
 }
 
-func GetMicroserviceName(namespace, appName, mscvName string) (name string, err error) {
+func GetMicroserviceName(namespace, appName, msvcName string) (name string, err error) {
 	clt, err := NewControllerClient(namespace)
 	if err != nil {
 		return
 	}
 
-	response, err := clt.GetMicroserviceByName(appName, mscvName)
+	response, err := clt.GetMicroserviceByName(appName, msvcName)
 	if err != nil {
 		return
 	}

@@ -14,7 +14,7 @@
 package cmd
 
 import (
-	stopapplication "github.com/datasance/potctl/internal/stop"
+	stopapplication "github.com/datasance/potctl/internal/stop/application"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )

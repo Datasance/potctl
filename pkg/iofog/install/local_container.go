@@ -153,6 +153,18 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 	if image == "" {
 		image = util.GetControllerImage()
 	}
+
+	// Handle nil pointer fields safely
+	sslValue := "false"
+	if db.SSL != nil {
+		sslValue = strconv.FormatBool(*db.SSL)
+	}
+
+	caValue := ""
+	if db.CA != nil {
+		caValue = *db.CA
+	}
+
 	return &LocalContainerConfig{
 		Host: "0.0.0.0",
 		Ports: []port{
@@ -174,8 +186,8 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 			"DB_PASSWORD=" + db.Password,
 			"DB_PORT=" + strconv.Itoa(db.Port),
 			"DB_NAME=" + db.DatabaseName,
-			"DB_USE_SSL=" + strconv.FormatBool(*db.SSL),
-			"DB_SSL_CA=" + *db.CA,
+			"DB_USE_SSL=" + sslValue,
+			"DB_SSL_CA=" + caValue,
 			"KC_URL=" + auth.URL,
 			"KC_REALM=" + auth.Realm,
 			"KC_SSL_REQ=" + auth.SSL,
