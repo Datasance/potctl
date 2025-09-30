@@ -7,13 +7,13 @@ Rebuilds a system microservice
 Rebuilds a system microservice
 
 ```
-potctl rebuild system-microservice AppNAME/MscvNAME [flags]
+potctl rebuild system-microservice AppNAME/MsvcNAME [flags]
 ```
 
 ### Examples
 
 ```
-potctl rebuild system-microservice AppNAME/MscvNAME
+potctl rebuild system-microservice AppNAME/MsvcNAME
 ```
 
 ### Options

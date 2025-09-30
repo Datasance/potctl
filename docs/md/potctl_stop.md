@@ -24,5 +24,6 @@ Stops a resource
 
 * [potctl](potctl.md)	 - 
 * [potctl stop application](potctl_stop_application.md)	 - Stop an application
+* [potctl stop microservice](potctl_stop_microservice.md)	 - Stop an microservice
 
 

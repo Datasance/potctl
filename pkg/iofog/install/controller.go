@@ -353,9 +353,15 @@ func (ctrl *Controller) Install() (err error) {
 		if err = DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
 			return
 		}
+		if err = ImportRouterCertificate(endpoint, "pot-site-ca"); err != nil {
+			return
+		}
 	}
 	if ctrl.LocalCA != nil {
 		if err = DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
+			return
+		}
+		if err = ImportRouterCertificate(endpoint, "default-router-local-ca"); err != nil {
 			return
 		}
 	}
@@ -428,5 +434,26 @@ func DeployRouterSecrets(endpoint, secretName string, TLSCert, TLSKey string) (e
 	if err = ctrlClient.CreateSecret(&request); err != nil {
 		return err
 	}
+	return nil
+}
+
+func ImportRouterCertificate(endpoint string, secretName string) (err error) {
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		return err
+	}
+	ctrlClient := client.New(client.Options{BaseURL: baseURL})
+
+	// Create CA certificate
+	request := client.CACreateRequest{
+		Name:       secretName,
+		Type:       "direct",
+		SecretName: secretName,
+	}
+
+	if err = ctrlClient.CreateCA(&request); err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -14,7 +14,7 @@
 package cmd
 
 import (
-	startapplication "github.com/datasance/potctl/internal/start"
+	startapplication "github.com/datasance/potctl/internal/start/application"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/spf13/cobra"
 )

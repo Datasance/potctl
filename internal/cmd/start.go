@@ -27,6 +27,7 @@ func newStartCommand() *cobra.Command {
 	// Add subcommands
 	cmd.AddCommand(
 		newStartApplicationCommand(),
+		newStartMicroserviceCommand(),
 	)
 	return cmd
 }

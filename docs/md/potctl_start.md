@@ -24,5 +24,6 @@ Starts a resource
 
 * [potctl](potctl.md)	 - 
 * [potctl start application](potctl_start_application.md)	 - Starts an application
+* [potctl start microservice](potctl_start_microservice.md)	 - Starts an microservice
 
 

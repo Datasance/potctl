@@ -22,10 +22,10 @@ import (
 func newRebuildSystemMicroserviceCommand() *cobra.Command {
 	opt := rebuildsystemmicroservice.Options{}
 	cmd := &cobra.Command{
-		Use:     "system-microservice AppNAME/MscvNAME",
+		Use:     "system-microservice AppNAME/MsvcNAME",
 		Short:   "Rebuilds a system microservice",
 		Long:    "Rebuilds a system microservice",
-		Example: `potctl rebuild system-microservice AppNAME/MscvNAME`,
+		Example: `potctl rebuild system-microservice AppNAME/MsvcNAME`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error

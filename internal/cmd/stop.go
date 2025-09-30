@@ -27,6 +27,7 @@ func newStopCommand() *cobra.Command {
 	// Add subcommands
 	cmd.AddCommand(
 		newStopApplicationCommand(),
+		newStopMicroserviceCommand(),
 	)
 	return cmd
 }
