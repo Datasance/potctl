@@ -388,42 +388,34 @@ func (ctrl *Controller) Uninstall() (err error) {
 	return nil
 }
 
-func (ctrl *Controller) Install() (err error) {
-	// Connect to server
-	Verbose("Connecting to server")
-	if err = ctrl.ssh.Connect(); err != nil {
-		return
-	}
-	defer util.Log(ctrl.ssh.Disconnect)
-
-	// Copy installation scripts to remote host
+func (ctrl *Controller) copyInstallScripts() error {
 	Verbose("Copying install files to server")
-	if _, err = ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.ctrlDir, ctrl.ctrlDir)); err != nil {
+	if _, err := ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.ctrlDir, ctrl.ctrlDir)); err != nil {
 		return err
 	}
 
 	// Use custom scripts if available, otherwise use default embedded scripts
 	if ctrl.customInstall || len(ctrl.procs.scriptNames) > 0 {
-		if err = ctrl.copyScriptsToController(); err != nil {
-			return err
-		}
-	} else {
-		// Fallback to default method for backward compatibility
-		scripts := []string{
-			pkg.controllerScriptPrereq,
-			pkg.controllerScriptInit,
-			pkg.controllerScriptInstallContainerEngine,
-			pkg.controllerScriptInstall,
-			pkg.controllerScriptSetEnv,
-		}
-		for _, script := range scripts {
-			if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
-				return err
-			}
-		}
+		return ctrl.copyScriptsToController()
 	}
 
-	// Encode environment variables
+	// Fallback to default method for backward compatibility
+	scripts := []string{
+		pkg.controllerScriptPrereq,
+		pkg.controllerScriptInit,
+		pkg.controllerScriptInstallContainerEngine,
+		pkg.controllerScriptInstall,
+		pkg.controllerScriptSetEnv,
+	}
+	for _, script := range scripts {
+		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (ctrl *Controller) prepareEnvironmentVariables() string {
 	env := []string{}
 	env = append(env, "CONTROL_PLANE=Remote")
 	env = append(env, fmt.Sprintf("\"CONTROLLER_NAMESPACE=%s\"", ctrl.Namespace))
@@ -459,7 +451,6 @@ func (ctrl *Controller) Install() (err error) {
 			fmt.Sprintf(`"KC_CLIENT=%s"`, ctrl.auth.controllerClient),
 			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
 			fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
-
 	}
 	if ctrl.PidBaseDir != "" {
 		env = append(env, fmt.Sprintf("\"PID_BASE=%s\"", ctrl.PidBaseDir))
@@ -479,9 +470,10 @@ func (ctrl *Controller) Install() (err error) {
 	if ctrl.LogLevel != "" {
 		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
 	}
+	return strings.Join(env, " ")
+}
 
-	envString := strings.Join(env, " ")
-
+func (ctrl *Controller) prepareCommands(envString string) []command {
 	// Define commands - use custom entrypoints if available
 	checkPrereqsCmd := ctrl.procs.check.getCommand()
 	if checkPrereqsCmd == "" {
@@ -506,7 +498,7 @@ func (ctrl *Controller) Install() (err error) {
 		installCmd = fmt.Sprintf("sudo %s", installCmd)
 	}
 
-	cmds := []command{
+	return []command{
 		{
 			cmd: checkPrereqsCmd,
 			msg: "Checking prerequisites on Controller " + ctrl.Host,
@@ -524,16 +516,20 @@ func (ctrl *Controller) Install() (err error) {
 			msg: "Installing ioFog on Controller " + ctrl.Host,
 		},
 	}
+}
 
-	// Execute commands
+func (ctrl *Controller) executeCommands(cmds []command) error {
 	for _, cmd := range cmds {
 		Verbose(cmd.msg)
-		_, err = ctrl.ssh.Run(cmd.cmd)
+		_, err := ctrl.ssh.Run(cmd.cmd)
 		if err != nil {
-			return
+			return err
 		}
 	}
+	return nil
+}
 
+func (ctrl *Controller) waitForControllerToStart() (string, error) {
 	// Specify errors to ignore while waiting
 	ignoredErrors := []string{
 		"Process exited with status 7", // curl: (7) Failed to connect to localhost port 8080: Connection refused
@@ -553,18 +549,67 @@ func (ctrl *Controller) Install() (err error) {
 	}
 	for i := 0; i < maxRetries; i++ {
 		Verbose(fmt.Sprintf("Try %d of %d", i+1, maxRetries))
-		err = ctrl.ssh.RunUntil(
+		err := ctrl.ssh.RunUntil(
 			regexp.MustCompile("\"status\":\"online\""),
 			fmt.Sprintf("curl --request GET --url %s://localhost:%s/api/v3/status", protocol, iofog.ControllerPortString),
 			ignoredErrors,
 		)
 		if err == nil {
-			break
+			return protocol, nil
 		}
 		time.Sleep(2 * time.Second * time.Duration(i+1)) // Exponential backoff
 	}
-	if err != nil {
+	return "", fmt.Errorf("controller failed to start after %d retries", maxRetries)
+}
+
+func (ctrl *Controller) deployRouterCertificates(endpoint string) error {
+	if ctrl.SiteCA != nil {
+		if err := DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
+			return err
+		}
+		if err := ImportRouterCertificate(endpoint, "pot-site-ca"); err != nil {
+			return err
+		}
+	}
+	if ctrl.LocalCA != nil {
+		if err := DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
+			return err
+		}
+		if err := ImportRouterCertificate(endpoint, "default-router-local-ca"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (ctrl *Controller) Install() (err error) {
+	// Connect to server
+	Verbose("Connecting to server")
+	if err = ctrl.ssh.Connect(); err != nil {
 		return
+	}
+	defer util.Log(ctrl.ssh.Disconnect)
+
+	// Copy installation scripts to remote host
+	if err = ctrl.copyInstallScripts(); err != nil {
+		return err
+	}
+
+	// Prepare and build environment variables
+	envString := ctrl.prepareEnvironmentVariables()
+
+	// Prepare commands
+	cmds := ctrl.prepareCommands(envString)
+
+	// Execute commands
+	if err = ctrl.executeCommands(cmds); err != nil {
+		return err
+	}
+
+	// Wait for controller to start
+	protocol, err := ctrl.waitForControllerToStart()
+	if err != nil {
+		return err
 	}
 
 	// Wait for API
@@ -572,22 +617,10 @@ func (ctrl *Controller) Install() (err error) {
 	if err = WaitForControllerAPI(endpoint); err != nil {
 		return
 	}
-	// Deploy router secrets
-	if ctrl.SiteCA != nil {
-		if err = DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
-			return
-		}
-		if err = ImportRouterCertificate(endpoint, "pot-site-ca"); err != nil {
-			return
-		}
-	}
-	if ctrl.LocalCA != nil {
-		if err = DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
-			return
-		}
-		if err = ImportRouterCertificate(endpoint, "default-router-local-ca"); err != nil {
-			return
-		}
+
+	// Deploy router certificates
+	if err = ctrl.deployRouterCertificates(endpoint); err != nil {
+		return
 	}
 
 	return nil
