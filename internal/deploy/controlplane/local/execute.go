@@ -15,17 +15,21 @@ package deploylocalcontrolplane
 
 import (
 	"fmt"
-	// "strings"
+	"net"
+	"net/url"
+	"strings"
 
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
+
 	// deployagentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	deploylocalcontroller "github.com/datasance/potctl/internal/deploy/controller/local"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
-	// iutil "github.com/datasance/potctl/internal/util"
+	iutil "github.com/datasance/potctl/internal/util"
+
 	// clientutil "github.com/datasance/potctl/internal/util/client"
-	// "github.com/datasance/potctl/pkg/iofog"
+	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
 )
@@ -56,6 +60,61 @@ type localControlPlaneExecutor struct {
 
 // 	return clt.PutDefaultRouter(routerConfig)
 // }
+
+// prepareViewerURL prepares the viewer URL from endpoint using logic similar to view.go
+func prepareViewerURL(endpoint string) (string, error) {
+	URL, err := url.Parse(endpoint)
+	if err != nil || URL.Host == "" {
+		URL, err = url.Parse("//" + endpoint)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse endpoint: %v", err)
+		}
+	}
+
+	if URL.Scheme == "" {
+		URL.Scheme = "http"
+	}
+
+	host := ""
+	if strings.Contains(URL.Host, ":") {
+		host, _, err = net.SplitHostPort(URL.Host)
+		if err != nil {
+			return "", fmt.Errorf("failed to split host and port: %v", err)
+		}
+	} else {
+		host = URL.Host
+	}
+
+	// Add port for localhost
+	if util.IsLocalHost(host) {
+		host = net.JoinHostPort(host, iofog.ControllerHostECNViewerPortString)
+	}
+
+	URL.Host = host
+	return URL.String(), nil
+}
+
+// updateViewerClientRootURL updates the viewer client root URL in Keycloak if auth is configured
+func updateViewerClientRootURL(controlPlane *rsc.LocalControlPlane, endpoint string) error {
+	// Check if auth is configured
+	if controlPlane.Auth.URL == "" || controlPlane.Auth.ViewerClient == "" {
+		// Auth not configured, skip update
+		return nil
+	}
+
+	// Prepare viewer URL
+	viewerURL, err := prepareViewerURL(endpoint)
+	if err != nil {
+		return fmt.Errorf("failed to prepare viewer URL: %v", err)
+	}
+
+	// Update viewer client root URL
+	if err := iutil.UpdateECNViewerClientRootURL(controlPlane.Auth, viewerURL); err != nil {
+		return fmt.Errorf("failed to update viewer client root URL: %v", err)
+	}
+
+	return nil
+}
 
 func (exe localControlPlaneExecutor) postDeploy() (err error) {
 	// Check controller is reachable
@@ -117,6 +176,13 @@ func (exe localControlPlaneExecutor) Execute() (err error) {
 	if err := config.Flush(); err != nil {
 		return err
 	}
+
+	// Update viewer client root URL if auth is configured
+	if err := updateViewerClientRootURL(exe.controlPlane, endpoint); err != nil {
+		// Log error but don't fail deployment
+		util.PrintInfo(fmt.Sprintf("Warning: Failed to update viewer client root URL: %v\n", err))
+	}
+
 	// Post deploy steps
 	return exe.postDeploy()
 }

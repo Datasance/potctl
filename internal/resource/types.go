@@ -250,6 +250,7 @@ type Ingresses struct {
 }
 
 // type RouterConfig struct {
+// 	HA *bool `yaml:"ha,omitempty"`
 // }
 
 type Secret struct {

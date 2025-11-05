@@ -82,6 +82,9 @@ do_start_iofog(){
     echo "${STATUS}"
 	done
 	sudo iofog-agent "config -cf 10 -sf 10"
+	if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
+        sudo iofog-agent "config -c unix:///var/run/podman/podman.sock"
+    fi   
 }
 
 agent_version="$1"

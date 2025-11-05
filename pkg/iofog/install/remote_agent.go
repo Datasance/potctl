@@ -94,7 +94,7 @@ func NewRemoteAgent(user, host string, port int, privKeyFilename, agentName, age
 				pkg.scriptInit,
 				pkg.scriptInstallDeps,
 				pkg.scriptInstallJava,
-				pkg.scriptInstallDocker,
+				pkg.scriptInstallContainerEngine,
 				pkg.scriptInstallIofog,
 				pkg.scriptUninstallIofog,
 			},
@@ -148,7 +148,7 @@ func NewRemoteContainerAgent(user, host string, port int, privKeyFilename, agent
 				pkg.scriptPrereq,
 				pkg.scriptInit,
 				pkg.scriptInstallDeps,
-				pkg.scriptInstallDocker,
+				pkg.scriptInstallContainerEngine,
 				pkg.scriptInstallIofog,
 				pkg.scriptUninstallIofog,
 			},
@@ -200,7 +200,7 @@ func (agent *RemoteAgent) CustomizeProcedures(dir string, procs *AgentProcedures
 	// Add default entrypoints and scripts if necessary (user not provided)
 	if procs.Deps.Name == "" {
 		procs.Deps = agent.procs.Deps
-		for _, script := range []string{pkg.scriptInstallDeps, pkg.scriptInstallDocker, pkg.scriptInstallJava} {
+		for _, script := range []string{pkg.scriptInstallDeps, pkg.scriptInstallContainerEngine, pkg.scriptInstallJava} {
 			procs.scriptNames = append(procs.scriptNames, script)
 			scriptContent, err := util.GetStaticFile(addAgentAssetPrefix(script))
 			if err != nil {

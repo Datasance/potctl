@@ -65,14 +65,12 @@ func (exe *registryExecutor) Execute() error {
 		if r.ID == exe.id {
 			private = !r.IsPublic
 			registry = rsc.Registry{
-				URL:          &r.URL,
-				ID:           r.ID,
-				Private:      &private,
-				Username:     &r.Username,
-				Email:        &r.Email,
-				Password:     nil,
-				RequiresCert: &r.RequiresCert,
-				Certificate:  &r.Certificate,
+				URL:      &r.URL,
+				ID:       r.ID,
+				Private:  &private,
+				Username: &r.Username,
+				Email:    &r.Email,
+				Password: nil,
 			}
 			break
 		}

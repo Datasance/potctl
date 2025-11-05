@@ -58,14 +58,12 @@ func (exe *remoteExecutor) Execute() error {
 			publicPtr = &public
 		}
 		return clt.UpdateRegistry(client.RegistryUpdateRequest{
-			URL:          exe.registry.URL,
-			IsPublic:     publicPtr,
-			Certificate:  exe.registry.Certificate,
-			RequiresCert: exe.registry.RequiresCert,
-			Username:     exe.registry.Username,
-			Email:        exe.registry.Email,
-			Password:     exe.registry.Password,
-			ID:           exe.registry.ID,
+			URL:      exe.registry.URL,
+			IsPublic: publicPtr,
+			Username: exe.registry.Username,
+			Email:    exe.registry.Email,
+			Password: exe.registry.Password,
+			ID:       exe.registry.ID,
 		})
 	}
 
@@ -75,12 +73,6 @@ func (exe *remoteExecutor) Execute() error {
 	}
 	if exe.registry.Private != nil {
 		createRequest.IsPublic = !*exe.registry.Private
-	}
-	if exe.registry.Certificate != nil {
-		createRequest.Certificate = *exe.registry.Certificate
-	}
-	if exe.registry.RequiresCert != nil {
-		createRequest.RequiresCert = *exe.registry.RequiresCert
 	}
 	if exe.registry.Username != nil {
 		createRequest.Username = *exe.registry.Username

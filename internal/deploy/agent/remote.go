@@ -20,6 +20,7 @@ import (
 	rsc "github.com/datasance/potctl/internal/resource"
 
 	// clientutil "github.com/datasance/potctl/internal/util/client"
+	iutil "github.com/datasance/potctl/internal/util"
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -46,7 +47,7 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 	var agent *install.RemoteAgent
 	var err error
 
-	if exe.agent.Package.Container.Image != "" {
+	if exe.agent.Config.DeploymentType != nil && *exe.agent.Config.DeploymentType == "container" {
 		// Use NewRemoteContainerAgent
 		agent, err = install.NewRemoteContainerAgent(
 			exe.agent.SSH.User,
@@ -138,7 +139,8 @@ func (exe *remoteExecutor) Execute() (err error) {
 
 	var agent *install.RemoteAgent
 
-	if exe.agent.Package.Container.Image != "" {
+	if (exe.agent.Config.DeploymentType != nil && *exe.agent.Config.DeploymentType == "container") || exe.agent.Package.Container.Image != "" {
+		exe.agent.Config.DeploymentType = iutil.MakeStrPtr("container")
 		// Use NewRemoteContainerAgent
 		agent, err = install.NewRemoteContainerAgent(
 			exe.agent.SSH.User,
@@ -149,6 +151,7 @@ func (exe *remoteExecutor) Execute() (err error) {
 			exe.agent.UUID,
 		)
 	} else {
+		exe.agent.Config.DeploymentType = iutil.MakeStrPtr("native")
 		// Use NewRemoteAgent
 		agent, err = install.NewRemoteAgent(
 			exe.agent.SSH.User,
@@ -175,7 +178,7 @@ func (exe *remoteExecutor) Execute() (err error) {
 		// Set Image
 		agent.SetContainerImage(exe.agent.Package.Container.Image)
 
-	} else {
+	} else if exe.agent.Package.Version != "" {
 		// Set version
 		agent.SetVersion(exe.agent.Package.Version)
 	}
@@ -204,7 +207,7 @@ func ValidateRemoteAgent(agent *rsc.RemoteAgent) error {
 	if err := util.IsLowerAlphanumeric("Agent", agent.Name); err != nil {
 		return err
 	}
-	if agent.Name == iofog.VanillaRouterAgentName || agent.Name == iofog.VanillaRemoteAgentName {
+	if agent.Name == iofog.VanillaRouterAgentName {
 		return util.NewInputError(fmt.Sprintf("%s is a reserved name and cannot be used for an Agent", iofog.VanillaRouterAgentName))
 	}
 	if (agent.Host != "localhost" && agent.Host != "127.0.0.1") && (agent.Host == "" || agent.SSH.User == "" || agent.SSH.KeyFile == "") {

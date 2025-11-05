@@ -61,9 +61,9 @@ func Validate(config *rsc.AgentConfiguration) error {
 }
 
 func findAgentUUIDInList(list []client.AgentInfo, name string) (uuid string, err error) {
-	if name == iofog.VanillaRemoteAgentName {
-		return name, nil
-	}
+	// if name == iofog.VanillaRemoteAgentName {
+	// 	return name, nil
+	// }
 	if name == iofog.VanillaRouterAgentName {
 		return name, nil
 	}

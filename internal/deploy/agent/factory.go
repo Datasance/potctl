@@ -15,6 +15,7 @@ package deployagent
 
 import (
 	"fmt"
+
 	"github.com/datasance/potctl/internal/config"
 	agentconfig "github.com/datasance/potctl/internal/deploy/agentconfig"
 	"github.com/datasance/potctl/internal/execute"
@@ -73,12 +74,10 @@ func (facade *facadeExecutor) Execute() (err error) {
 	if err = facade.exe.Execute(); err != nil {
 		return
 	}
-
-	// Don't add system agent to the namespace config file
-	if !facade.isSystem {
-		if err = ns.UpdateAgent(facade.agent); err != nil {
-			return
-		}
+	// Update: Include system agents in namespace file
+	// System agents should be saved to namespace file for consistency and management
+	if err = ns.UpdateAgent(facade.agent); err != nil {
+		return
 	}
 
 	// Set Agent configuration if provided

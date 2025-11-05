@@ -26,8 +26,8 @@ type RemoteControlPlane struct {
 	Database            Database                  `yaml:"database"`
 	Auth                Auth                      `yaml:"auth"`
 	Package             Package                   `yaml:"package,omitempty"`
-	SystemAgent         Package                   `yaml:"systemAgent,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`
+	Endpoint            string                    `yaml:"endpoint,omitempty"`
 }
 
 func (cp *RemoteControlPlane) GetUser() IofogUser {
@@ -66,6 +66,12 @@ func (cp *RemoteControlPlane) GetController(name string) (ret Controller, err er
 }
 
 func (cp *RemoteControlPlane) GetEndpoint() (string, error) {
+	// 1. Check if external endpoint (load balancer) is configured
+	if cp.Endpoint != "" {
+		return cp.Endpoint, nil
+	}
+
+	// 2. Fall back to existing logic (first controller with endpoint)
 	if len(cp.Controllers) == 0 {
 		return "", util.NewInternalError("Control Plane does not have any Controllers")
 	}
@@ -132,8 +138,8 @@ func (cp *RemoteControlPlane) Clone() ControlPlane {
 		Database:            cp.Database,
 		Auth:                cp.Auth,
 		Package:             cp.Package,
-		SystemAgent:         cp.SystemAgent,
 		SystemMicroservices: cp.SystemMicroservices,
 		Controllers:         controllers,
+		Endpoint:            cp.Endpoint,
 	}
 }
