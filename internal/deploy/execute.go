@@ -233,7 +233,7 @@ func Execute(opt *Options) (err error) {
 				isSystem := true
 				deploymentType := "container"
 				upstreamRouters := []string{}
-				routerMode := "interior"
+				routerMode := iofog.RouterModeInterior
 				edgeRouterPort := 45671
 				interRouterPort := 55671
 				agentConfig.IsSystem = &isSystem

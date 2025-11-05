@@ -74,7 +74,7 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	} else {
 		// Use defaults with configurable ports (router mode always interior)
 		RouterConfig := client.RouterConfig{
-			RouterMode:      iutil.MakeStrPtr("interior"),
+			RouterMode:      iutil.MakeStrPtr(iofog.RouterModeInterior),
 			MessagingPort:   iutil.MakeIntPtr(5671),
 			EdgeRouterPort:  iutil.MakeIntPtr(45671),
 			InterRouterPort: iutil.MakeIntPtr(55671),
@@ -97,11 +97,11 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 
 	// Ensure router mode is always "interior" for system agents
 	if deployAgentConfig.RouterConfig.RouterMode == nil {
-		interior := "interior"
+		interior := iofog.RouterModeInterior
 		deployAgentConfig.RouterConfig.RouterMode = &interior
-	} else if *deployAgentConfig.RouterConfig.RouterMode != "interior" {
+	} else if *deployAgentConfig.RouterConfig.RouterMode != iofog.RouterModeInterior {
 		// Force to interior mode
-		interior := "interior"
+		interior := iofog.RouterModeInterior
 		deployAgentConfig.RouterConfig.RouterMode = &interior
 	}
 
@@ -189,7 +189,7 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 	} else {
 		// Use defaults with configurable ports (router mode always interior)
 		RouterConfig := client.RouterConfig{
-			RouterMode:      iutil.MakeStrPtr("interior"),
+			RouterMode:      iutil.MakeStrPtr(iofog.RouterModeInterior),
 			MessagingPort:   iutil.MakeIntPtr(5671),
 			EdgeRouterPort:  iutil.MakeIntPtr(45671),
 			InterRouterPort: iutil.MakeIntPtr(55671),
@@ -212,11 +212,11 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 
 	// Ensure router mode is always "interior" for system agents
 	if deployAgentConfig.RouterConfig.RouterMode == nil {
-		interior := "interior"
+		interior := iofog.RouterModeInterior
 		deployAgentConfig.RouterConfig.RouterMode = &interior
-	} else if *deployAgentConfig.RouterConfig.RouterMode != "interior" {
+	} else if *deployAgentConfig.RouterConfig.RouterMode != iofog.RouterModeInterior {
 		// Force to interior mode
-		interior := "interior"
+		interior := iofog.RouterModeInterior
 		deployAgentConfig.RouterConfig.RouterMode = &interior
 	}
 	if deployAgentConfig.RouterConfig.EdgeRouterPort == nil {

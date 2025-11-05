@@ -29,4 +29,7 @@ const (
 	// VanillaRemoteAgentName string = "0-controlplane"
 	VanillaRouterAgentName string = client.DefaultRouterName
 	VanillaLocalAgentName  string = "local-agent"
+
+	// RouterMode values
+	RouterModeInterior string = "interior"
 )
