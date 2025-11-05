@@ -280,9 +280,9 @@ func getBackendAgents(namespace string, ioClient *client.Client) ([]client.Agent
 }
 
 func getAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid string) (name string) {
-	if uuid == iofog.VanillaRemoteAgentName {
-		return uuid
-	}
+	// if uuid == iofog.VanillaRemoteAgentName {
+	// 	return uuid
+	// }
 	if uuid == iofog.VanillaRouterAgentName {
 		return uuid
 	}

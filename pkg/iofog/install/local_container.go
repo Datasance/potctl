@@ -366,10 +366,11 @@ func (lc *LocalContainer) DeployContainer(containerConfig *LocalContainerConfig)
 		Env:          containerConfig.Envs,
 	}
 	hostConfig := &dockerContainer.HostConfig{
-		PortBindings: portMap,
-		Privileged:   containerConfig.Privileged,
-		Binds:        containerConfig.Binds,
-		NetworkMode:  dockerContainer.NetworkMode(containerConfig.NetworkMode),
+		PortBindings:  portMap,
+		Privileged:    containerConfig.Privileged,
+		Binds:         containerConfig.Binds,
+		NetworkMode:   dockerContainer.NetworkMode(containerConfig.NetworkMode),
+		RestartPolicy: dockerContainer.RestartPolicy{Name: dockerContainer.RestartPolicyAlways},
 	}
 
 	// Pull image
@@ -472,9 +473,9 @@ func (lc *LocalContainer) ExecuteCmd(name string, cmd []string) (execResult Exec
 	}
 
 	// Create command to execute inside container
-	execConfig := types.ExecConfig{AttachStdout: true, AttachStderr: true,
+	execConfig := dockerContainer.ExecOptions{AttachStdout: true, AttachStderr: true,
 		Cmd: cmd}
-	execStartCheck := types.ExecStartCheck{}
+	execStartCheck := dockerContainer.ExecStartOptions{}
 
 	execID, err := lc.client.ContainerExecCreate(ctx, container.ID, execConfig)
 	if err != nil {

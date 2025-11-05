@@ -15,6 +15,8 @@ package install
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -37,6 +39,7 @@ type ControllerOptions struct {
 	User            string
 	Host            string
 	Port            int
+	Namespace       string
 	PrivKeyFilename string
 	Version         string
 	Image           string
@@ -45,6 +48,7 @@ type ControllerOptions struct {
 	SystemMicroservices RemoteSystemMicroservices
 	PidBaseDir          string
 	EcnViewerPort       int
+	EcnViewerURL        string
 	LogLevel            string
 	Https               *Https
 	SiteCA              *SiteCertificate
@@ -84,13 +88,25 @@ type auth struct {
 	viewerClient     string
 }
 
+type ControllerProcedures struct {
+	check          Entrypoint `yaml:"-"` // Check prereqs script (runs for default and custom procedures)
+	Deps           Entrypoint `yaml:"deps,omitempty"`
+	SetEnv         Entrypoint `yaml:"setEnv,omitempty"`
+	Install        Entrypoint `yaml:"install,omitempty"`
+	Uninstall      Entrypoint `yaml:"uninstall,omitempty"`
+	scriptNames    []string   `yaml:"-"` // List of all script names to be pushed to Controller
+	scriptContents []string   `yaml:"-"` // List of contents of scripts to be pushed to Controller
+}
+
 type Controller struct {
 	*ControllerOptions
-	ssh      *util.SecureShellClient
-	db       database
-	auth     auth
-	ctrlDir  string
-	iofogDir string
+	ssh           *util.SecureShellClient
+	db            database
+	auth          auth
+	ctrlDir       string
+	iofogDir      string
+	procs         ControllerProcedures
+	customInstall bool // Flag set when custom install scripts are provided
 	// svcDir   string
 }
 
@@ -103,13 +119,52 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 	if options.Image == "" {
 		options.Image = util.GetControllerImage()
 	}
-	return &Controller{
+	ctrlDir := pkg.controllerDir
+	ctrl := &Controller{
 		ControllerOptions: options,
 		ssh:               ssh,
-		iofogDir:          "/etc/iofog",
-		ctrlDir:           "/etc/iofog/controller",
-		// svcDir:            "/etc/iofog/controller/service",
-	}, nil
+		iofogDir:          pkg.iofogDir,
+		ctrlDir:           ctrlDir,
+		procs: ControllerProcedures{
+			check: Entrypoint{
+				Name:     pkg.controllerScriptPrereq,
+				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptPrereq),
+			},
+			Deps: Entrypoint{
+				Name:     pkg.controllerScriptInstallContainerEngine,
+				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptInstallContainerEngine),
+			},
+			SetEnv: Entrypoint{
+				Name:     pkg.controllerScriptSetEnv,
+				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptSetEnv),
+			},
+			Install: Entrypoint{
+				Name:     pkg.controllerScriptInstall,
+				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptInstall),
+			},
+			Uninstall: Entrypoint{
+				Name:     pkg.controllerScriptUninstall,
+				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptUninstall),
+			},
+			scriptNames: []string{
+				pkg.controllerScriptPrereq,
+				pkg.controllerScriptInit,
+				pkg.controllerScriptInstallContainerEngine,
+				pkg.controllerScriptInstall,
+				pkg.controllerScriptSetEnv,
+				pkg.controllerScriptUninstall,
+			},
+		},
+	}
+	// Get script contents from embedded files
+	for _, scriptName := range ctrl.procs.scriptNames {
+		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(scriptName))
+		if err != nil {
+			return nil, err
+		}
+		ctrl.procs.scriptContents = append(ctrl.procs.scriptContents, scriptContent)
+	}
+	return ctrl, nil
 }
 
 func (ctrl *Controller) SetControllerExternalDatabase(host, user, password, provider, databaseName string, port int, ssl *bool, ca *string) {
@@ -137,6 +192,109 @@ func (ctrl *Controller) SetControllerAuth(url, realm, ssl, realmKey, controllerC
 		controllerSecret: controllerSecret,
 		viewerClient:     viewerClient,
 	}
+}
+
+func addControllerAssetPrefix(file string) string {
+	return fmt.Sprintf("container-controller/%s", file)
+}
+
+func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedures) error {
+	// Format source directory of script files
+	dir, err := util.FormatPath(dir)
+	if err != nil {
+		return err
+	}
+
+	// Load script files into memory
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			procs.scriptNames = append(procs.scriptNames, file.Name())
+			content, err := os.ReadFile(filepath.Join(dir, file.Name()))
+			if err != nil {
+				return err
+			}
+			procs.scriptContents = append(procs.scriptContents, string(content))
+		}
+	}
+
+	// Add check_prereqs script and entrypoint (always required for both default and custom)
+	procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptPrereq)
+	prereqContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptPrereq))
+	if err != nil {
+		return err
+	}
+	procs.scriptContents = append(procs.scriptContents, prereqContent)
+	procs.check.destPath = fmt.Sprintf("%s/%s", ctrl.ctrlDir, pkg.controllerScriptPrereq)
+
+	// Add default entrypoints and scripts if necessary (user not provided)
+	if procs.Deps.Name == "" {
+		procs.Deps = ctrl.procs.Deps
+		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptInstallContainerEngine)
+		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptInstallContainerEngine))
+		if err != nil {
+			return err
+		}
+		procs.scriptContents = append(procs.scriptContents, scriptContent)
+	}
+	if procs.SetEnv.Name == "" {
+		procs.SetEnv = ctrl.procs.SetEnv
+		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptSetEnv)
+		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptSetEnv))
+		if err != nil {
+			return err
+		}
+		procs.scriptContents = append(procs.scriptContents, scriptContent)
+	}
+	if procs.Install.Name == "" {
+		procs.Install = ctrl.procs.Install
+		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptInstall)
+		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptInstall))
+		if err != nil {
+			return err
+		}
+		procs.scriptContents = append(procs.scriptContents, scriptContent)
+	} else {
+		ctrl.customInstall = true
+	}
+	if procs.Uninstall.Name == "" {
+		procs.Uninstall = ctrl.procs.Uninstall
+		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptUninstall)
+		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptUninstall))
+		if err != nil {
+			return err
+		}
+		procs.scriptContents = append(procs.scriptContents, scriptContent)
+	}
+
+	// Set destination paths where scripts appear on Controller
+	procs.Deps.destPath = fmt.Sprintf("%s/%s", ctrl.ctrlDir, procs.Deps.Name)
+	procs.SetEnv.destPath = fmt.Sprintf("%s/%s", ctrl.ctrlDir, procs.SetEnv.Name)
+	procs.Install.destPath = fmt.Sprintf("%s/%s", ctrl.ctrlDir, procs.Install.Name)
+	procs.Uninstall.destPath = fmt.Sprintf("%s/%s", ctrl.ctrlDir, procs.Uninstall.Name)
+
+	ctrl.procs = *procs
+	return nil
+}
+
+func (ctrl *Controller) copyScriptsToController() error {
+	// Ensure SSH connection is established (no-op if already connected)
+	if err := ctrl.ssh.Connect(); err != nil {
+		return err
+	}
+
+	// Copy scripts to remote host
+	for idx, script := range ctrl.procs.scriptNames {
+		content := ctrl.procs.scriptContents[idx]
+		reader := strings.NewReader(content)
+		if err := ctrl.ssh.CopyTo(reader, ctrl.ctrlDir, script, "0775", int64(len(content))); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (ctrl *Controller) CopyScript(srcDir, filename, destDir string) (err error) {
@@ -172,19 +330,49 @@ func (ctrl *Controller) Uninstall() (err error) {
 	defer util.Log(ctrl.ssh.Disconnect)
 
 	// Copy uninstallation scripts to remote host
-	Verbose("Copying install files to server")
-	scripts := []string{
-		"uninstall_iofog.sh",
+	Verbose("Copying uninstall files to server")
+	if _, err = ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.ctrlDir, ctrl.ctrlDir)); err != nil {
+		return err
 	}
-	for _, script := range scripts {
-		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
+
+	// Use custom scripts if available, otherwise use default embedded scripts
+	if ctrl.customInstall || len(ctrl.procs.scriptNames) > 0 {
+		// Copy uninstall script specifically
+		uninstallIdx := -1
+		for idx, scriptName := range ctrl.procs.scriptNames {
+			if scriptName == pkg.controllerScriptUninstall {
+				uninstallIdx = idx
+				break
+			}
+		}
+		if uninstallIdx >= 0 {
+			content := ctrl.procs.scriptContents[uninstallIdx]
+			reader := strings.NewReader(content)
+			if err := ctrl.ssh.CopyTo(reader, ctrl.ctrlDir, pkg.controllerScriptUninstall, "0775", int64(len(content))); err != nil {
+				return err
+			}
+		} else {
+			// Fallback to default uninstall script
+			if err := ctrl.CopyScript("container-controller", pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
+				return err
+			}
+		}
+	} else {
+		// Fallback to default method for backward compatibility
+		if err := ctrl.CopyScript("container-controller", pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
 			return err
 		}
 	}
 
+	// Use uninstall entrypoint if available
+	uninstallCmd := ctrl.procs.Uninstall.getCommand()
+	if uninstallCmd == "" {
+		uninstallCmd = fmt.Sprintf("%s/%s", ctrl.ctrlDir, pkg.controllerScriptUninstall)
+	}
+
 	cmds := []command{
 		{
-			cmd: fmt.Sprintf("sudo %s/uninstall_iofog.sh", ctrl.ctrlDir),
+			cmd: fmt.Sprintf("sudo %s", uninstallCmd),
 			msg: "Uninstalling controller on host " + ctrl.Host,
 		},
 	}
@@ -213,24 +401,34 @@ func (ctrl *Controller) Install() (err error) {
 	if _, err = ctrl.ssh.Run(fmt.Sprintf("sudo mkdir -p %s && sudo chmod -R 0777 %s/", ctrl.ctrlDir, ctrl.ctrlDir)); err != nil {
 		return err
 	}
-	scripts := []string{
-		"check_prereqs.sh",
-		"init.sh",
-		"install_docker.sh",
-		"install_iofog.sh",
-		"set_env.sh",
-	}
-	for _, script := range scripts {
-		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
+
+	// Use custom scripts if available, otherwise use default embedded scripts
+	if ctrl.customInstall || len(ctrl.procs.scriptNames) > 0 {
+		if err = ctrl.copyScriptsToController(); err != nil {
 			return err
+		}
+	} else {
+		// Fallback to default method for backward compatibility
+		scripts := []string{
+			pkg.controllerScriptPrereq,
+			pkg.controllerScriptInit,
+			pkg.controllerScriptInstallContainerEngine,
+			pkg.controllerScriptInstall,
+			pkg.controllerScriptSetEnv,
+		}
+		for _, script := range scripts {
+			if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
+				return err
+			}
 		}
 	}
 
 	// Encode environment variables
 	env := []string{}
 	env = append(env, "CONTROL_PLANE=Remote")
+	env = append(env, fmt.Sprintf("\"CONTROLLER_NAMESPACE=%s\"", ctrl.Namespace))
 	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
-		env = append(env, fmt.Sprintf("\"SERVER_DEV_MODE=%t\"", "false"))
+		env = append(env, fmt.Sprintf("\"SERVER_DEV_MODE=%s\"", "false"))
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_CERT=%s\"", ctrl.Https.TLSCert))
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_KEY=%s\"", ctrl.Https.TLSKey))
 	}
@@ -269,6 +467,9 @@ func (ctrl *Controller) Install() (err error) {
 	if ctrl.EcnViewerPort != 0 {
 		env = append(env, fmt.Sprintf("\"VIEWER_PORT=%d\"", ctrl.EcnViewerPort))
 	}
+	if ctrl.EcnViewerURL != "" {
+		env = append(env, fmt.Sprintf("\"VIEWER_URL=%s\"", ctrl.EcnViewerURL))
+	}
 	if ctrl.SystemMicroservices.Router.X86 != "" {
 		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_1=%s\"", ctrl.SystemMicroservices.Router.X86))
 	}
@@ -281,22 +482,45 @@ func (ctrl *Controller) Install() (err error) {
 
 	envString := strings.Join(env, " ")
 
-	// Define commands
+	// Define commands - use custom entrypoints if available
+	checkPrereqsCmd := ctrl.procs.check.getCommand()
+	if checkPrereqsCmd == "" {
+		checkPrereqsCmd = fmt.Sprintf("%s/%s", ctrl.ctrlDir, pkg.controllerScriptPrereq)
+	}
+	depsCmd := ctrl.procs.Deps.getCommand()
+	if depsCmd == "" {
+		depsCmd = fmt.Sprintf("sudo %s/%s", ctrl.ctrlDir, pkg.controllerScriptInstallContainerEngine)
+	} else {
+		depsCmd = fmt.Sprintf("sudo %s", depsCmd)
+	}
+	setEnvCmd := ctrl.procs.SetEnv.getCommand()
+	if setEnvCmd == "" {
+		setEnvCmd = fmt.Sprintf("sudo %s/%s %s", ctrl.ctrlDir, pkg.controllerScriptSetEnv, envString)
+	} else {
+		setEnvCmd = fmt.Sprintf("sudo %s %s", setEnvCmd, envString)
+	}
+	installCmd := ctrl.procs.Install.getCommand()
+	if installCmd == "" {
+		installCmd = fmt.Sprintf("sudo %s/%s %s", ctrl.ctrlDir, pkg.controllerScriptInstall, ctrl.Image)
+	} else {
+		installCmd = fmt.Sprintf("sudo %s", installCmd)
+	}
+
 	cmds := []command{
 		{
-			cmd: fmt.Sprintf("%s/check_prereqs.sh", ctrl.ctrlDir),
+			cmd: checkPrereqsCmd,
 			msg: "Checking prerequisites on Controller " + ctrl.Host,
 		},
 		{
-			cmd: fmt.Sprintf("sudo %s/install_docker.sh", ctrl.ctrlDir),
-			msg: "Installing Docker container engine on Controller " + ctrl.Host,
+			cmd: depsCmd,
+			msg: "Installing dependencies on Controller " + ctrl.Host,
 		},
 		{
-			cmd: fmt.Sprintf("sudo %s/set_env.sh %s", ctrl.ctrlDir, envString),
+			cmd: setEnvCmd,
 			msg: "Setting up environment variables for Controller " + ctrl.Host,
 		},
 		{
-			cmd: fmt.Sprintf("sudo %s/install_iofog.sh %s", ctrl.ctrlDir, ctrl.Image),
+			cmd: installCmd,
 			msg: "Installing ioFog on Controller " + ctrl.Host,
 		},
 	}

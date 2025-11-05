@@ -41,8 +41,20 @@ func newViewCommand() *cobra.Command {
 				util.PrintError("You must deploy a Control Plane to a namespace to see an ECN Viewer")
 				os.Exit(1)
 			}
+			cp, err := ns.GetControlPlane()
+			cpEndpoint, err := cp.GetEndpoint()
+			if err != nil {
+				util.PrintError("Failed to get Control Plane endpoint: " + err.Error())
+				os.Exit(1)
+			}
 			ctrl := ns.GetControllers()[0]
-			URL, err := url.Parse(ctrl.GetEndpoint())
+			var endpoint string
+			if cpEndpoint != "" {
+				endpoint = cpEndpoint
+			} else {
+				endpoint = ctrl.GetEndpoint()
+			}
+			URL, err := url.Parse(endpoint)
 			if err != nil || URL.Host == "" {
 				URL, err = url.Parse("//" + ctrl.GetEndpoint()) // Try to see if controllerEndpoint is an IP, in which case it needs to be pefixed by //
 			}

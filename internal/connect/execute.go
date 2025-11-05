@@ -138,8 +138,8 @@ func executeWithYAML(yamlFile, namespace string) error {
 }
 
 func hasAllFlags(opt *Options) error {
-	if opt.IofogUserEmail == "" || opt.IofogUserPass == "" {
-		return util.NewInputError("Must provide ioFog User and Password flags")
+	if opt.IofogUserEmail == "" {
+		return util.NewInputError("Must provide ioFog User Email")
 	}
 	if opt.KubeConfig == "" {
 		if opt.ControllerName == "" || opt.ControllerEndpoint == "" {

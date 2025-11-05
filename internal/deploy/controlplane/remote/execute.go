@@ -15,7 +15,9 @@ package deployremotecontrolplane
 
 import (
 	"fmt"
-	// "strings"
+	"net"
+	"net/url"
+	"strings"
 
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
@@ -27,6 +29,7 @@ import (
 	iutil "github.com/datasance/potctl/internal/util"
 
 	// clientutil "github.com/datasance/potctl/internal/util/client"
+
 	"github.com/datasance/potctl/pkg/iofog"
 	"github.com/datasance/potctl/pkg/iofog/install"
 	"github.com/datasance/potctl/pkg/util"
@@ -46,107 +49,289 @@ type remoteControlPlaneExecutor struct {
 	name                string
 }
 
-func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent rsc.Package) (err error) {
+func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgentConfig *rsc.SystemAgentConfig) (err error) {
 	// Deploy system agent to host internal router
 	install.Verbose("Deploying system agent for controller " + ctrl.Name)
+
 	var deploymentType string
-	if systemAgent.Container.Image != "" {
+	if systemAgentConfig.Package.Container.Image != "" {
 		deploymentType = "container"
 	} else {
 		deploymentType = "native"
 	}
+
+	// Get agent configuration - use provided config or defaults
+	var deployAgentConfig rsc.AgentConfiguration
+	if systemAgentConfig.AgentConfiguration != nil {
+		// Use provided configuration
+		deployAgentConfig = *systemAgentConfig.AgentConfiguration
+		// Ensure host is set
+		if deployAgentConfig.Host == nil {
+			deployAgentConfig.Host = &ctrl.Host
+		}
+		// Ensure IsSystem is always true for system agents
+		deployAgentConfig.IsSystem = iutil.MakeBoolPtr(true)
+	} else {
+		// Use defaults with configurable ports (router mode always interior)
+		RouterConfig := client.RouterConfig{
+			RouterMode:      iutil.MakeStrPtr("interior"),
+			MessagingPort:   iutil.MakeIntPtr(5671),
+			EdgeRouterPort:  iutil.MakeIntPtr(45671),
+			InterRouterPort: iutil.MakeIntPtr(55671),
+		}
+
+		upstreamRouters := []string{}
+
+		deployAgentConfig = rsc.AgentConfiguration{
+			Name:    ctrl.Name,
+			FogType: iutil.MakeStrPtr("auto"),
+			AgentConfiguration: client.AgentConfiguration{
+				IsSystem:        iutil.MakeBoolPtr(true),
+				DeploymentType:  iutil.MakeStrPtr(deploymentType),
+				Host:            &ctrl.Host,
+				RouterConfig:    RouterConfig,
+				UpstreamRouters: &upstreamRouters,
+			},
+		}
+	}
+
+	// Ensure router mode is always "interior" for system agents
+	if deployAgentConfig.RouterConfig.RouterMode == nil {
+		interior := "interior"
+		deployAgentConfig.RouterConfig.RouterMode = &interior
+	} else if *deployAgentConfig.RouterConfig.RouterMode != "interior" {
+		// Force to interior mode
+		interior := "interior"
+		deployAgentConfig.RouterConfig.RouterMode = &interior
+	}
+
+	if deployAgentConfig.RouterConfig.EdgeRouterPort == nil {
+		edgeRouterPort := 45671
+		deployAgentConfig.RouterConfig.EdgeRouterPort = &edgeRouterPort
+	}
+	if deployAgentConfig.RouterConfig.InterRouterPort == nil {
+		interRouterPort := 55671
+		deployAgentConfig.RouterConfig.InterRouterPort = &interRouterPort
+	}
+
+	if deployAgentConfig.RouterConfig.MessagingPort == nil {
+		messagingPort := 5671
+		deployAgentConfig.RouterConfig.MessagingPort = &messagingPort
+	}
+
+	// Ensure name is set
+	if deployAgentConfig.Name == "" {
+		deployAgentConfig.Name = ctrl.Name
+	}
+
 	agent := rsc.RemoteAgent{
-		Name:    iofog.VanillaRemoteAgentName,
+		Name:    ctrl.Name,
 		Host:    ctrl.Host,
 		SSH:     ctrl.SSH,
-		Package: systemAgent,
-	}
-	// Configure agent to be system agent with default router
-	RouterConfig := client.RouterConfig{
-		RouterMode:      iutil.MakeStrPtr("interior"),
-		MessagingPort:   iutil.MakeIntPtr(5671),
-		EdgeRouterPort:  iutil.MakeIntPtr(45671),
-		InterRouterPort: iutil.MakeIntPtr(55671),
-	}
-
-	upstreamRouters := []string{}
-
-	deployAgentConfig := rsc.AgentConfiguration{
-		Name:    iofog.VanillaRemoteAgentName,
-		FogType: iutil.MakeStrPtr("auto"),
-		AgentConfiguration: client.AgentConfiguration{
-			IsSystem:        iutil.MakeBoolPtr(true),
-			DeploymentType:  iutil.MakeStrPtr(deploymentType),
-			Host:            &ctrl.Host,
-			RouterConfig:    RouterConfig,
-			UpstreamRouters: &upstreamRouters,
-		},
+		Package: systemAgentConfig.Package,
+		Scripts: systemAgentConfig.Scripts, // Support custom scripts
+		Config:  &deployAgentConfig,
 	}
 
 	// Get Agentconfig executor
-	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRemoteAgentName, &deployAgentConfig, namespace, nil)
+	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(ctrl.Name, &deployAgentConfig, namespace, nil)
 	// If there already is a system fog, ignore error
 	if err := deployAgentConfigExecutor.Execute(); err != nil {
 		return err
 	}
 	agent.UUID = deployAgentConfigExecutor.GetAgentUUID()
-	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, false)
+	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, true) // isSystem = true
 	if err != nil {
 		return err
 	}
 	return agentDeployExecutor.Execute()
 }
 
-func deployNonSystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent rsc.Package) (err error) {
+func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgentConfig *rsc.SystemAgentConfig) (err error) {
 	// Deploy system agent to host internal router
-	install.Verbose("Deploying non-system agent for controller " + ctrl.Name)
-	nonSystemAgentName := fmt.Sprintf("%s-controller", ctrl.Name)
+	install.Verbose("Deploying next-system agent for controller " + ctrl.Name)
+
 	var deploymentType string
-	if systemAgent.Container.Image != "" {
+	if systemAgentConfig.Package.Container.Image != "" {
 		deploymentType = "container"
 	} else {
 		deploymentType = "native"
 	}
+
+	// Get agent configuration - use provided config or defaults
+	var deployAgentConfig rsc.AgentConfiguration
+	if systemAgentConfig.AgentConfiguration != nil {
+		// Use provided configuration
+		deployAgentConfig = *systemAgentConfig.AgentConfiguration
+		// Ensure host is set
+		if deployAgentConfig.Host == nil {
+			deployAgentConfig.Host = &ctrl.Host
+		}
+		// Ensure IsSystem is always true for system agents
+		deployAgentConfig.IsSystem = iutil.MakeBoolPtr(true)
+		// Override upstream routers for non-first controllers
+		if deployAgentConfig.UpstreamRouters == nil {
+			upstreamRouters := []string{"default-router"}
+			deployAgentConfig.UpstreamRouters = &upstreamRouters
+		} else {
+			// Add default-router if not already present
+			hasDefaultRouter := false
+			for _, router := range *deployAgentConfig.UpstreamRouters {
+				if router == "default-router" {
+					hasDefaultRouter = true
+					break
+				}
+			}
+			if !hasDefaultRouter {
+				*deployAgentConfig.UpstreamRouters = append(*deployAgentConfig.UpstreamRouters, "default-router")
+			}
+		}
+	} else {
+		// Use defaults with configurable ports (router mode always interior)
+		RouterConfig := client.RouterConfig{
+			RouterMode:      iutil.MakeStrPtr("interior"),
+			MessagingPort:   iutil.MakeIntPtr(5671),
+			EdgeRouterPort:  iutil.MakeIntPtr(45671),
+			InterRouterPort: iutil.MakeIntPtr(55671),
+		}
+
+		upstreamRouters := []string{"default-router"}
+
+		deployAgentConfig = rsc.AgentConfiguration{
+			Name:    ctrl.Name,
+			FogType: iutil.MakeStrPtr("auto"),
+			AgentConfiguration: client.AgentConfiguration{
+				IsSystem:        iutil.MakeBoolPtr(true),
+				DeploymentType:  iutil.MakeStrPtr(deploymentType),
+				Host:            &ctrl.Host,
+				RouterConfig:    RouterConfig,
+				UpstreamRouters: &upstreamRouters,
+			},
+		}
+	}
+
+	// Ensure router mode is always "interior" for system agents
+	if deployAgentConfig.RouterConfig.RouterMode == nil {
+		interior := "interior"
+		deployAgentConfig.RouterConfig.RouterMode = &interior
+	} else if *deployAgentConfig.RouterConfig.RouterMode != "interior" {
+		// Force to interior mode
+		interior := "interior"
+		deployAgentConfig.RouterConfig.RouterMode = &interior
+	}
+	if deployAgentConfig.RouterConfig.EdgeRouterPort == nil {
+		edgeRouterPort := 45671
+		deployAgentConfig.RouterConfig.EdgeRouterPort = &edgeRouterPort
+	}
+	if deployAgentConfig.RouterConfig.InterRouterPort == nil {
+		interRouterPort := 55671
+		deployAgentConfig.RouterConfig.InterRouterPort = &interRouterPort
+	}
+
+	if deployAgentConfig.RouterConfig.MessagingPort == nil {
+		messagingPort := 5671
+		deployAgentConfig.RouterConfig.MessagingPort = &messagingPort
+	}
+
+	// Ensure name is set
+	if deployAgentConfig.Name == "" {
+		deployAgentConfig.Name = ctrl.Name
+	}
+
 	agent := rsc.RemoteAgent{
-		Name:    nonSystemAgentName,
+		Name:    ctrl.Name,
 		Host:    ctrl.Host,
 		SSH:     ctrl.SSH,
-		Package: systemAgent,
-	}
-	// Configure agent to be system agent with default router
-	RouterConfig := client.RouterConfig{
-		RouterMode:      iutil.MakeStrPtr("interior"),
-		MessagingPort:   iutil.MakeIntPtr(5671),
-		EdgeRouterPort:  iutil.MakeIntPtr(45671),
-		InterRouterPort: iutil.MakeIntPtr(55671),
-	}
-
-	upstreamRouters := []string{"default-router"}
-
-	deployAgentConfig := rsc.AgentConfiguration{
-		Name:    nonSystemAgentName,
-		FogType: iutil.MakeStrPtr("auto"),
-		AgentConfiguration: client.AgentConfiguration{
-			IsSystem:        iutil.MakeBoolPtr(false),
-			DeploymentType:  iutil.MakeStrPtr(deploymentType),
-			Host:            &ctrl.Host,
-			RouterConfig:    RouterConfig,
-			UpstreamRouters: &upstreamRouters,
-		},
+		Package: systemAgentConfig.Package,
+		Scripts: systemAgentConfig.Scripts, // Support custom scripts
+		Config:  &deployAgentConfig,
 	}
 
 	// Get Agentconfig executor
-	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(iofog.VanillaRemoteAgentName, &deployAgentConfig, namespace, nil)
+	deployAgentConfigExecutor := deployagentconfig.NewRemoteExecutor(ctrl.Name, &deployAgentConfig, namespace, nil)
 	// If there already is a system fog, ignore error
 	if err := deployAgentConfigExecutor.Execute(); err != nil {
 		return err
 	}
 	agent.UUID = deployAgentConfigExecutor.GetAgentUUID()
-	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, false)
+	agentDeployExecutor, err := deployagent.NewRemoteExecutor(namespace, &agent, true) // isSystem = true
 	if err != nil {
 		return err
 	}
 	return agentDeployExecutor.Execute()
+}
+
+// prepareViewerURL prepares the viewer URL from controller configuration or endpoint
+func prepareViewerURL(ctrl *rsc.RemoteController, endpoint string) (string, error) {
+	// If controller has EcnViewerURL set, use it
+	if ctrl.EcnViewerURL != "" {
+		return ctrl.EcnViewerURL, nil
+	}
+
+	// Otherwise, construct from endpoint using logic similar to view.go
+	URL, err := url.Parse(endpoint)
+	if err != nil || URL.Host == "" {
+		URL, err = url.Parse("//" + endpoint)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse endpoint: %v", err)
+		}
+	}
+
+	if URL.Scheme == "" {
+		URL.Scheme = "http"
+	}
+
+	host := ""
+	if strings.Contains(URL.Host, ":") {
+		host, _, err = net.SplitHostPort(URL.Host)
+		if err != nil {
+			return "", fmt.Errorf("failed to split host and port: %v", err)
+		}
+	} else {
+		host = URL.Host
+	}
+
+	// Add port for localhost
+	if util.IsLocalHost(host) {
+		host = net.JoinHostPort(host, iofog.ControllerHostECNViewerPortString)
+	}
+
+	URL.Host = host
+	return URL.String(), nil
+}
+
+// updateViewerClientRootURL updates the viewer client root URL in Keycloak if auth is configured
+func updateViewerClientRootURL(controlPlane *rsc.RemoteControlPlane, endpoint string) error {
+	// Check if auth is configured - validate all required fields
+	auth := controlPlane.Auth
+	if auth.URL == "" || auth.Realm == "" || auth.ControllerClient == "" || auth.ControllerSecret == "" || auth.ViewerClient == "" {
+		// Auth not fully configured, skip update
+		return nil
+	}
+
+	// Get first controller to check for EcnViewerURL
+	controllers := controlPlane.GetControllers()
+	if len(controllers) == 0 {
+		return fmt.Errorf("no controllers found in control plane")
+	}
+
+	firstController, ok := controllers[0].(*rsc.RemoteController)
+	if !ok {
+		return fmt.Errorf("failed to convert first controller to RemoteController")
+	}
+
+	// Prepare viewer URL
+	viewerURL, err := prepareViewerURL(firstController, endpoint)
+	if err != nil {
+		return fmt.Errorf("failed to prepare viewer URL: %v", err)
+	}
+
+	// Update viewer client root URL
+	if err := iutil.UpdateECNViewerClientRootURL(controlPlane.Auth, viewerURL); err != nil {
+		return fmt.Errorf("failed to update viewer client root URL: %v", err)
+	}
+
+	return nil
 }
 
 func tagControllerImage(ctrl *rsc.RemoteController, image string) (err error) {
@@ -184,29 +369,40 @@ func tagControllerImage(ctrl *rsc.RemoteController, image string) (err error) {
 
 func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 	controllers := exe.controlPlane.GetControllers()
+	remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
+	if !ok {
+		return util.NewInternalError("Could not convert ControlPlane to Remote ControlPlane")
+	}
 	// Deploy agents for each controller
 	for idx, baseController := range controllers {
 		controller, ok := baseController.(*rsc.RemoteController)
 		if !ok {
 			return util.NewInternalError("Could not convert Controller to Remote Controller")
 		}
-		remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
-		if !ok {
-			return util.NewInternalError("Could not convert ControlPlane to Remote ControlPlane")
+
+		// System agent config is required per controller
+		if controller.SystemAgent == nil {
+			return fmt.Errorf("controller '%s' must have a systemAgent configuration", controller.Name)
 		}
-		// First controller gets system agent, others get non-system agents
+
+		// First controller gets system agent(with default-router), others get next-system agents(with interior mode)
 		if idx == 0 {
-			if err := deploySystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
+			if err := deploySystemAgent(exe.ns.Name, controller, controller.SystemAgent); err != nil {
 				return fmt.Errorf("failed to deploy system agent for first controller: %v", err)
 			}
 		} else {
-			if err := deployNonSystemAgent(exe.ns.Name, controller, remoteControlPlane.SystemAgent); err != nil {
-				return fmt.Errorf("failed to deploy non-system agent for controller %d: %v", idx, err)
+			if err := deployNextSystemAgent(exe.ns.Name, controller, controller.SystemAgent); err != nil {
+				return fmt.Errorf("failed to deploy next-system agent for controller %d: %v", idx, err)
 			}
 		}
-
+		var image string
+		if controller.Scripts.Install.Args != nil {
+			image = controller.Scripts.Install.Args[0]
+		} else {
+			image = remoteControlPlane.Package.Container.Image
+		}
 		// Tag controller image for all controllers
-		if err := tagControllerImage(controller, remoteControlPlane.Package.Container.Image); err != nil {
+		if err := tagControllerImage(controller, image); err != nil {
 			return fmt.Errorf("failed to tag controller image for controller %d: %v", idx, err)
 		}
 	}
@@ -252,6 +448,15 @@ func (exe remoteControlPlaneExecutor) Execute() (err error) {
 	exe.ns.SetControlPlane(exe.controlPlane)
 	if err := config.Flush(); err != nil {
 		return err
+	}
+
+	// Update viewer client root URL if auth is configured
+	remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
+	if ok {
+		if err := updateViewerClientRootURL(remoteControlPlane, endpoint); err != nil {
+			// Log error but don't fail deployment
+			util.PrintInfo(fmt.Sprintf("Warning: Failed to update viewer client root URL: %v\n", err))
+		}
 	}
 
 	// Post deploy steps
@@ -354,8 +559,32 @@ func validateMultiControllerRouterCA(controlPlane *rsc.RemoteControlPlane) error
 	return nil
 }
 
+// Validates that each controller has a systemAgent configuration
+func validateControllerSystemAgent(controlPlane *rsc.RemoteControlPlane) error {
+	controllers := controlPlane.Controllers
+	if len(controllers) == 0 {
+		return util.NewInputError("Remote Control Plane must have at least one controller")
+	}
+
+	for idx, controller := range controllers {
+		if controller.SystemAgent == nil {
+			return fmt.Errorf("controller %d (%s): systemAgent configuration is required", idx, controller.Name)
+		}
+		// Validate systemAgent package is provided
+		if controller.SystemAgent.Package.Container.Image == "" && controller.SystemAgent.Package.Version == "" && controller.SystemAgent.Scripts.Install.Args == nil {
+			return fmt.Errorf("controller %d (%s): systemAgent must have either package.container.image or package.version or scripts.install.args specified", idx, controller.Name)
+		}
+	}
+	return nil
+}
+
 // Main validation function that orchestrates all validations
 func validateMultiControllerConfig(controlPlane *rsc.RemoteControlPlane) error {
+	// Validate systemAgent configuration
+	if err := validateControllerSystemAgent(controlPlane); err != nil {
+		return err
+	}
+
 	// Validate database configuration
 	if err := validateMultiControllerDatabase(controlPlane); err != nil {
 		return err

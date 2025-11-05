@@ -97,7 +97,7 @@ func (exe *RemoteExecutor) GetName() string {
 	return exe.name
 }
 
-func isOverridingSystemAgent(controllerHost, agentHost, agentName string) (err error) {
+func isOverridingSystemAgent(controllerHost, agentHost, agentName string, isSystem bool) (err error) {
 	// Generate controller endpoint
 	controllerURL, err := url.Parse(controllerHost)
 	if err != nil || controllerURL.Host == "" {
@@ -113,7 +113,7 @@ func isOverridingSystemAgent(controllerHost, agentHost, agentName string) (err e
 			return err
 		}
 	}
-	if agentURL.Hostname() == controllerURL.Hostname() && agentName != iofog.VanillaRemoteAgentName && agentName != iofog.VanillaLocalAgentName {
+	if agentURL.Hostname() == controllerURL.Hostname() && isSystem == false && agentName != iofog.VanillaLocalAgentName {
 		return util.NewConflictError("Cannot deploy an agent on the same host than the Controller\n")
 	}
 	return nil
@@ -216,7 +216,7 @@ func (exe *RemoteExecutor) Execute() error {
 		host = *exe.agentConfig.Host
 	}
 
-	if err := isOverridingSystemAgent(endpoint, host, exe.name); err != nil {
+	if err := isOverridingSystemAgent(endpoint, host, exe.name, isSystem); err != nil {
 		return err
 	}
 

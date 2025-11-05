@@ -26,7 +26,7 @@ const (
 	DefaultHTTPPort       = 8008
 	DefaultHTTPPortString = "8008"
 
-	VanillaRemoteAgentName string = "0-controlplane"
+	// VanillaRemoteAgentName string = "0-controlplane"
 	VanillaRouterAgentName string = client.DefaultRouterName
 	VanillaLocalAgentName  string = "local-agent"
 )

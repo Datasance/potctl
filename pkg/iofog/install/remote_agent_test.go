@@ -148,7 +148,7 @@ func TestCustomProceduresPartial(t *testing.T) {
 	}
 	runTest(t, state)
 
-	//	generateScripts(t, []string{pkg.scriptInstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallDocker, pkg.scriptInstallJava})
+	//	generateScripts(t, []string{pkg.scriptInstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallContainerEngine, pkg.scriptInstallJava})
 	//	state.procs = AgentProcedures{
 	//		Uninstall: Entrypoint{
 	//			Name: pkg.scriptUninstallIofog,
@@ -156,11 +156,11 @@ func TestCustomProceduresPartial(t *testing.T) {
 	//	}
 	//	runTest(t, state)
 	//
-	//	generateScripts(t, []string{pkg.scriptUninstallIofog, pkg.scriptInstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallDocker, pkg.scriptInstallJava})
+	//	generateScripts(t, []string{pkg.scriptUninstallIofog, pkg.scriptInstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallContainerEngine, pkg.scriptInstallJava})
 	//	state.procs = AgentProcedures{}
 	//	runTest(t, state)
 	//
-	//	generateScripts(t, []string{pkg.scriptUninstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallDocker, pkg.scriptInstallJava})
+	//	generateScripts(t, []string{pkg.scriptUninstallIofog, pkg.scriptInstallDeps, pkg.scriptInstallContainerEngine, pkg.scriptInstallJava})
 	//	state.procs = AgentProcedures{
 	//		Install: Entrypoint{
 	//			Name: pkg.scriptInstallIofog,

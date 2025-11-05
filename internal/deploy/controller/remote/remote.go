@@ -109,12 +109,14 @@ func (exe *remoteExecutor) Execute() (err error) {
 	}
 	// Instantiate deployer
 	controllerOptions := &install.ControllerOptions{
+		Namespace:       exe.namespace,
 		User:            exe.controller.SSH.User,
 		Host:            exe.controller.Host,
 		Port:            exe.controller.SSH.Port,
 		PrivKeyFilename: exe.controller.SSH.KeyFile,
 		PidBaseDir:      exe.controller.PidBaseDir,
 		EcnViewerPort:   exe.controller.EcnViewerPort,
+		EcnViewerURL:    exe.controller.EcnViewerURL,
 		LogLevel:        exe.controller.LogLevel,
 		Version:         exe.controlPlane.Package.Version,
 		Image:           exe.controlPlane.Package.Container.Image,
@@ -152,6 +154,15 @@ func (exe *remoteExecutor) Execute() (err error) {
 	deployer, err := install.NewController(controllerOptions)
 	if err != nil {
 		return err
+	}
+
+	// Set custom scripts if provided
+	if exe.controller.Scripts != nil {
+		if err := deployer.CustomizeProcedures(
+			exe.controller.Scripts.Directory,
+			&exe.controller.Scripts.ControllerProcedures); err != nil {
+			return err
+		}
 	}
 
 	// Set database configuration

@@ -144,8 +144,8 @@ func formatEndpoint(endpoint string) (*url.URL, error) {
 func validate(controlPlane rsc.ControlPlane) (err error) {
 	// Validate user
 	user := controlPlane.GetUser()
-	if user.Password == "" || user.Email == "" {
-		return util.NewInputError("To connect, Control Plane Iofog User must contain non-empty values in email and password fields")
+	if user.Email == "" {
+		return util.NewInputError("To connect, Control Plane Iofog User must contain non-empty value in email field")
 	}
 	// Validate Controllers
 	if len(controlPlane.GetControllers()) == 0 {

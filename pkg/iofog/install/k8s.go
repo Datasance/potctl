@@ -710,12 +710,9 @@ func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interio
 	k8s.ingresses.Router.EdgePort = edgePort
 }
 
-// func (k8s *Kubernetes) SetRouterConfig(internalSecret, amqpsSecret, requireSsl, saslMechanisms, authenticatePeer string) {
-// 	k8s.router.InternalSecret = internalSecret
-// 	k8s.router.AmqpsSecret = amqpsSecret
-// 	k8s.router.RequireSsl = requireSsl
-// 	k8s.router.SaslMechanisms = saslMechanisms
-// 	k8s.router.AuthenticatePeer = authenticatePeer
+// func (k8s *Kubernetes) SetRouterConfig(HA *bool) {
+// 	k8s.router.HA = HA
+
 // }
 
 func (k8s *Kubernetes) ExistsInNamespace(namespace string) error {

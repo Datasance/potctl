@@ -99,7 +99,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations)
 	installer.SetControllerIngress(exe.controlPlane.Ingresses.Controller.Annotations, exe.controlPlane.Ingresses.Controller.IngressClassName, exe.controlPlane.Ingresses.Controller.Host, exe.controlPlane.Ingresses.Controller.SecretName)
 	installer.SetRouterIngress(exe.controlPlane.Ingresses.Router.Address, exe.controlPlane.Ingresses.Router.MessagePort, exe.controlPlane.Ingresses.Router.InteriorPort, exe.controlPlane.Ingresses.Router.EdgePort)
-	// installer.SetRouterConfig(exe.controlPlane.Router.InternalSecret, exe.controlPlane.Router.AmqpsSecret, exe.controlPlane.Router.RequireSsl, exe.controlPlane.Router.SaslMechanisms, exe.controlPlane.Router.AuthenticatePeer)
+	// installer.SetRouterConfig(exe.controlPlane.Router.HA)
 
 	// Set isViewerDns based on EcnViewerURL presence
 	if exe.controlPlane.Controller.EcnViewerURL != "" {
@@ -157,8 +157,8 @@ const clusterIP = "ClusterIP"
 func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 	// Validate user
 	user := controlPlane.GetUser()
-	if user.Email == "" || user.Name == "" || user.Password == "" || user.Surname == "" {
-		return util.NewInputError("Control Plane Iofog User must contain non-empty values in email, name, surname, and password fields")
+	if user.Email == "" {
+		return util.NewInputError("Control Plane Iofog User must contain non-empty value in email field")
 	}
 	// Validate auth
 	auth := controlPlane.Auth

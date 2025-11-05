@@ -212,7 +212,8 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	}
 	msvc.Config = jsonConfig
 	msvc.Container.Annotations = jsonAnnotations
-	msvc.Container.RootHostAccess = msvcInfo.RootHostAccess
+	msvc.Container.HostNetworkMode = msvcInfo.HostNetworkMode
+	msvc.Container.IsPrivileged = msvcInfo.IsPrivileged
 	msvc.Container.PidMode = msvcInfo.PidMode
 	msvc.Container.IpcMode = msvcInfo.IpcMode
 	msvc.Container.Runtime = msvcInfo.Runtime

@@ -51,7 +51,7 @@ EnvironmentFile=${ETC_DIR}/iofog-controller.env
 Volume=iofog-controller-db:/home/runner/.npm-global/lib/node_modules/@datasance/iofogcontroller/src/data/sqlite_files/:rw
 Volume=iofog-controller-log:/var/log/iofog-controller:rw
 PublishPort=51121:51121
-PublishPort=8008:8008
+PublishPort=80:8008
 LogDriver=journald
 
 [Service]
@@ -106,7 +106,7 @@ ExecStart=/usr/bin/docker run --rm --name ${CONTROLLER_CONTAINER_NAME} \\
 -v iofog-controller-db:/home/runner/.npm-global/lib/node_modules/@datasance/iofogcontroller/src/data/sqlite_files/:rw \\
 -v iofog-controller-log:/var/log/iofog-controller:rw \\
 -p 51121:51121 \\
--p 8008:8008 \\
+-p 80:8008 \\
 --stop-timeout 60 \\
 --attach stdout \\
 --attach stderr \\

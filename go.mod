@@ -7,8 +7,8 @@ toolchain go1.23.2
 require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.23.1
-	github.com/datasance/iofog-go-sdk/v3 v3.5.1
-	github.com/datasance/iofog-operator/v3 v3.5.1
+	github.com/datasance/iofog-go-sdk/v3 v3.5.2
+	github.com/datasance/iofog-operator/v3 v3.5.2
 	github.com/docker/docker v27.4.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/gorilla/websocket v1.5.3
@@ -19,6 +19,7 @@ require (
 	github.com/twmb/algoimpl v0.0.0-20170717182524-076353e90b94
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.30.0
+	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sys v0.33.0
 	golang.org/x/term v0.32.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -79,7 +80,6 @@ require (
 	go.opentelemetry.io/otel/sdk v1.33.0 // indirect
 	go.opentelemetry.io/otel/trace v1.33.0 // indirect
 	golang.org/x/net v0.32.0 // indirect
-	golang.org/x/oauth2 v0.23.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
 	google.golang.org/protobuf v1.35.2 // indirect

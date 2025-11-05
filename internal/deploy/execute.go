@@ -189,6 +189,21 @@ func Execute(opt *Options) (err error) {
 	// Create any AgentConfig executor missing
 	// Each Agent requires a corresponding Agent Config to be created with Controller
 	appendedAgentExecs := append(executorsMap[config.LocalAgentKind], executorsMap[config.RemoteAgentKind]...)
+	// Check if control plane is LocalControlPlane (either already in namespace or being deployed)
+	var isLocalControlPlane bool
+	if len(executorsMap[config.LocalControlPlaneKind]) > 0 {
+		// LocalControlPlane is being deployed in this execution
+		isLocalControlPlane = true
+	} else {
+		// Check if LocalControlPlane already exists in namespace
+		ns, err := config.GetNamespace(opt.Namespace)
+		if err == nil {
+			controlPlane, err := ns.GetControlPlane()
+			if err == nil {
+				_, isLocalControlPlane = controlPlane.(*rsc.LocalControlPlane)
+			}
+		}
+	}
 	for _, agentGenericExecutor := range appendedAgentExecs {
 		agentExecutor, ok := agentGenericExecutor.(deployagent.AgentDeployExecutor)
 		if !ok {
@@ -214,7 +229,7 @@ func Execute(opt *Options) (err error) {
 			agentConfig := client.AgentConfiguration{
 				Host: &host,
 			}
-			if util.IsLocalHost(host) { // Set de default local config to interior standalone
+			if util.IsLocalHost(host) && isLocalControlPlane { // Set de default local config to interior standalone for LocalControlPlane
 				isSystem := true
 				deploymentType := "container"
 				upstreamRouters := []string{}
