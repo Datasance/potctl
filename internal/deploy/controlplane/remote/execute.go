@@ -35,6 +35,11 @@ import (
 	"github.com/datasance/potctl/pkg/util"
 )
 
+const (
+	deploymentTypeContainer = "container"
+	deploymentTypeNative    = "native"
+)
+
 type Options struct {
 	Namespace string
 	Yaml      []byte
@@ -59,10 +64,10 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		deploymentType = *systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType
 	} else if systemAgentConfig != nil && systemAgentConfig.Package.Container.Image != "" {
 		// If container image is specified, use container
-		deploymentType = "container"
+		deploymentType = deploymentTypeContainer
 	} else {
 		// Default to container if DeploymentType is nil
-		deploymentType = "container"
+		deploymentType = deploymentTypeContainer
 	}
 
 	// Get agent configuration - use provided config or defaults
@@ -169,10 +174,10 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 		deploymentType = *systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType
 	} else if systemAgentConfig != nil && systemAgentConfig.Package.Container.Image != "" {
 		// If container image is specified, use container
-		deploymentType = "container"
+		deploymentType = deploymentTypeContainer
 	} else {
 		// Default to container if DeploymentType is nil
-		deploymentType = "container"
+		deploymentType = deploymentTypeContainer
 	}
 
 	// Get agent configuration - use provided config or defaults
