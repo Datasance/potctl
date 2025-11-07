@@ -119,14 +119,13 @@ func GetMicroserviceUUID(namespace, appName, name string) (uuid string, err erro
 }
 
 func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfiguration, tags *[]string, agentStatus rsc.AgentStatus, err error) {
-	// Connect to controller first
-	ctrl, err := NewControllerClient(namespace)
-	if err != nil {
-		return
-	}
-
-	// Try to get agent info directly from controller by name
-	agentInfo, err := ctrl.GetAgentByName(agentName)
+	// Try to get agent info directly from controller by name with auth retry
+	var agentInfo *client.AgentInfo
+	err = ExecuteWithAuthRetry(namespace, func(ctrlClient *client.Client) error {
+		var err error
+		agentInfo, err = ctrlClient.GetAgentByName(agentName)
+		return err
+	})
 	if err != nil {
 		// If agent not found in controller, try local cache approach
 		ns, err2 := config.GetNamespace(namespace)
@@ -141,24 +140,34 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 			return
 		}
 
-		// Try to get agent info by UUID
-		agentInfo, err2 = ctrl.GetAgentByID(agent.GetUUID())
-		if err2 != nil {
-			// The agents might not be provisioned with Controller
-			// TODO: Standardize error check and error message here
-			if strings.Contains(err2.Error(), "NotFoundError") {
-				err = util.NewInputError("Cannot describe an Agent that is not provisioned with the Controller in Namespace " + namespace)
-				return
+		// Try to get agent info by UUID with auth retry
+		err = ExecuteWithAuthRetry(namespace, func(ctrlClient *client.Client) error {
+			var err error
+			agentInfo, err = ctrlClient.GetAgentByID(agent.GetUUID())
+			if err != nil {
+				// The agents might not be provisioned with Controller
+				// TODO: Standardize error check and error message here
+				if strings.Contains(err.Error(), "NotFoundError") {
+					return util.NewInputError("Cannot describe an Agent that is not provisioned with the Controller in Namespace " + namespace)
+				}
+				return err
 			}
-			err = err2
+			return nil
+		})
+		if err != nil {
 			return
 		}
 	}
 
 	tags = agentInfo.Tags
 
-	// Get all agents for mapping uuid to name if required
-	getAgentList, err := ctrl.ListAgents(client.ListAgentsRequest{})
+	// Get all agents for mapping uuid to name if required with auth retry
+	var getAgentList client.ListAgentsResponse
+	err = ExecuteWithAuthRetry(namespace, func(ctrlClient *client.Client) error {
+		var err error
+		getAgentList, err = ctrlClient.ListAgents(client.ListAgentsRequest{})
+		return err
+	})
 	if err != nil {
 		return
 	}
