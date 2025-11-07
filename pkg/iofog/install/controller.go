@@ -141,6 +141,11 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 			Install: Entrypoint{
 				Name:     pkg.controllerScriptInstall,
 				destPath: fmt.Sprintf("%s/%s", ctrlDir, pkg.controllerScriptInstall),
+				Args: []string{
+					options.Image,
+					"",
+					"",
+				},
 			},
 			Uninstall: Entrypoint{
 				Name:     pkg.controllerScriptUninstall,

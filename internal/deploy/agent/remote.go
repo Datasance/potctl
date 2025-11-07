@@ -46,8 +46,15 @@ func (exe *remoteExecutor) GetName() string {
 func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 	var agent *install.RemoteAgent
 	var err error
+	// If DeploymentType is nil, default to "container"
+	// Use NewRemoteContainerAgent if DeploymentType is nil or "container"
+	// Check if Config is nil and initialize if needed
+	if exe.agent.Config == nil {
+		exe.agent.Config = &rsc.AgentConfiguration{}
+	}
 
-	if exe.agent.Config.DeploymentType != nil && *exe.agent.Config.DeploymentType == "container" {
+	// Check DeploymentType (Config is guaranteed to be non-nil now)
+	if exe.agent.Config.DeploymentType == nil || *exe.agent.Config.DeploymentType == "container" {
 		// Use NewRemoteContainerAgent
 		agent, err = install.NewRemoteContainerAgent(
 			exe.agent.SSH.User,
@@ -58,7 +65,7 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 			exe.agent.UUID,
 		)
 	} else {
-		// Use NewRemoteAgent
+		// Use NewRemoteAgent for "native" deployment type
 		agent, err = install.NewRemoteAgent(
 			exe.agent.SSH.User,
 			exe.agent.Host,
@@ -138,8 +145,26 @@ func (exe *remoteExecutor) Execute() (err error) {
 	}
 
 	var agent *install.RemoteAgent
+	// If DeploymentType is nil, default to "container"
+	// Use NewRemoteContainerAgent if DeploymentType is nil, "container", or if container image is specified
+	// Check if Config is nil and initialize if needed
+	if exe.agent.Config == nil {
+		exe.agent.Config = &rsc.AgentConfiguration{}
+	}
 
-	if (exe.agent.Config.DeploymentType != nil && *exe.agent.Config.DeploymentType == "container") || exe.agent.Package.Container.Image != "" {
+	useContainer := false
+	// Check DeploymentType (Config is guaranteed to be non-nil now)
+	if exe.agent.Config.DeploymentType == nil {
+		useContainer = true
+	} else if *exe.agent.Config.DeploymentType == "container" {
+		useContainer = true
+	}
+	// Check if container image is specified (Package is a value type, always initialized)
+	if !useContainer && exe.agent.Package.Container.Image != "" {
+		useContainer = true
+	}
+
+	if useContainer {
 		exe.agent.Config.DeploymentType = iutil.MakeStrPtr("container")
 		// Use NewRemoteContainerAgent
 		agent, err = install.NewRemoteContainerAgent(
@@ -151,8 +176,8 @@ func (exe *remoteExecutor) Execute() (err error) {
 			exe.agent.UUID,
 		)
 	} else {
+		// Use NewRemoteAgent for "native" deployment type
 		exe.agent.Config.DeploymentType = iutil.MakeStrPtr("native")
-		// Use NewRemoteAgent
 		agent, err = install.NewRemoteAgent(
 			exe.agent.SSH.User,
 			exe.agent.Host,

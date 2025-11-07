@@ -343,13 +343,13 @@ func deployAgentConfiguration(executors []execute.Executor) (err error) {
 }
 
 func sortAndExecute(namespace string, executors []deployagentconfig.AgentConfigExecutor) error {
-	// List agents on Controller
-	ctrlClient, err := clientutil.NewControllerClient(namespace)
-	if err != nil {
+	// List agents on Controller with auth retry
+	var listAgentReponse client.ListAgentsResponse
+	err := clientutil.ExecuteWithAuthRetry(namespace, func(ctrlClient *client.Client) error {
+		var err error
+		listAgentReponse, err = ctrlClient.ListAgents(client.ListAgentsRequest{})
 		return err
-	}
-
-	listAgentReponse, err := ctrlClient.ListAgents(client.ListAgentsRequest{})
+	})
 	if err != nil {
 		return err
 	}

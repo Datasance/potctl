@@ -15,6 +15,7 @@ package client
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	"github.com/datasance/potctl/internal/config"
@@ -271,7 +272,29 @@ func newControllerClient(namespace string) (*client.Client, error) {
 }
 
 func getBackendAgents(namespace string, ioClient *client.Client) ([]client.AgentInfo, error) {
-	agentList, err := ioClient.ListAgents(client.ListAgentsRequest{})
+	var agentList client.ListAgentsResponse
+	var err error
+
+	// Try the operation
+	agentList, err = ioClient.ListAgents(client.ListAgentsRequest{})
+	if err == nil {
+		pkg.agentCache[namespace] = agentList.Agents
+		return agentList.Agents, nil
+	}
+
+	// Check if it's an authentication error
+	if !isAuthenticationError(err) {
+		return nil, err
+	}
+
+	// Refresh authentication and retry
+	refreshedClient, refreshErr := refreshClientAuthentication(namespace)
+	if refreshErr != nil {
+		return nil, fmt.Errorf("authentication error occurred and failed to refresh: %v (refresh error: %v)", err, refreshErr)
+	}
+
+	// Retry the operation with refreshed client
+	agentList, err = refreshedClient.ListAgents(client.ListAgentsRequest{})
 	if err != nil {
 		return nil, err
 	}
@@ -294,4 +317,107 @@ func getAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid strin
 		name = agent.Name
 	}
 	return
+}
+
+// isAuthenticationError checks if an error is an authentication/authorization error
+func isAuthenticationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := strings.ToLower(err.Error())
+	// Check for common authentication error patterns
+	return strings.Contains(errStr, "access denied") ||
+		strings.Contains(errStr, "accessdenied") ||
+		strings.Contains(errStr, "Access Denied") ||
+		strings.Contains(errStr, "AccessDenied") ||
+		strings.Contains(errStr, "Access denied") ||
+		strings.Contains(errStr, "unauthorized") ||
+		strings.Contains(errStr, "Unauthorized") ||
+		strings.Contains(errStr, "forbidden") ||
+		strings.Contains(errStr, "Forbidden") ||
+		strings.Contains(errStr, "authentication failed") ||
+		strings.Contains(errStr, "Authentication failed") ||
+		strings.Contains(errStr, "401") ||
+		strings.Contains(errStr, "403") ||
+		strings.Contains(errStr, "token expired") ||
+		strings.Contains(errStr, "tokenexpired") ||
+		strings.Contains(errStr, "invalid token") ||
+		strings.Contains(errStr, "invalidtoken")
+}
+
+// refreshClientAuthentication refreshes the client authentication for a namespace
+func refreshClientAuthentication(namespace string) (*client.Client, error) {
+	ns, err := config.GetNamespace(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	controlPlane, err := ns.GetControlPlane()
+	if err != nil {
+		return nil, err
+	}
+
+	endpoint, err := controlPlane.GetEndpoint()
+	if err != nil {
+		return nil, err
+	}
+
+	user := controlPlane.GetUser()
+	baseURL, err := util.GetBaseURL(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	// Re-authenticate using SessionLogin
+	util.SpinHandlePrompt()
+	refreshedClient, err := client.SessionLogin(client.Options{BaseURL: baseURL}, user.RefreshToken, user.Email, user.GetRawPassword())
+	if err != nil {
+		util.SpinHandlePromptComplete()
+		return nil, fmt.Errorf("failed to refresh authentication: %v", err)
+	}
+	util.SpinHandlePromptComplete()
+
+	// Update tokens in config
+	user.AccessToken = refreshedClient.GetAccessToken()
+	user.RefreshToken = refreshedClient.GetRefreshToken()
+	config.UpdateUser(namespace, user.AccessToken, user.RefreshToken)
+
+	// Update cached client
+	pkg.clientCache[namespace] = refreshedClient
+
+	// Flush config
+	if err := config.Flush(); err != nil {
+		return nil, fmt.Errorf("failed to flush config: %v", err)
+	}
+
+	return refreshedClient, nil
+}
+
+// ExecuteWithAuthRetry executes a function that uses a client, and retries with refreshed auth if auth error occurs
+func ExecuteWithAuthRetry(namespace string, operation func(*client.Client) error) error {
+	// Get client
+	ioClient, err := NewControllerClient(namespace)
+	if err != nil {
+		return err
+	}
+
+	// Try the operation
+	err = operation(ioClient)
+	if err == nil {
+		return nil
+	}
+
+	// Check if it's an authentication error
+	if !isAuthenticationError(err) {
+		return err
+	}
+
+	// Refresh authentication and retry
+	refreshedClient, refreshErr := refreshClientAuthentication(namespace)
+	if refreshErr != nil {
+		return fmt.Errorf("authentication error occurred and failed to refresh: %v (refresh error: %v)", err, refreshErr)
+	}
+
+	// Retry the operation with refreshed client
+	return operation(refreshedClient)
 }

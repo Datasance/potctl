@@ -52,17 +52,22 @@ type remoteControlPlaneExecutor struct {
 func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgentConfig *rsc.SystemAgentConfig) (err error) {
 	// Deploy system agent to host internal router
 	install.Verbose("Deploying system agent for controller " + ctrl.Name)
-
+	// If DeploymentType is nil, default to "container"
 	var deploymentType string
-	if systemAgentConfig.Package.Container.Image != "" {
+	if systemAgentConfig != nil && systemAgentConfig.AgentConfiguration != nil && systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType != nil {
+		// Use DeploymentType from provided configuration
+		deploymentType = *systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType
+	} else if systemAgentConfig != nil && systemAgentConfig.Package.Container.Image != "" {
+		// If container image is specified, use container
 		deploymentType = "container"
 	} else {
-		deploymentType = "native"
+		// Default to container if DeploymentType is nil
+		deploymentType = "container"
 	}
 
 	// Get agent configuration - use provided config or defaults
 	var deployAgentConfig rsc.AgentConfiguration
-	if systemAgentConfig.AgentConfiguration != nil {
+	if systemAgentConfig != nil && systemAgentConfig.AgentConfiguration != nil {
 		// Use provided configuration
 		deployAgentConfig = *systemAgentConfig.AgentConfiguration
 		// Ensure host is set
@@ -71,6 +76,10 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		}
 		// Ensure IsSystem is always true for system agents
 		deployAgentConfig.IsSystem = iutil.MakeBoolPtr(true)
+		// Ensure DeploymentType is set (default to container if nil)
+		if deployAgentConfig.AgentConfiguration.DeploymentType == nil {
+			deployAgentConfig.AgentConfiguration.DeploymentType = iutil.MakeStrPtr(deploymentType)
+		}
 	} else {
 		// Use defaults with configurable ports (router mode always interior)
 		RouterConfig := client.RouterConfig{
@@ -125,12 +134,15 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 	}
 
 	agent := rsc.RemoteAgent{
-		Name:    ctrl.Name,
-		Host:    ctrl.Host,
-		SSH:     ctrl.SSH,
-		Package: systemAgentConfig.Package,
-		Scripts: systemAgentConfig.Scripts, // Support custom scripts
-		Config:  &deployAgentConfig,
+		Name:   ctrl.Name,
+		Host:   ctrl.Host,
+		SSH:    ctrl.SSH,
+		Config: &deployAgentConfig,
+	}
+	// Set Package and Scripts if systemAgentConfig is provided
+	if systemAgentConfig != nil {
+		agent.Package = systemAgentConfig.Package
+		agent.Scripts = systemAgentConfig.Scripts // Support custom scripts
 	}
 
 	// Get Agentconfig executor
@@ -150,17 +162,22 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgentConfig *rsc.SystemAgentConfig) (err error) {
 	// Deploy system agent to host internal router
 	install.Verbose("Deploying next-system agent for controller " + ctrl.Name)
-
+	// If DeploymentType is nil, default to "container"
 	var deploymentType string
-	if systemAgentConfig.Package.Container.Image != "" {
+	if systemAgentConfig != nil && systemAgentConfig.AgentConfiguration != nil && systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType != nil {
+		// Use DeploymentType from provided configuration
+		deploymentType = *systemAgentConfig.AgentConfiguration.AgentConfiguration.DeploymentType
+	} else if systemAgentConfig != nil && systemAgentConfig.Package.Container.Image != "" {
+		// If container image is specified, use container
 		deploymentType = "container"
 	} else {
-		deploymentType = "native"
+		// Default to container if DeploymentType is nil
+		deploymentType = "container"
 	}
 
 	// Get agent configuration - use provided config or defaults
 	var deployAgentConfig rsc.AgentConfiguration
-	if systemAgentConfig.AgentConfiguration != nil {
+	if systemAgentConfig != nil && systemAgentConfig.AgentConfiguration != nil {
 		// Use provided configuration
 		deployAgentConfig = *systemAgentConfig.AgentConfiguration
 		// Ensure host is set
@@ -169,6 +186,10 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 		}
 		// Ensure IsSystem is always true for system agents
 		deployAgentConfig.IsSystem = iutil.MakeBoolPtr(true)
+		// Ensure DeploymentType is set (default to container if nil)
+		if deployAgentConfig.AgentConfiguration.DeploymentType == nil {
+			deployAgentConfig.AgentConfiguration.DeploymentType = iutil.MakeStrPtr(deploymentType)
+		}
 		// Override upstream routers for non-first controllers
 		if deployAgentConfig.UpstreamRouters == nil {
 			upstreamRouters := []string{"default-router"}
@@ -239,12 +260,15 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 	}
 
 	agent := rsc.RemoteAgent{
-		Name:    ctrl.Name,
-		Host:    ctrl.Host,
-		SSH:     ctrl.SSH,
-		Package: systemAgentConfig.Package,
-		Scripts: systemAgentConfig.Scripts, // Support custom scripts
-		Config:  &deployAgentConfig,
+		Name:   ctrl.Name,
+		Host:   ctrl.Host,
+		SSH:    ctrl.SSH,
+		Config: &deployAgentConfig,
+	}
+	// Set Package and Scripts if systemAgentConfig is provided
+	if systemAgentConfig != nil {
+		agent.Package = systemAgentConfig.Package
+		agent.Scripts = systemAgentConfig.Scripts // Support custom scripts
 	}
 
 	// Get Agentconfig executor
@@ -262,11 +286,7 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 }
 
 // prepareViewerURL prepares the viewer URL from controller configuration or endpoint
-func prepareViewerURL(ctrl *rsc.RemoteController, endpoint string) (string, error) {
-	// If controller has EcnViewerURL set, use it
-	if ctrl.EcnViewerURL != "" {
-		return ctrl.EcnViewerURL, nil
-	}
+func prepareViewerURL(endpoint string) (string, error) {
 
 	// Otherwise, construct from endpoint using logic similar to view.go
 	URL, err := url.Parse(endpoint)
@@ -315,13 +335,8 @@ func updateViewerClientRootURL(controlPlane *rsc.RemoteControlPlane, endpoint st
 		return fmt.Errorf("no controllers found in control plane")
 	}
 
-	firstController, ok := controllers[0].(*rsc.RemoteController)
-	if !ok {
-		return fmt.Errorf("failed to convert first controller to RemoteController")
-	}
-
 	// Prepare viewer URL
-	viewerURL, err := prepareViewerURL(firstController, endpoint)
+	viewerURL, err := prepareViewerURL(endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to prepare viewer URL: %v", err)
 	}
@@ -380,10 +395,10 @@ func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 			return util.NewInternalError("Could not convert Controller to Remote Controller")
 		}
 
-		// System agent config is required per controller
-		if controller.SystemAgent == nil {
-			return fmt.Errorf("controller '%s' must have a systemAgent configuration", controller.Name)
-		}
+		// // System agent config is required per controller
+		// if controller.SystemAgent == nil {
+		// 	return fmt.Errorf("controller '%s' must have a systemAgent configuration", controller.Name)
+		// }
 
 		// First controller gets system agent(with default-router), others get next-system agents(with interior mode)
 		if idx == 0 {
@@ -396,10 +411,15 @@ func (exe remoteControlPlaneExecutor) postDeploy() (err error) {
 			}
 		}
 		var image string
-		if controller.Scripts.Install.Args != nil {
+		// Check if controller has custom install script args (highest priority)
+		if controller.Scripts != nil && controller.Scripts.Install.Args != nil && len(controller.Scripts.Install.Args) > 0 {
 			image = controller.Scripts.Install.Args[0]
-		} else {
+		} else if remoteControlPlane.Package.Container.Image != "" {
+			// Use image from control plane package
 			image = remoteControlPlane.Package.Container.Image
+		} else {
+			// Default to standard controller image
+			image = util.GetControllerImage()
 		}
 		// Tag controller image for all controllers
 		if err := tagControllerImage(controller, image); err != nil {
@@ -559,31 +579,31 @@ func validateMultiControllerRouterCA(controlPlane *rsc.RemoteControlPlane) error
 	return nil
 }
 
-// Validates that each controller has a systemAgent configuration
-func validateControllerSystemAgent(controlPlane *rsc.RemoteControlPlane) error {
-	controllers := controlPlane.Controllers
-	if len(controllers) == 0 {
-		return util.NewInputError("Remote Control Plane must have at least one controller")
-	}
+// // Validates that each controller has a systemAgent configuration
+// func validateControllerSystemAgent(controlPlane *rsc.RemoteControlPlane) error {
+// 	controllers := controlPlane.Controllers
+// 	if len(controllers) == 0 {
+// 		return util.NewInputError("Remote Control Plane must have at least one controller")
+// 	}
 
-	for idx, controller := range controllers {
-		if controller.SystemAgent == nil {
-			return fmt.Errorf("controller %d (%s): systemAgent configuration is required", idx, controller.Name)
-		}
-		// Validate systemAgent package is provided
-		if controller.SystemAgent.Package.Container.Image == "" && controller.SystemAgent.Package.Version == "" && controller.SystemAgent.Scripts.Install.Args == nil {
-			return fmt.Errorf("controller %d (%s): systemAgent must have either package.container.image or package.version or scripts.install.args specified", idx, controller.Name)
-		}
-	}
-	return nil
-}
+// 	for idx, controller := range controllers {
+// 		if controller.SystemAgent == nil {
+// 			return fmt.Errorf("controller %d (%s): systemAgent configuration is required", idx, controller.Name)
+// 		}
+// 		// Validate systemAgent package is provided
+// 		if controller.SystemAgent.Package.Container.Image == "" && controller.SystemAgent.Package.Version == "" && controller.SystemAgent.Scripts.Install.Args == nil {
+// 			return fmt.Errorf("controller %d (%s): systemAgent must have either package.container.image or package.version or scripts.install.args specified", idx, controller.Name)
+// 		}
+// 	}
+// 	return nil
+// }
 
 // Main validation function that orchestrates all validations
 func validateMultiControllerConfig(controlPlane *rsc.RemoteControlPlane) error {
-	// Validate systemAgent configuration
-	if err := validateControllerSystemAgent(controlPlane); err != nil {
-		return err
-	}
+	// // Validate systemAgent configuration
+	// if err := validateControllerSystemAgent(controlPlane); err != nil {
+	// 	return err
+	// }
 
 	// Validate database configuration
 	if err := validateMultiControllerDatabase(controlPlane); err != nil {
