@@ -111,12 +111,15 @@ func NewRemoteAgent(user, host string, port int, privKeyFilename, agentName, age
 	return agent, nil
 }
 
-func NewRemoteContainerAgent(user, host string, port int, privKeyFilename, agentName, agentUUID string) (*RemoteAgent, error) {
+func NewRemoteContainerAgent(user, host string, port int, privKeyFilename, agentName, agentUUID, agentTZ string) (*RemoteAgent, error) {
 	ssh, err := util.NewSecureShellClient(user, host, privKeyFilename)
 	if err != nil {
 		return nil, err
 	}
 	ssh.SetPort(port)
+	if agentTZ == "" {
+		agentTZ = "Europe/Istanbul"
+	}
 	agent := &RemoteAgent{
 		defaultAgent: defaultAgent{name: agentName, uuid: agentUUID},
 		ssh:          ssh,
@@ -136,7 +139,7 @@ func NewRemoteContainerAgent(user, host string, port int, privKeyFilename, agent
 				destPath: util.JoinAgentPath(pkg.agentDir, pkg.scriptInstallIofog),
 				Args: []string{
 					util.GetAgentImage(),
-					"",
+					agentTZ,
 					"",
 				},
 			},

@@ -116,17 +116,24 @@ func sanitizeContainerName(name string) string {
 }
 
 // NewAgentConfig generates a static agent config
-func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, credentials Credentials, isSystem bool) *LocalAgentConfig {
+func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, credentials Credentials, isSystem bool, timeZone string) *LocalAgentConfig {
 	if image == "" {
 		image = util.GetAgentImage()
 	}
 
+	if ctrlConfig != nil && ctrlConfig.Host == "" {
+		ctrlConfig.Host = "0.0.0.0"
+	}
+
+	if timeZone == "" {
+		timeZone = "Europe/Istanbul"
+	}
+
 	return &LocalAgentConfig{
 		LocalContainerConfig: LocalContainerConfig{
-			Host: "0.0.0.0",
+			Host: ctrlConfig.Host,
 			Ports: []port{
 				{Host: "54321", Container: &LocalContainerPort{Protocol: "tcp", Port: "54321"}},
-				{Host: "8081", Container: &LocalContainerPort{Protocol: "tcp", Port: "22"}},
 			},
 			ContainerName: GetLocalContainerName("agent", isSystem),
 			Image:         image,
@@ -140,7 +147,9 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 				"iofog-agent-directory:/var/lib/iofog-agent:rw",
 				// "/sbin/shutdown:/sbin/shutdown",
 			},
-			Envs:        []string{},
+			Envs: []string{
+				"TZ=" + timeZone,
+			},
 			NetworkMode: "host",
 			Credentials: credentials,
 		},

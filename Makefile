@@ -20,10 +20,10 @@ LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -
 LDFLAGS += -X $(PREFIX).operatorTag=3.5.2
 LDFLAGS += -X $(PREFIX).routerAdaptorTag=3.5.2
 LDFLAGS += -X $(PREFIX).routerTag=3.5.2
-LDFLAGS += -X $(PREFIX).controllerTag=3.5.7
-LDFLAGS += -X $(PREFIX).agentTag=3.5.4
-LDFLAGS += -X $(PREFIX).controllerVersion=3.5.7
-LDFLAGS += -X $(PREFIX).agentVersion=3.5.4
+LDFLAGS += -X $(PREFIX).controllerTag=3.5.9
+LDFLAGS += -X $(PREFIX).agentTag=3.5.6
+LDFLAGS += -X $(PREFIX).controllerVersion=3.5.9
+LDFLAGS += -X $(PREFIX).agentVersion=3.5.6
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.5.2
 OPERATOR_MODULE = iofog-operator/v3@v3.5.2

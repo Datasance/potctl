@@ -63,6 +63,7 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 			exe.agent.SSH.KeyFile,
 			exe.agent.Name,
 			exe.agent.UUID,
+			exe.agent.Config.TimeZone,
 		)
 	} else {
 		// Use NewRemoteAgent for "native" deployment type
@@ -174,6 +175,7 @@ func (exe *remoteExecutor) Execute() (err error) {
 			exe.agent.SSH.KeyFile,
 			exe.agent.Name,
 			exe.agent.UUID,
+			exe.agent.Config.TimeZone,
 		)
 	} else {
 		// Use NewRemoteAgent for "native" deployment type
