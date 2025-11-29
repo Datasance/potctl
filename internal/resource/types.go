@@ -118,6 +118,19 @@ type Volume struct {
 	Permissions string   `json:"permissions" yaml:"permissions"`
 }
 
+type OfflineImage struct {
+	Name     string            `json:"name" yaml:"name"`
+	X86Image string            `json:"x86,omitempty" yaml:"x86,omitempty"`
+	ArmImage string            `json:"arm,omitempty" yaml:"arm,omitempty"`
+	Auth     *OfflineImageAuth `json:"auth,omitempty" yaml:"auth,omitempty"`
+	Agents   []string          `json:"agent,omitempty" yaml:"agent,omitempty"`
+}
+
+type OfflineImageAuth struct {
+	Username string `json:"username,omitempty" yaml:"username,omitempty"`
+	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+}
+
 // AgentConfiguration contains configuration information for a deployed agent
 type AgentConfiguration struct {
 	Name                      string  `json:"name,omitempty" yaml:"name"`

@@ -32,6 +32,7 @@ import (
 	deployremotecontrolplane "github.com/datasance/potctl/internal/deploy/controlplane/remote"
 	deployedgeresource "github.com/datasance/potctl/internal/deploy/edgeresource"
 	deploymicroservice "github.com/datasance/potctl/internal/deploy/microservice"
+	deployofflineimage "github.com/datasance/potctl/internal/deploy/offlineimage"
 	deployregistry "github.com/datasance/potctl/internal/deploy/registry"
 	deployroute "github.com/datasance/potctl/internal/deploy/route"
 	deploysecret "github.com/datasance/potctl/internal/deploy/secret"
@@ -56,6 +57,7 @@ var kindOrder = []config.Kind{
 	config.EdgeResourceKind,
 	config.ApplicationTemplateKind,
 	config.VolumeKind,
+	config.OfflineImageKind,
 	config.VolumeMountKind,
 	config.RegistryKind,
 	config.CatalogItemKind,
@@ -66,8 +68,10 @@ var kindOrder = []config.Kind{
 }
 
 type Options struct {
-	Namespace string
-	InputFile string
+	Namespace    string
+	InputFile    string
+	NoCache      bool
+	TransferPool int
 }
 
 func deployEdgeResource(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
@@ -154,33 +158,9 @@ func deployCertificate(opt *execute.KindHandlerOpt) (exe execute.Executor, err e
 	return deploycertificate.NewExecutor(deploycertificate.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name, Kind: opt.Kind})
 }
 
-var kindHandlers = map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error){
-	config.ApplicationKind:            deployApplication,
-	config.ApplicationTemplateKind:    deployApplicationTemplate,
-	config.MicroserviceKind:           deployMicroservice,
-	config.CatalogItemKind:            deployCatalogItem,
-	config.EdgeResourceKind:           deployEdgeResource,
-	config.KubernetesControlPlaneKind: deployKubernetesControlPlane,
-	config.RemoteControlPlaneKind:     deployRemoteControlPlane,
-	config.LocalControlPlaneKind:      deployLocalControlPlane,
-	config.RemoteControllerKind:       deployRemoteController,
-	config.LocalControllerKind:        deployLocalController,
-	config.RemoteAgentKind:            deployRemoteAgent,
-	config.LocalAgentKind:             deployLocalAgent,
-	config.AgentConfigKind:            deployAgentConfig,
-	config.RegistryKind:               deployRegistry,
-	config.VolumeKind:                 deployVolume,
-	config.RouteKind:                  deployRoute,
-	config.SecretKind:                 deploySecret,
-	config.ConfigMapKind:              deployConfigMap,
-	config.ServiceKind:                deployService,
-	config.VolumeMountKind:            deployVolumeMount,
-	config.CertificateAuthorityKind:   deployCertificate,
-	config.CertificateKind:            deployCertificate,
-}
-
 // Execute deploy from yaml file
 func Execute(opt *Options) (err error) {
+	kindHandlers := buildKindHandlers(opt.NoCache, opt.TransferPool)
 	executorsMap, err := execute.GetExecutorsFromYAML(opt.InputFile, opt.Namespace, kindHandlers)
 	if err != nil {
 		return err
@@ -314,6 +294,43 @@ func Execute(opt *Options) (err error) {
 	}
 
 	return nil
+}
+
+func buildKindHandlers(noCache bool, transferPool int) map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error) {
+	handlers := map[config.Kind]func(*execute.KindHandlerOpt) (execute.Executor, error){
+		config.ApplicationKind:            deployApplication,
+		config.ApplicationTemplateKind:    deployApplicationTemplate,
+		config.MicroserviceKind:           deployMicroservice,
+		config.CatalogItemKind:            deployCatalogItem,
+		config.EdgeResourceKind:           deployEdgeResource,
+		config.KubernetesControlPlaneKind: deployKubernetesControlPlane,
+		config.RemoteControlPlaneKind:     deployRemoteControlPlane,
+		config.LocalControlPlaneKind:      deployLocalControlPlane,
+		config.RemoteControllerKind:       deployRemoteController,
+		config.LocalControllerKind:        deployLocalController,
+		config.RemoteAgentKind:            deployRemoteAgent,
+		config.LocalAgentKind:             deployLocalAgent,
+		config.AgentConfigKind:            deployAgentConfig,
+		config.RegistryKind:               deployRegistry,
+		config.VolumeKind:                 deployVolume,
+		config.RouteKind:                  deployRoute,
+		config.SecretKind:                 deploySecret,
+		config.ConfigMapKind:              deployConfigMap,
+		config.ServiceKind:                deployService,
+		config.VolumeMountKind:            deployVolumeMount,
+		config.CertificateAuthorityKind:   deployCertificate,
+		config.CertificateKind:            deployCertificate,
+	}
+	handlers[config.OfflineImageKind] = func(opt *execute.KindHandlerOpt) (execute.Executor, error) {
+		return deployofflineimage.NewExecutor(deployofflineimage.Options{
+			Namespace: opt.Namespace,
+			Yaml:      opt.YAML,
+			Name:      opt.Name,
+			NoCache:   noCache,
+			PoolSize:  transferPool,
+		})
+	}
+	return handlers
 }
 
 func deployAgentConfiguration(executors []execute.Executor) (err error) {

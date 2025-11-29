@@ -30,6 +30,7 @@ const (
 	ConfigMapKind              Kind = "ConfigMap"
 	ServiceKind                Kind = "Service"
 	VolumeMountKind            Kind = "VolumeMount"
+	OfflineImageKind           Kind = "OfflineImage"
 	CertificateKind            Kind = "Certificate"
 	CertificateAuthorityKind   Kind = "CertificateAuthority"
 )

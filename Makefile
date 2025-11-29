@@ -39,14 +39,21 @@ bootstrap: ## Bootstrap environment
 	@cp gitHooks/* .git/hooks/
 	@script/bootstrap.sh
 
+.PHONY: verify-gpgme
+verify-gpgme:
+	@if ! pkg-config --exists gpgme; then \
+		echo "Missing gpgme development headers. Install via 'brew install gpgme' or 'sudo apt-get install libgpgme-dev'."; \
+		exit 1; \
+	fi
+
 .PHONY: build
 build: GOARGS += -tags "$(GOTAGS)" -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME)
-build: fmt ## Build the binary
+build: fmt verify-gpgme ## Build the binary
 	@cd pkg/util && rice embed-go
 	@go build -v $(GOARGS) $(PACKAGE_DIR)/main.go
 
 .PHONY: install
-install:
+install: verify-gpgme
 	go install -ldflags "$(LDFLAGS)" ./cmd/potctl/
 
 .PHONY: lint
@@ -69,7 +76,7 @@ fmt: ## Format the source
 	@gofmt -s -w .
 
 .PHONY: test
-test: ## Run unit tests
+test: verify-gpgme ## Run unit tests
 	mkdir -p $(REPORTS_DIR)
 	rm -f $(REPORTS_DIR)/*
 	set -o pipefail; find ./internal ./pkg -name '*_test.go' -not -path vendor | sed -E "s|(/.*/).*_test.go|\1|g" | xargs -n1 go test -ldflags "$(LDFLAGS)" -coverprofile=$(REPORTS_DIR)/coverage.txt -v -parallel 1 2>&1 | tee $(REPORTS_DIR)/$(TEST_RESULTS)
