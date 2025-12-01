@@ -23,6 +23,7 @@ builds:
   - id: build_macos
     binary: potctl
     env:
+      - CGO_ENABLED=0
     main: ./cmd/potctl/main.go
     goos:
       - darwin
