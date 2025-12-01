@@ -39,6 +39,7 @@ const (
 	LatestAPIVersion     = apiVersionGroup + "/" + latestVersion
 	defaultDirname       = ".iofog/" + latestVersion
 	namespaceDirname     = "namespaces/"
+	offlineImagesDirname = "offline-images"
 	defaultFilename      = "config.yaml"
 	configV3             = "potctl/v3"
 	CurrentConfigVersion = configV3
@@ -217,6 +218,23 @@ func flushShared() error {
 // Flush will write namespace files to disk
 func Flush() error {
 	return flushNamespaces()
+}
+
+// GetOfflineImageNamespaceDir returns the directory path used to store OfflineImage artifacts for a namespace.
+func GetOfflineImageNamespaceDir(namespace string) string {
+	return path.Join(configFolder, offlineImagesDirname, namespace)
+}
+
+// GetOfflineImageCacheDir returns the directory path for a specific OfflineImage resource and platform.
+func GetOfflineImageCacheDir(namespace, resourceName, platform string) string {
+	pathElems := []string{configFolder, offlineImagesDirname, namespace}
+	if resourceName != "" {
+		pathElems = append(pathElems, resourceName)
+	}
+	if platform != "" {
+		pathElems = append(pathElems, platform)
+	}
+	return path.Join(pathElems...)
 }
 
 func ValidateHeader(header *Header) error {

@@ -88,6 +88,13 @@ type auth struct {
 	viewerClient     string
 }
 
+type events struct {
+	auditEnabled     *bool // nil if not configured, pointer to bool if configured
+	retentionDays    int
+	cleanupInterval  int
+	captureIpAddress *bool // nil if not configured, pointer to bool if configured
+}
+
 type ControllerProcedures struct {
 	check          Entrypoint `yaml:"-"` // Check prereqs script (runs for default and custom procedures)
 	Deps           Entrypoint `yaml:"deps,omitempty"`
@@ -103,6 +110,7 @@ type Controller struct {
 	ssh           *util.SecureShellClient
 	db            database
 	auth          auth
+	events        events
 	ctrlDir       string
 	iofogDir      string
 	procs         ControllerProcedures
@@ -196,6 +204,15 @@ func (ctrl *Controller) SetControllerAuth(url, realm, ssl, realmKey, controllerC
 		controllerClient: controllerClient,
 		controllerSecret: controllerSecret,
 		viewerClient:     viewerClient,
+	}
+}
+
+func (ctrl *Controller) SetControllerEvents(auditEnabled bool, retentionDays, cleanupInterval int, captureIpAddress bool) {
+	ctrl.events = events{
+		auditEnabled:     &auditEnabled,
+		retentionDays:    retentionDays,
+		cleanupInterval:  cleanupInterval,
+		captureIpAddress: &captureIpAddress,
 	}
 }
 
@@ -447,6 +464,9 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	if ctrl.db.ca != nil {
 		env = append(env, fmt.Sprintf(`"DB_SSL_CA=%s"`, *ctrl.db.ca))
 	}
+	if ctrl.Host != "" {
+		env = append(env, fmt.Sprintf(`"CONTROLLER_HOST=%s"`, ctrl.Host))
+	}
 	if ctrl.auth.url != "" {
 		env = append(env,
 			fmt.Sprintf(`"KC_URL=%s"`, ctrl.auth.url),
@@ -474,6 +494,26 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	}
 	if ctrl.LogLevel != "" {
 		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
+	}
+	// Add Events environment variables only if events were explicitly configured
+	if ctrl.events.auditEnabled != nil {
+		// Always set EVENT_AUDIT_ENABLED (true or false)
+		env = append(env, fmt.Sprintf("\"EVENT_AUDIT_ENABLED=%t\"", *ctrl.events.auditEnabled))
+
+		// Set optional fields only if audit is enabled
+		if *ctrl.events.auditEnabled {
+			if ctrl.events.retentionDays != 0 {
+				env = append(env, fmt.Sprintf("\"EVENT_RETENTION_DAYS=%d\"", ctrl.events.retentionDays))
+			}
+			if ctrl.events.cleanupInterval != 0 {
+				env = append(env, fmt.Sprintf("\"EVENT_CLEANUP_INTERVAL=%d\"", ctrl.events.cleanupInterval))
+			}
+		}
+
+		// Set EVENT_CAPTURE_IP_ADDRESS if explicitly configured
+		if ctrl.events.captureIpAddress != nil {
+			env = append(env, fmt.Sprintf("\"EVENT_CAPTURE_IP_ADDRESS=%t\"", *ctrl.events.captureIpAddress))
+		}
 	}
 	return strings.Join(env, " ")
 }

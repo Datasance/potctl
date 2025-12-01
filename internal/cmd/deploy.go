@@ -65,6 +65,8 @@ Visit iofog.org to view all YAML specifications usable with this command.`,
 
 	// Register flags
 	cmd.Flags().StringVarP(&opt.InputFile, "file", "f", "", pkg.flagDescYaml)
+	cmd.Flags().BoolVar(&opt.NoCache, "no-cache", false, "Disable caching for OfflineImage images after download")
+	cmd.Flags().IntVar(&opt.TransferPool, "transfer-pool", 2, "Maximum number of concurrent OfflineImage transfers")
 
 	return cmd
 }

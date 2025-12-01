@@ -48,7 +48,7 @@ rm -f "$ENV_FILE"
 touch "$ENV_FILE"
 
 echo "IOFOG_AGENT_IMAGE=${agent_image}" >> "$ENV_FILE"
-
+echo "IOFOG_AGENT_TZ=${agent_tz}" >> "$ENV_FILE"
 
 }
 
@@ -199,9 +199,10 @@ do_start_iofog(){
 }
 
 agent_image="$1"
+agent_tz="$2"
 echo "Using variables"
 echo "version: $agent_image"
-
+echo "timezone: $agent_tz"
 . /etc/iofog/agent/init.sh
 init
 do_check_install

@@ -57,6 +57,21 @@ if ! checkForInstallation "jq"; then
     fi
 fi
 
+# Are gpgme headers installed?
+if ! pkg-config --exists gpgme; then
+    echoInfo " Attempting to install 'gpgme'"
+    if [ "$(uname -s)" = "Darwin" ]; then
+        brew install gpgme
+    else
+        sudo apt-get update
+        sudo apt-get install -y libgpgme-dev
+    fi
+    if ! pkg-config --exists gpgme; then
+        echoNotify "\nFailed to locate gpgme after installation. Please install gpgme development libraries and re-run bootstrap."
+        exit 1
+    fi
+fi
+
 # Is go lint installed?
 if ! checkForInstallation "golangci-lint"; then
     if [ "$(uname -s)" = "Darwin" ]; then

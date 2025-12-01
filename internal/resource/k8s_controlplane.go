@@ -23,6 +23,7 @@ type KubernetesControlPlane struct {
 	ControllerPods []KubernetesController `yaml:"controllerPods,omitempty"`
 	Database       Database               `yaml:"database"`
 	Auth           Auth                   `yaml:"auth"`
+	Events         Events                 `yaml:"events,omitempty"`
 	Services       Services               `yaml:"services,omitempty"`
 	Replicas       Replicas               `yaml:"replicas,omitempty"`
 	Images         KubeImages             `yaml:"images,omitempty"`
