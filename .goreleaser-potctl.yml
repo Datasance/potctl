@@ -30,7 +30,7 @@ builds:
       - amd64
       - arm64
     flags:
-      - -tags=containers_image_openpgp
+      - -tags=containers_image_openpgp,exclude_graphdriver_btrfs
     ldflags:
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
@@ -59,7 +59,7 @@ builds:
       - 7
     flags:
       - -v
-      - -tags=containers_image_openpgp
+      - -tags=containers_image_openpgp,exclude_graphdriver_btrfs
     ldflags:
       - -extldflags -static
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
@@ -84,7 +84,7 @@ builds:
     goarch:
       - amd64
     flags:
-      - -tags=containers_image_openpgp
+      - -tags=containers_image_openpgp,exclude_graphdriver_btrfs
     ldflags:
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
