@@ -58,18 +58,17 @@ if ! checkForInstallation "jq"; then
 fi
 
 # Are gpgme headers installed?
+# Note: GPGME is not required when using the containers_image_openpgp build tag (default)
+# This check is kept for optional GPGME support if needed
 if ! pkg-config --exists gpgme; then
-    echoInfo " Attempting to install 'gpgme'"
-    if [ "$(uname -s)" = "Darwin" ]; then
-        brew install gpgme
-    else
-        sudo apt-get update
-        sudo apt-get install -y libgpgme-dev
-    fi
-    if ! pkg-config --exists gpgme; then
-        echoNotify "\nFailed to locate gpgme after installation. Please install gpgme development libraries and re-run bootstrap."
-        exit 1
-    fi
+    echoInfo " GPGME not found (optional - not needed with containers_image_openpgp build tag)"
+    # Uncomment below if you want to build with GPGME support (without containers_image_openpgp tag)
+    # if [ "$(uname -s)" = "Darwin" ]; then
+    #     brew install gpgme
+    # else
+    #     sudo apt-get update
+    #     sudo apt-get install -y libgpgme-dev
+    # fi
 fi
 
 # Is go lint installed?
