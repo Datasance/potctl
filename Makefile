@@ -5,6 +5,8 @@ OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 BINARY_NAME = potctl
 BUILD_DIR ?= bin
 PACKAGE_DIR = cmd/potctl
+GOTAGS ?= containers_image_openpgp
+export CGO_ENABLED=1
 LATEST_TAG = $(shell git for-each-ref refs/tags --sort=-taggerdate --format='%(refname)' | tail -n1 | sed "s|refs/tags/||")
 MAJOR ?= $(shell echo "$(LATEST_TAG)" | tr -d "v" | sed "s|-.*||" | sed -E "s|(.)\..\..|\1|g")
 MINOR ?= $(shell echo "$(LATEST_TAG)" | tr -d "v" | sed "s|-.*||" | sed -E "s|.\.(.)\..|\1|g")
@@ -48,13 +50,13 @@ verify-gpgme:
 
 .PHONY: build
 build: GOARGS += -tags "$(GOTAGS)" -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME)
-build: fmt verify-gpgme ## Build the binary
+build: fmt ## Build the binary
 	@cd pkg/util && rice embed-go
 	@go build -v $(GOARGS) $(PACKAGE_DIR)/main.go
 
 .PHONY: install
-install: verify-gpgme
-	@GOBIN=$$(go env GOPATH)/bin go install -ldflags "$(LDFLAGS)" ./cmd/potctl/
+install: ## Install the binary
+	@GOBIN=$$(go env GOPATH)/bin go install -tags "$(GOTAGS)" -ldflags "$(LDFLAGS)" ./cmd/potctl/
 
 .PHONY: lint
 lint: golangci-lint fmt ## Lint the source
@@ -76,10 +78,10 @@ fmt: ## Format the source
 	@gofmt -s -w .
 
 .PHONY: test
-test: verify-gpgme ## Run unit tests
+test: ## Run unit tests
 	mkdir -p $(REPORTS_DIR)
 	rm -f $(REPORTS_DIR)/*
-	set -o pipefail; find ./internal ./pkg -name '*_test.go' -not -path vendor | sed -E "s|(/.*/).*_test.go|\1|g" | xargs -n1 go test -ldflags "$(LDFLAGS)" -coverprofile=$(REPORTS_DIR)/coverage.txt -v -parallel 1 2>&1 | tee $(REPORTS_DIR)/$(TEST_RESULTS)
+	set -o pipefail; find ./internal ./pkg -name '*_test.go' -not -path vendor | sed -E "s|(/.*/).*_test.go|\1|g" | xargs -n1 go test -tags "$(GOTAGS)" -ldflags "$(LDFLAGS)" -coverprofile=$(REPORTS_DIR)/coverage.txt -v -parallel 1 2>&1 | tee $(REPORTS_DIR)/$(TEST_RESULTS)
 	cat $(REPORTS_DIR)/$(TEST_RESULTS) | go-junit-report -set-exit-code > $(REPORTS_DIR)/$(TEST_REPORT)
 
 .PHONY: list

@@ -14,7 +14,7 @@ version: 2
 project_name: potctl
 env:
   - GO111MODULE=on
-  - CGO_ENABLED=0
+  - CGO_ENABLED=1
 before:
   hooks:
     - go version
@@ -29,6 +29,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    flags:
+      - -tags=containers_image_openpgp
     ldflags:
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
@@ -55,6 +57,9 @@ builds:
     goarm:
       - 6
       - 7
+    flags:
+      - -v
+      - -tags=containers_image_openpgp
     ldflags:
       - -extldflags -static
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
@@ -70,9 +75,6 @@ builds:
       - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.6"
       - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
 
-    flags:
-      - -v
-
   - id: build_windows
     binary: potctl
     env:
@@ -81,6 +83,8 @@ builds:
       - windows
     goarch:
       - amd64
+    flags:
+      - -tags=containers_image_openpgp
     ldflags:
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
