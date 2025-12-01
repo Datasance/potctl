@@ -5,7 +5,7 @@ OS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 BINARY_NAME = potctl
 BUILD_DIR ?= bin
 PACKAGE_DIR = cmd/potctl
-GOTAGS ?= containers_image_openpgp
+GOTAGS ?= containers_image_openpgp,exclude_graphdriver_btrfs
 export CGO_ENABLED=1
 LATEST_TAG = $(shell git for-each-ref refs/tags --sort=-taggerdate --format='%(refname)' | tail -n1 | sed "s|refs/tags/||")
 MAJOR ?= $(shell echo "$(LATEST_TAG)" | tr -d "v" | sed "s|-.*||" | sed -E "s|(.)\..\..|\1|g")
