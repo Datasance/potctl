@@ -133,6 +133,7 @@ builds:
   - id: build_windows
     binary: potctl
     env:
+      - CGO_ENABLED=0
     main: ./cmd/potctl/main.go
     goos:
       - windows
