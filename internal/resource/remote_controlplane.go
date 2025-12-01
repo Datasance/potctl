@@ -25,6 +25,7 @@ type RemoteControlPlane struct {
 	Controllers         []RemoteController        `yaml:"controllers"`
 	Database            Database                  `yaml:"database"`
 	Auth                Auth                      `yaml:"auth"`
+	Events              Events                    `yaml:"events,omitempty"`
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`
 	Endpoint            string                    `yaml:"endpoint,omitempty"`

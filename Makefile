@@ -17,16 +17,16 @@ COMMIT ?= $(shell git rev-parse HEAD 2>/dev/null)
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 PREFIX = github.com/datasance/potctl/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
-LDFLAGS += -X $(PREFIX).operatorTag=3.5.2
+LDFLAGS += -X $(PREFIX).operatorTag=3.5.4
 LDFLAGS += -X $(PREFIX).routerAdaptorTag=3.5.2
 LDFLAGS += -X $(PREFIX).routerTag=3.5.2
-LDFLAGS += -X $(PREFIX).controllerTag=3.5.9
+LDFLAGS += -X $(PREFIX).controllerTag=3.5.10
 LDFLAGS += -X $(PREFIX).agentTag=3.5.6
-LDFLAGS += -X $(PREFIX).controllerVersion=3.5.9
+LDFLAGS += -X $(PREFIX).controllerVersion=3.5.10
 LDFLAGS += -X $(PREFIX).agentVersion=3.5.6
 LDFLAGS += -X $(PREFIX).repo=ghcr.io/datasance
 GO_SDK_MODULE = iofog-go-sdk/v3@v3.5.2
-OPERATOR_MODULE = iofog-operator/v3@v3.5.2
+OPERATOR_MODULE = iofog-operator/v3@v3.5.4
 REPORTS_DIR ?= reports
 TEST_RESULTS ?= TEST-potctl.txt
 TEST_REPORT ?= TEST-potctl.xml
@@ -54,7 +54,7 @@ build: fmt verify-gpgme ## Build the binary
 
 .PHONY: install
 install: verify-gpgme
-	go install -ldflags "$(LDFLAGS)" ./cmd/potctl/
+	@GOBIN=$$(go env GOPATH)/bin go install -ldflags "$(LDFLAGS)" ./cmd/potctl/
 
 .PHONY: lint
 lint: golangci-lint fmt ## Lint the source

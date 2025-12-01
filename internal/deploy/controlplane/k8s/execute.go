@@ -118,6 +118,7 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 		Replicas:      replicas,
 		Auth:          install.Auth(exe.controlPlane.Auth),
 		Database:      install.Database(exe.controlPlane.Database),
+		Events:        install.Events(exe.controlPlane.Events),
 		PidBaseDir:    exe.controlPlane.Controller.PidBaseDir,
 		EcnViewerPort: exe.controlPlane.Controller.EcnViewerPort,
 		EcnViewerURL:  exe.controlPlane.Controller.EcnViewerURL,

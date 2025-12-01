@@ -176,6 +176,21 @@ func (exe *remoteExecutor) Execute() (err error) {
 		deployer.SetControllerAuth(auth.URL, auth.Realm, auth.SSL, auth.RealmKey, auth.ControllerClient, auth.ControllerSecret, auth.ViewerClient)
 	}
 
+	// Set events configuration if present
+	if exe.controlPlane.Events.AuditEnabled != nil {
+		auditEnabled := *exe.controlPlane.Events.AuditEnabled
+		captureIpAddress := false
+		if exe.controlPlane.Events.CaptureIpAddress != nil {
+			captureIpAddress = *exe.controlPlane.Events.CaptureIpAddress
+		}
+		deployer.SetControllerEvents(
+			auditEnabled,
+			exe.controlPlane.Events.RetentionDays,
+			exe.controlPlane.Events.CleanupInterval,
+			captureIpAddress,
+		)
+	}
+
 	// Deploy Controller
 	if err = deployer.Install(); err != nil {
 		return

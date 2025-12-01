@@ -22,6 +22,7 @@ type LocalControlPlane struct {
 	Controller *LocalController `yaml:"controller,omitempty"`
 	Database   Database         `yaml:"database"`
 	Auth       Auth             `yaml:"auth"`
+	Events     Events           `yaml:"events,omitempty"`
 }
 
 func (cp *LocalControlPlane) GetUser() IofogUser {

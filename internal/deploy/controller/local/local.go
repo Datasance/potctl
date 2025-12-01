@@ -122,6 +122,11 @@ func newExecutor(namespace string, controlPlane *rsc.LocalControlPlane, ctrl *rs
 			DatabaseName: controlPlane.Database.DatabaseName,
 			SSL:          controlPlane.Database.SSL,
 			CA:           controlPlane.Database.CA,
+		}, install.Events{
+			AuditEnabled:     controlPlane.Events.AuditEnabled,
+			RetentionDays:    controlPlane.Events.RetentionDays,
+			CleanupInterval:  controlPlane.Events.CleanupInterval,
+			CaptureIpAddress: controlPlane.Events.CaptureIpAddress,
 		}),
 		iofogUser: controlPlane.GetUser(),
 		ctrlPlane: controlPlane,

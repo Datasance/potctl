@@ -99,6 +99,13 @@ type Database struct {
 	CA           *string `yaml:"ca,omitempty"`
 }
 
+type Events struct {
+	AuditEnabled     *bool `yaml:"auditEnabled,omitempty"`
+	RetentionDays    int   `yaml:"retentionDays,omitempty"`
+	CleanupInterval  int   `yaml:"cleanupInterval,omitempty"`
+	CaptureIpAddress *bool `yaml:"captureIpAddress,omitempty"`
+}
+
 type Registry struct {
 	URL          *string `yaml:"url"`
 	Private      *bool   `yaml:"private"`

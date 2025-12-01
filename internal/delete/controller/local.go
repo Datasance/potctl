@@ -34,7 +34,7 @@ func NewLocalExecutor(controlPlane *rsc.LocalControlPlane, namespace, name strin
 		controlPlane:          controlPlane,
 		namespace:             namespace,
 		name:                  name,
-		localControllerConfig: install.NewLocalControllerConfig("", install.Credentials{}, install.Auth{}, install.Database{}),
+		localControllerConfig: install.NewLocalControllerConfig("", install.Credentials{}, install.Auth{}, install.Database{}, install.Events{}),
 	}
 	return exe
 }

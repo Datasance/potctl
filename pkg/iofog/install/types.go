@@ -44,6 +44,13 @@ type Database struct {
 	CA           *string
 }
 
+type Events struct {
+	AuditEnabled     *bool
+	RetentionDays    int
+	CleanupInterval  int
+	CaptureIpAddress *bool
+}
+
 type Pod struct {
 	Name   string
 	Status string
@@ -58,6 +65,7 @@ type K8SControllerConfig struct {
 	EcnViewerURL  string
 	LogLevel      string
 	Auth          Auth
+	Events        Events
 	Https         *bool
 	SecretName    string
 }

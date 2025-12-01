@@ -158,7 +158,7 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 }
 
 // NewLocalControllerConfig generats a static controller config
-func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, db Database) *LocalContainerConfig {
+func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, db Database, events Events) *LocalContainerConfig {
 	if image == "" {
 		image = util.GetControllerImage()
 	}
@@ -174,6 +174,45 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 		caValue = *db.CA
 	}
 
+	envs := []string{
+		"CONTROL_PLANE=Remote",
+		"DB_PROVIDER=" + db.Provider,
+		"DB_HOST=" + db.Host,
+		"DB_USERNAME=" + db.User,
+		"DB_PASSWORD=" + db.Password,
+		"DB_PORT=" + strconv.Itoa(db.Port),
+		"DB_NAME=" + db.DatabaseName,
+		"DB_USE_SSL=" + sslValue,
+		"DB_SSL_CA=" + caValue,
+		"KC_URL=" + auth.URL,
+		"KC_REALM=" + auth.Realm,
+		"KC_SSL_REQ=" + auth.SSL,
+		"KC_REALM_KEY=" + auth.RealmKey,
+		"KC_CLIENT=" + auth.ControllerClient,
+		"KC_CLIENT_SECRET=" + auth.ControllerSecret,
+		"KC_VIEWER_CLIENT=" + auth.ViewerClient,
+	}
+
+	// Add Events environment variables only if Events is explicitly configured
+	if events.AuditEnabled != nil {
+		// Always set EVENT_AUDIT_ENABLED (true or false)
+		envs = append(envs, fmt.Sprintf("EVENT_AUDIT_ENABLED=%t", *events.AuditEnabled))
+
+		// Set optional fields only if audit is enabled
+		if *events.AuditEnabled {
+			if events.RetentionDays != 0 {
+				envs = append(envs, fmt.Sprintf("EVENT_RETENTION_DAYS=%d", events.RetentionDays))
+			}
+			if events.CleanupInterval != 0 {
+				envs = append(envs, fmt.Sprintf("EVENT_CLEANUP_INTERVAL=%d", events.CleanupInterval))
+			}
+			// Set EVENT_CAPTURE_IP_ADDRESS if explicitly configured
+			if events.CaptureIpAddress != nil {
+				envs = append(envs, fmt.Sprintf("EVENT_CAPTURE_IP_ADDRESS=%t", *events.CaptureIpAddress))
+			}
+		}
+	}
+
 	return &LocalContainerConfig{
 		Host: "0.0.0.0",
 		Ports: []port{
@@ -187,24 +226,7 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 			"iofog-controller-db:/home/runner/.npm-global/lib/node_modules/@datasance/iofogcontroller/src/data/sqlite_files/:rw",
 			"iofog-controller-logs:/var/log/iofog-controller:rw",
 		},
-		Envs: []string{
-			"CONTROL_PLANE=Remote",
-			"DB_PROVIDER=" + db.Provider,
-			"DB_HOST=" + db.Host,
-			"DB_USERNAME=" + db.User,
-			"DB_PASSWORD=" + db.Password,
-			"DB_PORT=" + strconv.Itoa(db.Port),
-			"DB_NAME=" + db.DatabaseName,
-			"DB_USE_SSL=" + sslValue,
-			"DB_SSL_CA=" + caValue,
-			"KC_URL=" + auth.URL,
-			"KC_REALM=" + auth.Realm,
-			"KC_SSL_REQ=" + auth.SSL,
-			"KC_REALM_KEY=" + auth.RealmKey,
-			"KC_CLIENT=" + auth.ControllerClient,
-			"KC_CLIENT_SECRET=" + auth.ControllerSecret,
-			"KC_VIEWER_CLIENT=" + auth.ViewerClient,
-		},
+		Envs:        envs,
 		NetworkMode: "bridge",
 		Credentials: credentials,
 	}
