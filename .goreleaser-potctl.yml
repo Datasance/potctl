@@ -45,13 +45,37 @@ builds:
       - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.6"
       - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
 
-  - id: build_linux
+  - id: build_linux_amd64
     binary: potctl
     main: ./cmd/potctl/
     goos:
       - linux
     goarch:
       - amd64
+    flags:
+      - -v
+      - -tags=containers_image_openpgp,exclude_graphdriver_btrfs
+    ldflags:
+      - -extldflags -static
+      - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.date={{.Date}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.platform={{.Os}}/{{.Arch}}"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.operatorTag=3.5.4"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.routerAdaptorTag=3.5.2"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.routerTag=3.5.2"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerTag=3.5.10"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentTag=3.5.6"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.controllerVersion=3.5.10"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.agentVersion=3.5.6"
+      - -s -w -X "github.com/datasance/potctl/pkg/util.repo=ghcr.io/datasance"
+
+  - id: build_linux_arm
+    binary: potctl
+    main: ./cmd/potctl/
+    goos:
+      - linux
+    goarch:
       - arm64
       - arm
     goarm:
@@ -61,7 +85,6 @@ builds:
       - -v
       - -tags=containers_image_openpgp,exclude_graphdriver_btrfs
     ldflags:
-      - -extldflags -static
       - -s -w -X "github.com/datasance/potctl/pkg/util.versionNumber=v{{.Version}}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.commit={{ .ShortCommit }}"
       - -s -w -X "github.com/datasance/potctl/pkg/util.date={{.Date}}"
@@ -104,7 +127,8 @@ archives:
   -
     id: linux
     ids:
-      - build_linux
+      - build_linux_amd64
+      - build_linux_arm
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     formats: [ 'tar.gz' ]
     files:
@@ -181,7 +205,7 @@ brews:
 
 nfpms:
   -
-    ids: ['build_linux']
+    ids: ['build_linux_amd64', 'build_linux_arm']
     homepage:  "https://github.com/datasance/potctl"
     description: CLI for managing Datasance PoT's Distributed Edge Compute clusters
     maintainer: Datasance Teknoloji A.S.
