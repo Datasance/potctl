@@ -43,6 +43,9 @@ func newGetCommand() *cobra.Command {
 		"services",
 		"volume-mounts",
 		"certificates",
+		"roles",
+		"rolebindings",
+		"serviceaccounts",
 	}
 	cmd := &cobra.Command{
 		Use:   "get RESOURCE",
@@ -68,7 +71,10 @@ Resources like Agents will require a working Controller in the namespace to disp
              configmaps
              services
              volume-mounts
-             certificates`,
+             certificates
+             roles
+             rolebindings
+             serviceaccounts`,
 		ValidArgs: validResources,
 		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

@@ -24,6 +24,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// headerDecode accepts both potctl-style (spec: ...) and Controller-style RBAC YAML
+// (top-level rules, roleRef, subjects) so deploy works with Controller examples.
+type headerDecode struct {
+	APIVersion string                `yaml:"apiVersion"`
+	Kind       config.Kind           `yaml:"kind"`
+	Metadata   config.HeaderMetadata `yaml:"metadata"`
+	Spec       interface{}           `yaml:"spec,omitempty"`
+	Data       interface{}           `yaml:"data,omitempty"`
+	Status     interface{}           `yaml:"status,omitempty"`
+	Rules      interface{}           `yaml:"rules,omitempty"`
+	RoleRef    interface{}           `yaml:"roleRef,omitempty"`
+	Subjects   interface{}           `yaml:"subjects,omitempty"`
+}
+
 type emptyExecutor struct {
 	name string
 }
@@ -101,21 +115,15 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 	dec := yaml.NewDecoder(r)
 	dec.SetStrict(true)
 
-	var raw yaml.MapSlice
-	var header config.Header
-	header = config.Header{
-		Spec:     raw,
-		Metadata: config.HeaderMetadata{},
-		Data:     raw,
-		Status:   raw,
-	}
+	var h headerDecode
 
 	// Generate all executors
 	empty := true
 	executorsMap = make(map[config.Kind][]Executor)
-	decodeErr := dec.Decode(&header)
+	decodeErr := dec.Decode(&h)
 	for decodeErr == nil {
-		exe, err := generateExecutor(&header, namespace, kindHandlers)
+		header := headerDecodeToHeader(&h)
+		exe, err := generateExecutor(header, namespace, kindHandlers)
 		if err != nil {
 			return nil, err
 		}
@@ -124,15 +132,10 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 			executorsMap[header.Kind] = append(executorsMap[header.Kind], exe)
 		}
 
-		// Reset header and prevent memory sharing between executors
-		header = config.Header{
-			Spec:     raw,
-			Metadata: config.HeaderMetadata{},
-			Data:     raw,
-			Status:   raw,
-		}
+		// Reset for next document
+		h = headerDecode{}
 
-		decodeErr = dec.Decode(&header)
+		decodeErr = dec.Decode(&h)
 	}
 	if decodeErr != io.EOF && decodeErr != nil {
 		return nil, decodeErr
@@ -143,4 +146,51 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 	}
 
 	return executorsMap, err
+}
+
+// headerDecodeToHeader converts headerDecode to config.Header, building Spec from
+// top-level rules/roleRef/subjects when present (Controller-style RBAC YAML).
+func headerDecodeToHeader(h *headerDecode) *config.Header {
+	header := &config.Header{
+		APIVersion: h.APIVersion,
+		Kind:       h.Kind,
+		Metadata:   h.Metadata,
+		Spec:       h.Spec,
+		Data:       h.Data,
+		Status:     h.Status,
+	}
+
+	switch h.Kind {
+	case config.RoleKind:
+		if h.Rules != nil {
+			// Controller-style: rules at top level
+			header.Spec = map[string]interface{}{
+				"name":  h.Metadata.Name,
+				"kind":  "Role",
+				"rules": h.Rules,
+			}
+		}
+	case config.RoleBindingKind:
+		if h.RoleRef != nil || h.Subjects != nil {
+			// Controller-style: roleRef and subjects at top level
+			spec := map[string]interface{}{"name": h.Metadata.Name}
+			if h.RoleRef != nil {
+				spec["roleRef"] = h.RoleRef
+			}
+			if h.Subjects != nil {
+				spec["subjects"] = h.Subjects
+			}
+			header.Spec = spec
+		}
+	case config.ServiceAccountKind:
+		if h.RoleRef != nil {
+			// Controller-style: roleRef at top level
+			header.Spec = map[string]interface{}{
+				"name":    h.Metadata.Name,
+				"roleRef": h.RoleRef,
+			}
+		}
+	}
+
+	return header
 }

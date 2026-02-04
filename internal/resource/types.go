@@ -50,11 +50,10 @@ type SSH struct {
 }
 
 type KubeImages struct {
-	PullSecret    string `yaml:"pullSecret,omitempty"`
-	Controller    string `yaml:"controller,omitempty"`
-	Operator      string `yaml:"operator,omitempty"`
-	Router        string `yaml:"router,omitempty"`
-	RouterAdaptor string `yaml:"routerAdaptor,omitempty"`
+	PullSecret string `yaml:"pullSecret,omitempty"`
+	Controller string `yaml:"controller,omitempty"`
+	Operator   string `yaml:"operator,omitempty"`
+	Router     string `yaml:"router,omitempty"`
 }
 
 type Services struct {
@@ -283,6 +282,44 @@ type ConfigMap struct {
 	Name      string            `yaml:"name,omitempty"`
 	Immutable bool              `yaml:"immutable"`
 	Data      map[string]string `yaml:"data,omitempty"`
+}
+
+// RBAC types (mirror SDK for describe/deploy YAML)
+type RBACRule struct {
+	APIGroups     []string `json:"apiGroups" yaml:"apiGroups,omitempty"`
+	Resources     []string `json:"resources" yaml:"resources,omitempty"`
+	Verbs         []string `json:"verbs" yaml:"verbs,omitempty"`
+	ResourceNames []string `json:"resourceNames,omitempty" yaml:"resourceNames,omitempty"`
+}
+
+type RoleRef struct {
+	Kind     string `json:"kind" yaml:"kind,omitempty"`
+	Name     string `json:"name" yaml:"name,omitempty"`
+	APIGroup string `json:"apiGroup,omitempty" yaml:"apiGroup,omitempty"`
+}
+
+type Subject struct {
+	Kind     string `json:"kind" yaml:"kind,omitempty"`
+	Name     string `json:"name" yaml:"name,omitempty"`
+	APIGroup string `json:"apiGroup,omitempty" yaml:"apiGroup,omitempty"`
+}
+
+type Role struct {
+	Name  string     `yaml:"name,omitempty"`
+	Kind  string     `yaml:"kind,omitempty"`
+	Rules []RBACRule `yaml:"rules,omitempty"`
+}
+
+type RoleBinding struct {
+	Name     string    `yaml:"name,omitempty"`
+	Kind     string    `yaml:"kind,omitempty"`
+	RoleRef  RoleRef   `yaml:"roleRef,omitempty"`
+	Subjects []Subject `yaml:"subjects,omitempty"`
+}
+
+type ServiceAccount struct {
+	Name    string  `yaml:"name,omitempty"`
+	RoleRef RoleRef `yaml:"roleRef,omitempty"`
 }
 
 type ClusterService struct {

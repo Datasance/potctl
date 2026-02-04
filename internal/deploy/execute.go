@@ -34,9 +34,12 @@ import (
 	deploymicroservice "github.com/datasance/potctl/internal/deploy/microservice"
 	deployofflineimage "github.com/datasance/potctl/internal/deploy/offlineimage"
 	deployregistry "github.com/datasance/potctl/internal/deploy/registry"
+	deployrole "github.com/datasance/potctl/internal/deploy/role"
+	deployrolebinding "github.com/datasance/potctl/internal/deploy/rolebinding"
 	deployroute "github.com/datasance/potctl/internal/deploy/route"
 	deploysecret "github.com/datasance/potctl/internal/deploy/secret"
 	deployservice "github.com/datasance/potctl/internal/deploy/service"
+	deployserviceaccount "github.com/datasance/potctl/internal/deploy/serviceaccount"
 	deployvolume "github.com/datasance/potctl/internal/deploy/volume"
 	deployvolumemount "github.com/datasance/potctl/internal/deploy/volumeMount"
 	"github.com/datasance/potctl/internal/execute"
@@ -52,6 +55,9 @@ var kindOrder = []config.Kind{
 	config.CertificateAuthorityKind,
 	config.CertificateKind,
 	config.ConfigMapKind,
+	config.RoleKind,
+	config.RoleBindingKind,
+	config.ServiceAccountKind,
 	config.RemoteAgentKind,
 	config.LocalAgentKind,
 	config.EdgeResourceKind,
@@ -156,6 +162,18 @@ func deployVolumeMount(opt *execute.KindHandlerOpt) (exe execute.Executor, err e
 
 func deployCertificate(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
 	return deploycertificate.NewExecutor(deploycertificate.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name, Kind: opt.Kind})
+}
+
+func deployRole(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployrole.NewExecutor(deployrole.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
+}
+
+func deployRoleBinding(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployrolebinding.NewExecutor(deployrolebinding.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
+}
+
+func deployServiceAccount(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deployserviceaccount.NewExecutor(deployserviceaccount.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
 }
 
 // Execute deploy from yaml file
@@ -316,6 +334,9 @@ func buildKindHandlers(noCache bool, transferPool int) map[config.Kind]func(*exe
 		config.RouteKind:                  deployRoute,
 		config.SecretKind:                 deploySecret,
 		config.ConfigMapKind:              deployConfigMap,
+		config.RoleKind:                   deployRole,
+		config.RoleBindingKind:            deployRoleBinding,
+		config.ServiceAccountKind:         deployServiceAccount,
 		config.ServiceKind:                deployService,
 		config.VolumeMountKind:            deployVolumeMount,
 		config.CertificateAuthorityKind:   deployCertificate,

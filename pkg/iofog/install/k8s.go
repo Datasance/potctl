@@ -105,14 +105,6 @@ func (k8s *Kubernetes) SetRouterImage(image string) {
 	}
 }
 
-func (k8s *Kubernetes) SetRouterAdaptorImage(image string) {
-	if image != "" {
-		k8s.images.RouterAdaptor = image
-	} else {
-		k8s.images.RouterAdaptor = util.GetRouterAdaptorImage()
-	}
-}
-
 func (k8s *Kubernetes) SetControllerImage(image string) {
 	if image != "" {
 		k8s.images.Controller = image

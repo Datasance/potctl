@@ -93,7 +93,6 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetOperatorImage(exe.controlPlane.Images.Operator)
 	installer.SetPullSecret(exe.controlPlane.Images.PullSecret)
 	installer.SetRouterImage(exe.controlPlane.Images.Router)
-	installer.SetRouterAdaptorImage(exe.controlPlane.Images.RouterAdaptor)
 	installer.SetControllerImage(exe.controlPlane.Images.Controller)
 	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.Address, exe.controlPlane.Services.Controller.Annotations)
 	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations)

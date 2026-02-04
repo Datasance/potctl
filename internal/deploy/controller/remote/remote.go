@@ -151,6 +151,9 @@ func (exe *remoteExecutor) Execute() (err error) {
 		}
 	}
 
+	// Set airgap flag from control plane
+	controllerOptions.Airgap = exe.controlPlane.Airgap
+
 	deployer, err := install.NewController(controllerOptions)
 	if err != nil {
 		return err

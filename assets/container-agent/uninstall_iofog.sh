@@ -12,29 +12,63 @@ CONTAINER_NAME="iofog-agent"
 do_uninstall_iofog() {
     echo "# Removing ioFog agent..."
 
-    # Set the appropriate systemd service file based on the Linux distribution
-    if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
-        SYSTEMD_SERVICE_FILE=/etc/containers/systemd/iofog-agent.container
-        CONTAINER_RUNTIME="podman"
-    else
-        SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-agent.service
-        CONTAINER_RUNTIME="docker"
-    fi
+    case "$lsb_dist" in
+        rhel|fedora|centos|ol|sles|opensuse*) CONTAINER_RUNTIME="podman" ;;
+        *) CONTAINER_RUNTIME="docker" ;;
+    esac
 
-    # Disable and stop the systemd service
-    if [ -f ${SYSTEMD_SERVICE_FILE} ]; then
-        echo "Disabling and stopping the systemd service..."
-        sudo systemctl stop iofog-agent.service || true
-        sudo systemctl disable iofog-agent.service || true
-        sudo rm -f ${SYSTEMD_SERVICE_FILE}
-        sudo systemctl daemon-reload
-    fi
+    # Stop and remove service based on init system
+    case "${INIT_SYSTEM:-systemd}" in
+        systemd)
+            for f in /etc/systemd/system/iofog-agent.service /etc/containers/systemd/iofog-agent.container; do
+                if [ -f "$f" ]; then
+                    echo "Disabling and stopping systemd service..."
+                    sudo systemctl stop iofog-agent.service 2>/dev/null || true
+                    sudo systemctl disable iofog-agent.service 2>/dev/null || true
+                    sudo rm -f "$f"
+                    sudo systemctl daemon-reload
+                    break
+                fi
+            done
+            ;;
+        sysvinit|openrc)
+            if [ -f /etc/init.d/iofog-agent ]; then
+                sudo service iofog-agent stop 2>/dev/null || sudo /etc/init.d/iofog-agent stop 2>/dev/null || true
+                [ "$INIT_SYSTEM" = "openrc" ] && sudo rc-update del iofog-agent default 2>/dev/null || true
+                sudo update-rc.d -f iofog-agent remove 2>/dev/null || sudo chkconfig --del iofog-agent 2>/dev/null || true
+                sudo rm -f /etc/init.d/iofog-agent
+            fi
+            ;;
+        s6)
+            sudo s6-svc -d /etc/s6/sv/iofog-agent 2>/dev/null || true
+            sudo rm -rf /etc/s6/sv/iofog-agent
+            [ -L /etc/s6/adminsv/default/iofog-agent ] && sudo rm -f /etc/s6/adminsv/default/iofog-agent
+            ;;
+        runit)
+            sudo sv stop iofog-agent 2>/dev/null || true
+            [ -L /var/service/iofog-agent ] && sudo rm -f /var/service/iofog-agent
+            [ -L /etc/runit/runsvdir/default/iofog-agent ] && sudo rm -f /etc/runit/runsvdir/default/iofog-agent
+            sudo rm -rf /etc/runit/sv/iofog-agent
+            ;;
+        upstart)
+            sudo initctl stop iofog-agent 2>/dev/null || true
+            sudo rm -f /etc/init/iofog-agent.conf
+            ;;
+        *)
+            sudo systemctl stop iofog-agent 2>/dev/null || true
+            sudo systemctl disable iofog-agent 2>/dev/null || true
+            sudo rm -f /etc/systemd/system/iofog-agent.service /etc/containers/systemd/iofog-agent.container
+            sudo systemctl daemon-reload 2>/dev/null || true
+            [ -f /etc/init.d/iofog-agent ] && sudo /etc/init.d/iofog-agent stop 2>/dev/null || true
+            sudo rm -f /etc/init.d/iofog-agent
+            ;;
+    esac
 
     # Remove the container
-    if ${CONTAINER_RUNTIME} ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    if sudo ${CONTAINER_RUNTIME} ps -a --format '{{.Names}}' 2>/dev/null | grep -q "^${CONTAINER_NAME}$"; then
         echo "Stopping and removing the ioFog agent container..."
-        ${CONTAINER_RUNTIME} stop ${CONTAINER_NAME}
-        ${CONTAINER_RUNTIME} rm ${CONTAINER_NAME}
+        sudo ${CONTAINER_RUNTIME} stop ${CONTAINER_NAME} 2>/dev/null || true
+        sudo ${CONTAINER_RUNTIME} rm ${CONTAINER_NAME} 2>/dev/null || true
     fi
 
     # Remove config files

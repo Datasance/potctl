@@ -14,7 +14,6 @@
 package describe
 
 import (
-	"fmt"
 	"strconv"
 
 	rsc "github.com/datasance/potctl/internal/resource"
@@ -53,31 +52,19 @@ func (exe *registryExecutor) Execute() error {
 		return err
 	}
 
-	registriesList, err := ctrl.ListRegistries()
+	r, err := ctrl.GetRegistry(exe.id)
 	if err != nil {
 		return err
 	}
 
-	var registry rsc.Registry
-	var private bool
-
-	for _, r := range registriesList.Registries {
-		if r.ID == exe.id {
-			private = !r.IsPublic
-			registry = rsc.Registry{
-				URL:      &r.URL,
-				ID:       r.ID,
-				Private:  &private,
-				Username: &r.Username,
-				Email:    &r.Email,
-				Password: nil,
-			}
-			break
-		}
-	}
-
-	if registry.ID == 0 {
-		return util.NewNotFoundError(fmt.Sprintf("Could not find registry with ID %d", exe.id))
+	private := !r.IsPublic
+	registry := rsc.Registry{
+		URL:      &r.URL,
+		ID:       r.ID,
+		Private:  &private,
+		Username: &r.Username,
+		Email:    &r.Email,
+		Password: &r.Password,
 	}
 
 	header := config.Header{

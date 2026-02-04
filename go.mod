@@ -8,7 +8,7 @@ require (
 	github.com/GeertJohan/go.rice v1.0.2
 	github.com/briandowns/spinner v1.23.1
 	github.com/containers/image/v5 v5.32.1
-	github.com/datasance/iofog-go-sdk/v3 v3.5.2
+	github.com/datasance/iofog-go-sdk/v3 v3.6.0
 	github.com/datasance/iofog-operator/v3 v3.5.4
 	github.com/docker/docker v27.4.1+incompatible
 	github.com/docker/go-connections v0.5.0

@@ -21,6 +21,10 @@ const (
 	MessageTypeControl    uint8 = 3
 	MessageTypeClose      uint8 = 4
 	MessageTypeActivation uint8 = 5
+	MessageTypeLogLine    uint8 = 6
+	MessageTypeLogStart   uint8 = 7
+	MessageTypeLogStop    uint8 = 8
+	MessageTypeLogError   uint8 = 9
 )
 
 // WebSocket configuration constants
