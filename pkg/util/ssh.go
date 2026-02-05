@@ -23,14 +23,15 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 )
 
 const (
-	maxFileSize = 100 * 1024 * 1024 // 100MB
+	maxFileSize     = 100 * 1024 * 1024 // 100MB
+	scpProgressStep = 5 * 1024 * 1024   // 5 MB - log transfer progress every 5 MB when debug
 )
 
 type SecureShellClient struct {
@@ -222,75 +223,77 @@ func (cl *SecureShellClient) RunUntil(condition *regexp.Regexp, cmd string, igno
 	return NewInternalError("Timed out waiting for condition '" + condition.String() + "' with SSH command: " + cmd)
 }
 
+// progressReader wraps a reader and logs SFTP transfer progress every 5 MB when debug is on.
+type progressReader struct {
+	r          io.Reader
+	total      int64
+	n          int64
+	lastLogged int64
+}
+
+func (p *progressReader) Read(b []byte) (int, error) {
+	n, err := p.r.Read(b)
+	if n > 0 {
+		p.n += int64(n)
+		for p.n-p.lastLogged >= scpProgressStep {
+			p.lastLogged += scpProgressStep
+			mbSent := p.lastLogged / (1024 * 1024)
+			mbTotal := p.total / (1024 * 1024)
+			pct := int64(0)
+			if p.total > 0 {
+				pct = (p.lastLogged * 100) / p.total
+			}
+			SSHVerbose(fmt.Sprintf("SFTP: sent %d MB / %d MB (%d%%)", mbSent, mbTotal, pct))
+		}
+		if p.n >= p.total && p.total > 0 && p.lastLogged < p.total {
+			mbTotal := p.total / (1024 * 1024)
+			SSHVerbose(fmt.Sprintf("SFTP: sent %d MB / %d MB (100%%)", mbTotal, mbTotal))
+			p.lastLogged = p.total
+		}
+	}
+	return n, err
+}
+
 func (cl *SecureShellClient) CopyTo(reader io.Reader, destPath, destFilename, permissions string, size int64) error {
-	// Check permissions string
 	SSHVerbose(fmt.Sprintf("Copying file %s...", JoinAgentPath(destPath, destFilename)))
 	if !regexp.MustCompile(`\d{4}`).MatchString(permissions) {
 		return NewError("Invalid file permission specified: " + permissions)
 	}
+	if cl.conn == nil {
+		return NewError("SSH connection not established; call Connect() before CopyTo")
+	}
 
-	// Establish the session
-	session, err := cl.conn.NewSession()
+	sftpClient, err := sftp.NewClient(cl.conn)
 	if err != nil {
-		return err
+		return fmt.Errorf("SFTP subsystem not available on remote host: %w", err)
 	}
-	defer session.Close()
+	defer sftpClient.Close()
 
-	// Connect pipes
-	var stderr io.Reader
-	stderr, err = session.StderrPipe()
+	remotePath := JoinAgentPath(destPath, destFilename)
+	dstFile, err := sftpClient.Create(remotePath)
 	if err != nil {
-		return err
+		return fmt.Errorf("SFTP create %s: %w", remotePath, err)
 	}
-	// Refresh stdout for every iter
-	stdoutBuffer := &bytes.Buffer{}
-	session.Stdout = stdoutBuffer
 
-	// Start routine to write file
-	errChan := make(chan error)
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	copyReader := io.Reader(reader)
+	if IsDebug() && size > 0 {
+		copyReader = &progressReader{r: reader, total: size}
+	}
+	if _, err := io.Copy(dstFile, copyReader); err != nil {
+		_ = dstFile.Close()
+		return fmt.Errorf("SFTP write %s: %w", remotePath, err)
+	}
+	if err := dstFile.Close(); err != nil {
+		return fmt.Errorf("SFTP close %s: %w", remotePath, err)
+	}
 
-		// Instantiate reference to stdin
-		remoteStdin, err := session.StdinPipe()
-		if err != nil {
-			errChan <- err
-		}
-		defer remoteStdin.Close()
-
-		// Write to stdin
-		fmt.Fprintf(remoteStdin, "C%s %d %s\n", permissions, size, destFilename)
-		if _, err := io.Copy(remoteStdin, reader); err != nil {
-			errChan <- err
-		}
-		fmt.Fprint(remoteStdin, "\x00")
-	}()
-
-	// Start the scp command
-	cmd := "/usr/bin/scp -t "
-	SSHVerbose(fmt.Sprintf("Running: %s", cmd+destPath))
-	err = session.Run(cmd + destPath)
-
-	// Wait for completion
-	wg.Wait()
-
-	// Check for errors
-	close(errChan)
-	errMsg := ""
+	perm, err := strconv.ParseUint(permissions, 8, 32)
 	if err != nil {
-		errMsg = err.Error()
+		return fmt.Errorf("invalid permissions %s: %w", permissions, err)
 	}
-	for copyErr := range errChan {
-		if copyErr != nil {
-			errMsg = fmt.Sprintf("%s\n%s", errMsg, copyErr.Error())
-		}
+	if err := sftpClient.Chmod(remotePath, os.FileMode(perm)); err != nil {
+		return fmt.Errorf("SFTP chmod %s: %w", remotePath, err)
 	}
-	if errMsg != "" {
-		return format(errors.New(errMsg), stdoutBuffer, readToBuffer(stderr))
-	}
-
 	return nil
 }
 

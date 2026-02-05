@@ -248,11 +248,16 @@ detect_package_type() {
         fedora|centos|rhel|ol|sles|opensuse*)
             PACKAGE_TYPE="rpm"
             ;;
+        alpine)
+            PACKAGE_TYPE="apk"
+            ;;
         *)
             if command_exists apt-get || command_exists dpkg; then
                 PACKAGE_TYPE="deb"
             elif command_exists yum || command_exists dnf || command_exists zypper; then
                 PACKAGE_TYPE="rpm"
+            elif command_exists apk; then
+                PACKAGE_TYPE="apk"
             else
                 PACKAGE_TYPE="other"
             fi

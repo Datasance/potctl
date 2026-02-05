@@ -1,12 +1,7 @@
 #!/bin/sh
 set -x
 
-# Check if running as root or via sudo 
-if [ "$(id -u)" -ne 0 ]; then
-	echo "Error: This script must be run as root or via sudo"
-	echo "   Please run: sudo \$0 \$*"
-	exit 1
-fi
+
 
 # Check can sudo without password (when re-executed or for subcommands)
 if ! $(sudo ls /tmp/ > /dev/null); then

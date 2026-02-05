@@ -460,7 +460,10 @@ func (exe remoteControlPlaneExecutor) Execute() (err error) {
 	// Check if airgap is enabled
 	remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
 	if ok && remoteControlPlane.Airgap {
-		// Transfer images before controller deployment
+		if err := deployairgap.ValidateControlPlaneAirgapRequirements(remoteControlPlane); err != nil {
+			return err
+		}
+		// Transfer only controller image; router and debugger are transferred in system agent phase
 		if err := exe.transferControllerImages(); err != nil {
 			return fmt.Errorf("failed to transfer airgap images for controllers: %w", err)
 		}
@@ -657,51 +660,43 @@ func validateMultiControllerConfig(controlPlane *rsc.RemoteControlPlane) error {
 	return nil
 }
 
-// transferControllerImages transfers controller, router, and debugger images for airgap deployment
+// transferControllerImages transfers only the controller image for airgap deployment.
+// Router and debugger are transferred in the system agent phase (transferSystemAgentImages).
 func (exe remoteControlPlaneExecutor) transferControllerImages() error {
 	remoteControlPlane, ok := exe.controlPlane.(*rsc.RemoteControlPlane)
 	if !ok {
 		return util.NewInternalError("Could not convert ControlPlane to Remote ControlPlane")
 	}
 
-	// Determine if this is initial deployment
 	isInitial, err := deployairgap.IsInitialDeployment(exe.ns.Name)
 	if err != nil {
 		return fmt.Errorf("failed to determine deployment type: %w", err)
 	}
 
-	// Collect required images
 	images, err := deployairgap.CollectControllerImages(exe.ns.Name, remoteControlPlane, isInitial)
 	if err != nil {
 		return fmt.Errorf("failed to collect controller images: %w", err)
 	}
 
-	// Transfer images to each controller host
+	// Transfer only controller image; router and debugger are needed in agent phase only.
+	// Use platform and container engine from system agent config (validated when airgap is enabled).
+	imageList := []string{images.Controller}
+
 	controllers := remoteControlPlane.GetControllers()
+	ctx := context.Background()
 	for _, baseController := range controllers {
 		controller, ok := baseController.(*rsc.RemoteController)
 		if !ok {
 			return util.NewInternalError("Could not convert Controller to Remote Controller")
 		}
-
-		// Prepare image list (controller, router x86, router arm, debugger if available)
-		imageList := []string{images.Controller}
-		if images.RouterX86 != "" {
-			imageList = append(imageList, images.RouterX86)
+		platform, err := deployairgap.ResolvePlatform(controller.SystemAgent.AgentConfiguration.FogType)
+		if err != nil {
+			return fmt.Errorf("controller %s: %w", controller.Name, err)
 		}
-		if images.RouterARM != "" {
-			imageList = append(imageList, images.RouterARM)
+		engine, err := deployairgap.ResolveContainerEngine(controller.SystemAgent.AgentConfiguration.AgentConfiguration.ContainerEngine)
+		if err != nil {
+			return fmt.Errorf("controller %s: %w", controller.Name, err)
 		}
-		if images.Debugger != "" {
-			imageList = append(imageList, images.Debugger)
-		}
-
-		// For controllers, we need to transfer both x86 and ARM router images
-		// Use x86 platform for controller (controllers are typically x86)
-		platform := deployairgap.PlatformAMD64
-		engine := deployairgap.EngineDocker // Default to docker, could be made configurable
-
-		ctx := context.Background()
 		if err := deployairgap.TransferAirgapImages(ctx, exe.ns.Name, controller.Host, &controller.SSH, platform, engine, imageList); err != nil {
 			return fmt.Errorf("failed to transfer images to controller %s: %w", controller.Name, err)
 		}

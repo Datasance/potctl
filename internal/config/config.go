@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/util"
@@ -40,6 +41,7 @@ const (
 	defaultDirname       = ".iofog/" + latestVersion
 	namespaceDirname     = "namespaces/"
 	offlineImagesDirname = "offline-images"
+	airgapImagesDirname  = "airgap-images"
 	defaultFilename      = "config.yaml"
 	configV3             = "potctl/v3"
 	CurrentConfigVersion = configV3
@@ -233,6 +235,21 @@ func GetOfflineImageCacheDir(namespace, resourceName, platform string) string {
 	}
 	if platform != "" {
 		pathElems = append(pathElems, platform)
+	}
+	return path.Join(pathElems...)
+}
+
+// GetAirgapImageCacheDir returns the directory path for a specific airgap image (namespace, imageRef, platform).
+// Image ref and platform are sanitized for use in the path (e.g. / and : replaced with _).
+func GetAirgapImageCacheDir(namespace, imageRef, platform string) string {
+	sanitizedRef := strings.ReplaceAll(strings.ReplaceAll(imageRef, "/", "_"), ":", "_")
+	sanitizedPlatform := strings.ReplaceAll(platform, "/", "_")
+	pathElems := []string{configFolder, airgapImagesDirname, namespace}
+	if sanitizedRef != "" {
+		pathElems = append(pathElems, sanitizedRef)
+	}
+	if sanitizedPlatform != "" {
+		pathElems = append(pathElems, sanitizedPlatform)
 	}
 	return path.Join(pathElems...)
 }

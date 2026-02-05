@@ -11,7 +11,7 @@ CONTAINER_ENGINE_MSG="This operating system does not support automatic container
 check_docker_version() {
     docker_version_num=0
     if command -v docker >/dev/null 2>&1; then
-        raw=$(docker -v 2>/dev/null | sed -n 's/.*version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | tr -d '.')
+        raw=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
         [ -n "$raw" ] && docker_version_num="$raw"
     fi
     [ "$docker_version_num" -ge 2500 ] 2>/dev/null || return 1
@@ -288,7 +288,7 @@ do_install_container_engine() {
 
     # Docker: check existing version first
     if command_exists docker; then
-        docker_version=$(docker -v 2>/dev/null | sed -n 's/.*version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | tr -d '.')
+        docker_version=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
         if [ -n "$docker_version" ] && [ "$docker_version" -ge 2500 ] 2>/dev/null; then
             echo "# Docker already installed (>= 25)"
             start_docker

@@ -101,7 +101,7 @@ func (exe *agentExecutor) Execute() error {
 		// Convert http(s):// to ws(s)://
 		wsURL := strings.Replace(controllerURL, "http://", "ws://", 1)
 		wsURL = strings.Replace(wsURL, "https://", "wss://", 1)
-		wsURL = fmt.Sprintf("%s/api/v3/iofog/%s/logs", wsURL, agentInfo.UUID)
+		wsURL = fmt.Sprintf("%s/iofog/%s/logs", wsURL, agentInfo.UUID)
 
 		// Append query parameters from log config
 		if exe.logConfig != nil {

@@ -10,11 +10,13 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/containers/image/v5/copy"
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/transports/alltransports"
 	"github.com/containers/image/v5/types"
+	"github.com/datasance/potctl/internal/config"
 	rsc "github.com/datasance/potctl/internal/resource"
 	"github.com/datasance/potctl/pkg/util"
 	"github.com/opencontainers/go-digest"
@@ -100,34 +102,62 @@ func prepareArtifacts(ctx context.Context, namespace string, plan transferPlan) 
 	return artifacts, nil
 }
 
-// ensureArtifact pulls and compresses an image, reusing offlineimage patterns
+// ensureArtifact pulls and compresses an image, using persistent cache (same style as offline-image).
 func ensureArtifact(ctx context.Context, platform, imageRef string, namespace string) (*imageArtifact, error) {
-	// Build system context for image pulling
 	sysCtx, err := buildSystemContext(platform, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// Use temp directory for airgap artifacts (no caching for now, can be added later)
-	dir, err := os.MkdirTemp("", "potctl-airgap-*")
+	cacheDir := config.GetAirgapImageCacheDir(namespace, imageRef, platform)
+	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
+		return nil, err
+	}
+	archivePath := filepath.Join(cacheDir, archiveFilename)
+	metaPath := filepath.Join(cacheDir, cacheMetadataFilename)
+
+	remoteDigest, err := fetchRemoteDigest(ctx, imageRef, sysCtx)
 	if err != nil {
 		return nil, err
 	}
-	tarPath := filepath.Join(dir, archiveFilename)
+	remoteDigestStr := remoteDigest.String()
+
+	if cached, err := loadCacheMetadata(metaPath); err == nil {
+		if ok, reason := canReuseCachedArtifact(archivePath, cached, imageRef, platform, remoteDigestStr); ok {
+			util.PrintInfo(fmt.Sprintf("Reusing cached airgap image for %s (%s)", imageRef, platform))
+			return &imageArtifact{
+				platform: platform,
+				imageRef: imageRef,
+				digest:   cached.Digest,
+				path:     archivePath,
+			}, nil
+		} else if reason != "" {
+			util.PrintNotify(reason)
+			_ = os.Remove(archivePath)
+		}
+	}
+
 	label := fmt.Sprintf("Pulling %s (%s)", imageRef, platform)
-	digestValue, _, _, err := pullCompressedImage(ctx, imageRef, tarPath, sysCtx, label)
+	_, checksum, size, err := pullCompressedImage(ctx, imageRef, archivePath, sysCtx, label)
 	if err != nil {
-		_ = os.RemoveAll(dir)
 		return nil, err
 	}
+	if err := saveCacheMetadata(metaPath, cacheMetadata{
+		Image:       imageRef,
+		Digest:      remoteDigestStr,
+		Platform:    platform,
+		TarChecksum: checksum,
+		TarSize:     size,
+		UpdatedAt:   time.Now().UTC(),
+	}); err != nil {
+		return nil, err
+	}
+
 	return &imageArtifact{
 		platform: platform,
 		imageRef: imageRef,
-		digest:   digestValue,
-		path:     tarPath,
-		cleanup: func() error {
-			return os.RemoveAll(dir)
-		},
+		digest:   remoteDigestStr,
+		path:     archivePath,
 	}, nil
 }
 

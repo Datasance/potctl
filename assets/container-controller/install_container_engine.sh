@@ -10,7 +10,7 @@ CONTAINER_ENGINE_MSG="This operating system does not support automatic container
 check_docker_version() {
     docker_version_num=0
     if command -v docker >/dev/null 2>&1; then
-        raw=$(docker -v 2>/dev/null | sed -n 's/.*version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | tr -d '.')
+        raw=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
         [ -n "$raw" ] && docker_version_num="$raw"
     fi
     [ "$docker_version_num" -ge 2500 ] 2>/dev/null || return 1
@@ -244,6 +244,31 @@ do_install_wasm_shim() {
 }
 
 do_install_container_engine() {
+    if [ "$PACKAGE_TYPE" = "apk" ]; then
+        if command_exists docker && check_docker_version; then
+            echo "# Docker already installed (>= 25)"
+            start_docker
+            do_modify_daemon
+            return 0
+        fi
+        echo "# Installing Docker on Alpine..."
+        $sh_c "apk add docker"
+        $sh_c "rc-update add docker default"
+        $sh_c "service docker start"
+        $sh_c "addgroup $user docker"
+        if ! command_exists docker; then
+            echo "Failed to install Docker"
+            exit 1
+        fi
+        if ! check_docker_version; then
+            echo "Error: Docker 25+ is required. Please upgrade the Docker package or install Docker 25+ manually."
+            exit 1
+        fi
+        start_docker
+        do_modify_daemon
+        return 0
+    fi
+
     if [ "$PACKAGE_TYPE" = "other" ]; then
         if check_docker_version; then
             USE_PODMAN="false"
@@ -281,7 +306,7 @@ do_install_container_engine() {
     fi
 
     if command_exists docker; then
-        docker_version=$(docker -v 2>/dev/null | sed -n 's/.*version \([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | tr -d '.')
+        docker_version=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
         if [ -n "$docker_version" ] && [ "$docker_version" -ge 2500 ] 2>/dev/null; then
             echo "# Docker already installed (>= 25)"
             start_docker

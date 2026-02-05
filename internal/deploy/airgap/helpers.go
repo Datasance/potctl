@@ -93,3 +93,21 @@ func ValidateAirgapRequirements(agentConfig *rsc.AgentConfiguration) error {
 
 	return nil
 }
+
+// ValidateControlPlaneAirgapRequirements validates that each controller has system agent config with
+// agent type (FogType) and container engine when airgap is enabled. Router and debugger are transferred
+// only in the system agent phase, so system agent config is required to resolve platform.
+func ValidateControlPlaneAirgapRequirements(controlPlane *rsc.RemoteControlPlane) error {
+	if controlPlane == nil {
+		return util.NewInputError("Control plane is required for airgap deployment")
+	}
+	for _, ctrl := range controlPlane.Controllers {
+		if ctrl.SystemAgent == nil || ctrl.SystemAgent.AgentConfiguration == nil {
+			return util.NewInputError("System agent configuration is required for airgap control plane deployment. Please specify systemAgent with agent type (x86 or arm) and container engine (docker or podman) for controller " + ctrl.Name)
+		}
+		if err := ValidateAirgapRequirements(ctrl.SystemAgent.AgentConfiguration); err != nil {
+			return err
+		}
+	}
+	return nil
+}
