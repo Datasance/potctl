@@ -1,0 +1,110 @@
+/*
+ *  *******************************************************************************
+ *  * Copyright (c) 2023 Datasance Teknoloji A.S.
+ *  *
+ *  * This program and the accompanying materials are made available under the
+ *  * terms of the Eclipse Public License v. 2.0 which is available at
+ *  * http://www.eclipse.org/legal/epl-2.0
+ *  *
+ *  * SPDX-License-Identifier: EPL-2.0
+ *  *******************************************************************************
+ *
+ */
+
+package deployserviceaccount
+
+import (
+	"fmt"
+
+	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
+	"github.com/datasance/potctl/internal/config"
+	"github.com/datasance/potctl/internal/execute"
+	rsc "github.com/datasance/potctl/internal/resource"
+	clientutil "github.com/datasance/potctl/internal/util/client"
+	"github.com/datasance/potctl/pkg/util"
+	"gopkg.in/yaml.v2"
+)
+
+type Options struct {
+	Namespace string
+	Yaml      []byte
+	Name      string
+}
+
+type executor struct {
+	serviceAccount rsc.ServiceAccount
+	namespace      string
+	name           string
+}
+
+func (exe *executor) GetName() string {
+	return exe.name
+}
+
+func (exe *executor) Execute() error {
+	util.SpinStart(fmt.Sprintf("Deploying serviceaccount %s", exe.GetName()))
+	clt, err := clientutil.NewControllerClient(exe.namespace)
+	if err != nil {
+		return err
+	}
+
+	if _, err = clt.GetServiceAccount(exe.name); err != nil {
+		return exe.createServiceAccount(clt)
+	}
+	return exe.updateServiceAccount(clt)
+}
+
+func (exe *executor) createServiceAccount(clt *client.Client) error {
+	req := &client.ServiceAccountCreateRequest{
+		Name:    exe.name,
+		RoleRef: toClientRoleRef(exe.serviceAccount.RoleRef),
+	}
+	_, err := clt.CreateServiceAccount(req)
+	return err
+}
+
+func (exe *executor) updateServiceAccount(clt *client.Client) error {
+	req := client.ServiceAccountUpdateRequest{
+		Name:    exe.name,
+		RoleRef: toClientRoleRef(exe.serviceAccount.RoleRef),
+	}
+	_, err := clt.UpdateServiceAccount(exe.name, &req)
+	return err
+}
+
+func toClientRoleRef(ref rsc.RoleRef) client.RoleRef {
+	return client.RoleRef{
+		Kind:     ref.Kind,
+		Name:     ref.Name,
+		APIGroup: ref.APIGroup,
+	}
+}
+
+func NewExecutor(opt Options) (execute.Executor, error) {
+	ns, err := config.GetNamespace(opt.Namespace)
+	if err != nil {
+		return nil, err
+	}
+	if len(ns.GetControllers()) == 0 {
+		return nil, util.NewInputError("This namespace does not have a Controller. You must first deploy a Controller before deploying ServiceAccounts")
+	}
+
+	var sa rsc.ServiceAccount
+	if err = yaml.UnmarshalStrict(opt.Yaml, &sa); err != nil {
+		return nil, util.NewUnmarshalError(err.Error())
+	}
+
+	name := opt.Name
+	if name == "" {
+		name = sa.Name
+	}
+	if name == "" {
+		return nil, util.NewInputError("Name must be specified")
+	}
+
+	return &executor{
+		namespace:      opt.Namespace,
+		serviceAccount: sa,
+		name:           name,
+	}, nil
+}

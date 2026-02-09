@@ -84,7 +84,7 @@ func (exe *agentExecutor) Execute() error {
 	// Convert http(s):// to ws(s)://
 	wsURL := strings.Replace(controllerURL, "http://", "ws://", 1)
 	wsURL = strings.Replace(wsURL, "https://", "wss://", 1)
-	wsURL = fmt.Sprintf("%s/microservices/exec/%s", wsURL, exe.msvc.UUID)
+	wsURL = fmt.Sprintf("%s/microservices/system/exec/%s", wsURL, exe.msvc.UUID)
 
 	// Set up headers
 	headers := http.Header{}

@@ -21,6 +21,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+// operatorDeploymentLabels are applied to the iofog-operator Deployment and Pod template.
+var operatorDeploymentLabels = map[string]string{
+	"app.kubernetes.io/name":       "pot",
+	"app.kubernetes.io/instance":   "pot",
+	"app.kubernetes.io/component":  "iofog-operator",
+	"app.kubernetes.io/managed-by": "potctl",
+	"datasance.com/component":      "iofog-operator",
+}
+
 func newDeployment(namespace string, ms *microservice) *appsv1.Deployment {
 	maxUnavailable := intstr.FromInt(0)
 	maxSurge := intstr.FromInt(1)
@@ -31,13 +40,19 @@ func newDeployment(namespace string, ms *microservice) *appsv1.Deployment {
 			MaxSurge:       &maxSurge,
 		},
 	}
+	depLabels := map[string]string{"name": ms.name}
+	podLabels := map[string]string{"name": ms.name}
+	if ms.name == "iofog-operator" {
+		for k, v := range operatorDeploymentLabels {
+			depLabels[k] = v
+			podLabels[k] = v
+		}
+	}
 	dep := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ms.name,
 			Namespace: namespace,
-			Labels: map[string]string{
-				"name": ms.name,
-			},
+			Labels:    depLabels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &ms.replicas,
@@ -49,9 +64,7 @@ func newDeployment(namespace string, ms *microservice) *appsv1.Deployment {
 			Strategy: strategy,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"name": ms.name,
-					},
+					Labels: podLabels,
 				},
 				Spec: corev1.PodSpec{
 					ServiceAccountName: ms.name,

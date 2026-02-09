@@ -29,6 +29,7 @@ type RemoteControlPlane struct {
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`
 	Endpoint            string                    `yaml:"endpoint,omitempty"`
+	Airgap              bool                      `yaml:"airgap,omitempty"`
 }
 
 func (cp *RemoteControlPlane) GetUser() IofogUser {
@@ -142,5 +143,6 @@ func (cp *RemoteControlPlane) Clone() ControlPlane {
 		SystemMicroservices: cp.SystemMicroservices,
 		Controllers:         controllers,
 		Endpoint:            cp.Endpoint,
+		Airgap:              cp.Airgap,
 	}
 }

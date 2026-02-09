@@ -21,22 +21,34 @@ do_check_install() {
 }
 
 do_stop_iofog() {
-	if command_exists iofog-agent; then
-		sudo systemctl stop iofog-agent
+	if ! command_exists iofog-agent; then
+		return 0
 	fi
+	case "${INIT_SYSTEM:-systemd}" in
+		systemd)
+			sudo systemctl stop iofog-agent 2>/dev/null || true
+			;;
+		sysvinit|openrc)
+			sudo service iofog-agent stop 2>/dev/null || sudo /etc/init.d/iofog-agent stop 2>/dev/null || true
+			;;
+		s6)
+			sudo s6-svc -d /etc/s6/sv/iofog-agent 2>/dev/null || true
+			;;
+		runit)
+			sudo sv stop iofog-agent 2>/dev/null || true
+			;;
+		upstart)
+			sudo initctl stop iofog-agent 2>/dev/null || true
+			;;
+		*)
+			sudo systemctl stop iofog-agent 2>/dev/null || sudo service iofog-agent stop 2>/dev/null || true
+			;;
+	esac
+	# Ensure container is stopped by name (in case init did not)
+	(docker stop ${AGENT_CONTAINER_NAME} 2>/dev/null || podman stop ${AGENT_CONTAINER_NAME} 2>/dev/null) || true
 }
 
-# do_check_iofog_on_arm() {
-#   if [ "$lsb_dist" = "raspbian" ] || [ "$(uname -m)" = "armv7l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "armv8" ]; then
-#     echo "# We re on ARM ($(uname -m)) : Updating config.xml to use correct docker_url"
-#     $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
 
-#     echo "# Restarting iofog-agent service"
-#     $sh_c "systemctl stop iofog-agent"
-#     sleep 3
-#     $sh_c "systemctl start iofog-agent"
-#  fi
-# }
 
 do_create_env() {
 ENV_FILE_NAME=iofog-agent.env # Used as an env file in systemd
@@ -65,12 +77,25 @@ do_install_iofog() {
     done
 	do_create_env
 
-    # Check if we're using Podman (RHEL, CentOS, Fedora, etc.)
-    if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
-        echo "Using Podman for container management..."
-        SYSTEMD_SERVICE_FILE=/etc/containers/systemd/iofog-agent.container
+    # Determine container engine (Podman for rpm-like distros, else Docker)
+    USE_PODMAN="false"
+    case "$lsb_dist" in
+        rhel|centos|fedora|ol|sles|opensuse*) USE_PODMAN="true" ;;
+    esac
+    if [ "$USE_PODMAN" = "true" ]; then
+        CONTAINER_RUNTIME="podman"
+        SOCK_MOUNT="-v /run/podman/podman.sock:/run/podman/podman.sock:rw"
+    else
+        CONTAINER_RUNTIME="docker"
+        SOCK_MOUNT="-v /var/run/docker.sock:/var/run/docker.sock:rw"
+    fi
 
-        cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
+    # Systemd: use Quadlet for Podman or systemd unit for Docker
+    if [ "${INIT_SYSTEM:-systemd}" = "systemd" ]; then
+        if [ "$USE_PODMAN" = "true" ]; then
+            echo "Using Podman (Quadlet) for container management..."
+            SYSTEMD_SERVICE_FILE=/etc/containers/systemd/iofog-agent.container
+            cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
 [Unit]
 Description=Datasance PoT IoFog Agent Service
 After=podman.service
@@ -96,33 +121,14 @@ Restart=always
 [Install]
 WantedBy=default.target
 EOF
-
-        # Reload systemd and enable the service
-        sudo systemctl daemon-reload
-        sudo systemctl restart podman
-        sudo systemctl start iofog-agent.service
-
-        # Create the iofog-agent executable script for Podman
-        EXECUTABLE_FILE=/usr/local/bin/iofog-agent
-        cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
-#!/bin/bash
-CONTAINER_NAME="iofog-agent"
-
-# Check if the container is running
-if ! podman ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "Error: The iofog-agent container is not running."
-    exit 1
-fi
-
-# Execute the command in the container
-podman exec ${CONTAINER_NAME} iofog-agent "$@"
-EOF
-    else
-        # Docker-based installation (Debian, Ubuntu, etc.)
-        echo "Using Docker for container management..."
-        SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-agent.service
-
-        cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
+            sudo systemctl daemon-reload
+            sudo systemctl restart podman 2>/dev/null || true
+            sudo systemctl enable iofog-agent.service
+            sudo systemctl start iofog-agent.service
+        else
+            echo "Using Docker (systemd) for container management..."
+            SYSTEMD_SERVICE_FILE=/etc/systemd/system/iofog-agent.service
+            cat <<EOF | sudo tee ${SYSTEMD_SERVICE_FILE} > /dev/null
 [Unit]
 Description=Datasance PoT IoFog Agent Service
 After=docker.service
@@ -150,52 +156,174 @@ ExecStop=/usr/bin/docker stop ${AGENT_CONTAINER_NAME}
 [Install]
 WantedBy=default.target
 EOF
+            sudo systemctl daemon-reload
+            sudo systemctl enable iofog-agent.service
+            sudo systemctl start iofog-agent.service
+        fi
+    else
+        # Non-systemd: create init script that runs the container
+        echo "Using $CONTAINER_RUNTIME with $INIT_SYSTEM for container management..."
+        RUN_CMD="${CONTAINER_RUNTIME} run --rm -d --name ${AGENT_CONTAINER_NAME} --env-file ${ETC_DIR}/iofog-agent.env ${SOCK_MOUNT} -v iofog-agent-config:/etc/iofog-agent:rw -v /var/log/iofog-agent:/var/log/iofog-agent:rw -v /var/backups/iofog-agent:/var/backups/iofog-agent:rw -v /usr/share/iofog-agent:/usr/share/iofog-agent:rw -v /var/lib/iofog-agent:/var/lib/iofog-agent:rw --net=host --privileged --stop-timeout 60 ${agent_image}"
+        RUN_CMD_FG="${CONTAINER_RUNTIME} run --rm --name ${AGENT_CONTAINER_NAME} --env-file ${ETC_DIR}/iofog-agent.env ${SOCK_MOUNT} -v iofog-agent-config:/etc/iofog-agent:rw -v /var/log/iofog-agent:/var/log/iofog-agent:rw -v /var/backups/iofog-agent:/var/backups/iofog-agent:rw -v /usr/share/iofog-agent:/usr/share/iofog-agent:rw -v /var/lib/iofog-agent:/var/lib/iofog-agent:rw --net=host --privileged --stop-timeout 60 ${agent_image}"
+        STOP_CMD="${CONTAINER_RUNTIME} stop ${AGENT_CONTAINER_NAME}"
 
-        # Reload systemd and enable the service
-        sudo systemctl daemon-reload
-        sudo systemctl enable iofog-agent.service
+        case "$INIT_SYSTEM" in
+            sysvinit|openrc)
+                sudo tee /etc/init.d/iofog-agent > /dev/null <<INITSCRIPT
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          iofog-agent
+# Required-Start:    \$network \$local_fs
+# Required-Stop:     \$network \$local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: IoFog Agent container
+### END INIT INFO
+case "\$1" in
+    start)
+        n=0; while [ \$n -lt 30 ]; do [ -S /var/run/docker.sock ] || [ -S /run/podman/podman.sock ] && break; n=\$((n+1)); sleep 1; done
+        [ -S /var/run/docker.sock ] || [ -S /run/podman/podman.sock ] || { echo "Container engine socket not available"; exit 1; }
+        if ${CONTAINER_RUNTIME} ps --format '{{.Names}}' 2>/dev/null | grep -q "^${AGENT_CONTAINER_NAME}\$"; then exit 0; fi
+        $RUN_CMD
+        ;;
+    stop)
+        $STOP_CMD 2>/dev/null || true
+        ;;
+    restart)
+        \$0 stop; \$0 start
+        ;;
+    status)
+        if ${CONTAINER_RUNTIME} ps --format '{{.Names}}' 2>/dev/null | grep -q "^${AGENT_CONTAINER_NAME}\$"; then echo "running"; exit 0; else echo "stopped"; exit 1; fi
+        ;;
+    *)
+        echo "Usage: \$0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+exit 0
+INITSCRIPT
+                sudo chmod +x /etc/init.d/iofog-agent
+                if [ "$INIT_SYSTEM" = "openrc" ]; then
+                    sudo rc-update add iofog-agent default 2>/dev/null || true
+                    sudo rc-service iofog-agent start
+                else
+                    sudo update-rc.d iofog-agent defaults 2>/dev/null || sudo chkconfig iofog-agent on 2>/dev/null || true
+                    sudo service iofog-agent start 2>/dev/null || sudo /etc/init.d/iofog-agent start
+                fi
+                ;;
+            s6)
+                sudo mkdir -p /etc/s6/sv/iofog-agent
+                sudo tee /etc/s6/sv/iofog-agent/run > /dev/null <<RUNSCRIPT
+#!/bin/sh
+exec $RUN_CMD_FG
+RUNSCRIPT
+                sudo chmod +x /etc/s6/sv/iofog-agent/run
+                [ -d /etc/s6/adminsv/default ] && sudo ln -sf /etc/s6/sv/iofog-agent /etc/s6/adminsv/default/iofog-agent 2>/dev/null || true
+                sudo s6-svc -u /etc/s6/sv/iofog-agent 2>/dev/null || true
+                ;;
+            runit)
+                sudo mkdir -p /etc/runit/sv/iofog-agent
+                sudo tee /etc/runit/sv/iofog-agent/run > /dev/null <<RUNSCRIPT
+#!/bin/sh
+exec $RUN_CMD_FG
+RUNSCRIPT
+                sudo chmod +x /etc/runit/sv/iofog-agent/run
+                if [ -d /var/service ]; then
+                    sudo ln -sf /etc/runit/sv/iofog-agent /var/service/iofog-agent 2>/dev/null || true
+                elif [ -d /etc/runit/runsvdir/default ]; then
+                    sudo ln -sf /etc/runit/sv/iofog-agent /etc/runit/runsvdir/default/iofog-agent 2>/dev/null || true
+                fi
+                sudo sv start iofog-agent 2>/dev/null || true
+                ;;
+            upstart)
+                sudo tee /etc/init/iofog-agent.conf > /dev/null <<UPSTART
+description "IoFog Agent container"
+start on runlevel [2345]
+stop on runlevel [!2345]
+respawn
+respawn limit 10 5
+exec $RUN_CMD_FG
+UPSTART
+                sudo initctl reload-configuration 2>/dev/null || true
+                sudo initctl start iofog-agent 2>/dev/null || true
+                ;;
+            *)
+                echo "Warning: Unknown init system $INIT_SYSTEM. Creating /etc/init.d/iofog-agent fallback."
+                sudo tee /etc/init.d/iofog-agent > /dev/null <<INITSCRIPT
+#!/bin/sh
+case "\$1" in start) n=0; while [ \$n -lt 30 ]; do [ -S /var/run/docker.sock ] || [ -S /run/podman/podman.sock ] && break; n=\$((n+1)); sleep 1; done; [ -S /var/run/docker.sock ] || [ -S /run/podman/podman.sock ] || { echo "Container engine socket not available"; exit 1; }; $RUN_CMD ;; stop) $STOP_CMD ;; restart) $STOP_CMD; $RUN_CMD ;; *) echo "Usage: \$0 {start|stop|restart}"; exit 1 ;; esac
+INITSCRIPT
+                sudo chmod +x /etc/init.d/iofog-agent
+                sudo /etc/init.d/iofog-agent start
+                ;;
+        esac
+    fi
 
-        # Create the iofog-agent executable script for Docker
-        EXECUTABLE_FILE=/usr/local/bin/iofog-agent
+    # Create the iofog-agent executable wrapper (same for all inits)
+    EXECUTABLE_FILE=/usr/local/bin/iofog-agent
+    if [ "$USE_PODMAN" = "true" ]; then
         cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
-#!/bin/bash
+#!/bin/sh
 CONTAINER_NAME="iofog-agent"
-
-# Check if the container is running
+if ! podman ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    echo "Error: The iofog-agent container is not running."
+    exit 1
+fi
+exec podman exec ${CONTAINER_NAME} iofog-agent "$@"
+EOF
+    else
+        cat <<'EOF' | sudo tee ${EXECUTABLE_FILE} > /dev/null
+#!/bin/sh
+CONTAINER_NAME="iofog-agent"
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "Error: The iofog-agent container is not running."
     exit 1
 fi
-
-# Execute the command in the container
-docker exec ${CONTAINER_NAME} iofog-agent "$@"
+exec docker exec ${CONTAINER_NAME} iofog-agent "$@"
 EOF
     fi
-
-    # Make the script executable
     sudo chmod +x ${EXECUTABLE_FILE}
 
     echo "ioFog agent installation completed!"
 }
 
 do_start_iofog(){
-	sudo systemctl start iofog-agent > /dev/null 2&>1 &
+	case "${INIT_SYSTEM:-systemd}" in
+		systemd)
+			sudo systemctl start iofog-agent >/dev/null 2>&1 &
+			;;
+		sysvinit|openrc)
+			sudo service iofog-agent start 2>/dev/null || sudo /etc/init.d/iofog-agent start 2>/dev/null &
+			;;
+		s6)
+			sudo s6-svc -u /etc/s6/sv/iofog-agent 2>/dev/null &
+			;;
+		runit)
+			sudo sv start iofog-agent 2>/dev/null &
+			;;
+		upstart)
+			sudo initctl start iofog-agent 2>/dev/null &
+			;;
+		*)
+			sudo systemctl start iofog-agent 2>/dev/null || sudo /etc/init.d/iofog-agent start 2>/dev/null &
+			;;
+	esac
 	local STATUS=""
 	local ITER=0
-	while [ "$STATUS" != "RUNNING" ] ; do
-    ITER=$((ITER+1))
-    if [ "$ITER" -gt 600 ]; then
-      echo 'Timed out waiting for Agent to be RUNNING'
-      exit 1;
-    fi
-    sleep 1
-    STATUS=$(sudo iofog-agent status | cut -f2 -d: | head -n 1 | tr -d '[:space:]')
-    echo "${STATUS}"
+	while [ "$STATUS" != "RUNNING" ]; do
+		ITER=$((ITER+1))
+		if [ "$ITER" -gt 600 ]; then
+			echo "Timed out waiting for Agent to be RUNNING"
+			exit 1
+		fi
+		sleep 1
+		STATUS=$(sudo iofog-agent status 2>/dev/null | cut -f2 -d: | head -n 1 | tr -d '[:space:]')
+		echo "${STATUS}"
 	done
 	sudo iofog-agent "config -cf 10 -sf 10"
-    if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
-        sudo iofog-agent "config -c unix:///var/run/podman/podman.sock"
-    fi    
+	if [ "$lsb_dist" = "rhel" ] || [ "$lsb_dist" = "centos" ] || [ "$lsb_dist" = "fedora" ] || [ "$lsb_dist" = "ol" ] || [ "$lsb_dist" = "sles" ] || [ "$lsb_dist" = "opensuse" ]; then
+		sudo iofog-agent "config -c unix:///var/run/podman/podman.sock"
+	fi
 }
 
 agent_image="$1"

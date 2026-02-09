@@ -20,10 +20,14 @@ import (
 	"github.com/datasance/potctl/pkg/util"
 )
 
-func NewExecutor(resourceType, namespace, name string) (execute.Executor, error) {
+func NewExecutor(resourceType, namespace, name string, logConfig *LogTailConfig) (execute.Executor, error) {
 	ns, err := config.GetNamespace(namespace)
 	if err != nil {
 		return nil, err
+	}
+	// Use default config if nil
+	if logConfig == nil {
+		logConfig = DefaultLogTailConfig()
 	}
 	switch resourceType {
 	case "controller":
@@ -40,12 +44,12 @@ func NewExecutor(resourceType, namespace, name string) (execute.Executor, error)
 			return newLocalControllerExecutor(controlPlane, namespace, name), nil
 		}
 	case "agent":
-		return newAgentExecutor(namespace, name), nil
+		return newAgentExecutor(namespace, name, logConfig), nil
 	case "microservice":
 		if len(ns.GetControllers()) == 0 {
 			return nil, util.NewError("No Controllers found in namespace " + namespace)
 		}
-		return newRemoteMicroserviceExecutor(namespace, name), nil
+		return newRemoteMicroserviceExecutor(namespace, name, logConfig), nil
 	}
 	msg := "Unknown resource: '" + resourceType + "'"
 	return nil, util.NewInputError(msg)

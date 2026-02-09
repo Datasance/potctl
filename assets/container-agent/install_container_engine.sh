@@ -5,33 +5,80 @@
 set -x
 set -e
 
+CONTAINER_ENGINE_MSG="This operating system does not support automatic container engine installation. Please install Docker 25+ or Podman 4+ on the target host and re-run, or use an airgap deployment with a pre-installed engine."
+
+check_docker_version() {
+    docker_version_num=0
+    if command -v docker >/dev/null 2>&1; then
+        raw=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
+        [ -n "$raw" ] && docker_version_num="$raw"
+    fi
+    [ "$docker_version_num" -ge 2500 ] 2>/dev/null || return 1
+}
+
+check_podman_version() {
+    podman_version_num=0
+    if command -v podman >/dev/null 2>&1; then
+        raw=$(podman --version 2>/dev/null | sed -n 's/.*version \([0-9][0-9]*\).*/\1/p')
+        [ -n "$raw" ] && podman_version_num="$raw"
+    fi
+    [ "$podman_version_num" -ge 4 ] 2>/dev/null || return 1
+}
+
 start_docker() {
     set +e
-    # check if docker is running
-    if ! $sh_c "docker ps" >/dev/null 2>&1; then
-        # Try init.d
-        $sh_c "/etc/init.d/docker start" >/dev/null 2>&1
-        local err_code=$?
-        # Try systemd
-        if [ $err_code -ne 0 ]; then
+    if $sh_c "docker ps" >/dev/null 2>&1; then
+        set -e
+        return 0
+    fi
+    err_code=1
+    case "${INIT_SYSTEM:-unknown}" in
+        systemd)
             $sh_c "systemctl start docker" >/dev/null 2>&1
             err_code=$?
-        fi
-        # Try service
-        if [ $err_code -ne 0 ]; then
-            $sh_c "service docker start" >/dev/null 2>&1
+            ;;
+        sysvinit)
+            $sh_c "service docker start" >/dev/null 2>&1 || $sh_c "/etc/init.d/docker start" >/dev/null 2>&1
             err_code=$?
-        fi
-        # Try snapd
-        if [ $err_code -ne 0 ]; then
-            $sh_c "snap start docker" >/dev/null 2>&1
+            ;;
+        openrc)
+            $sh_c "rc-service docker start" >/dev/null 2>&1
             err_code=$?
-        fi
-        if [ $err_code -ne 0 ]; then
-            echo "Could not start Docker daemon"
-            exit 1
-        fi
+            ;;
+        *)
+            $sh_c "/etc/init.d/docker start" >/dev/null 2>&1
+            err_code=$?
+            [ $err_code -ne 0 ] && $sh_c "systemctl start docker" >/dev/null 2>&1 && err_code=0
+            [ $err_code -ne 0 ] && $sh_c "service docker start" >/dev/null 2>&1 && err_code=0
+            [ $err_code -ne 0 ] && $sh_c "snap start docker" >/dev/null 2>&1 && err_code=0
+            ;;
+    esac
+    set -e
+    if [ $err_code -ne 0 ]; then
+        echo "Could not start Docker daemon"
+        exit 1
     fi
+}
+
+start_podman() {
+    set +e
+    case "${INIT_SYSTEM:-unknown}" in
+        systemd)
+            $sh_c "systemctl start podman" >/dev/null 2>&1
+            $sh_c "systemctl start podman.socket" >/dev/null 2>&1
+            ;;
+        sysvinit)
+            $sh_c "service podman start" >/dev/null 2>&1 || $sh_c "/etc/init.d/podman start" >/dev/null 2>&1
+            ;;
+        openrc)
+            $sh_c "rc-service podman start" >/dev/null 2>&1
+            ;;
+        *)
+            $sh_c "systemctl start podman" >/dev/null 2>&1 || true
+            $sh_c "systemctl start podman.socket" >/dev/null 2>&1 || true
+            $sh_c "service podman start" >/dev/null 2>&1 || true
+            ;;
+    esac
     set -e
 }
 
@@ -76,14 +123,23 @@ EOF'
             fi
         fi
 
-        # Enable and start Podman services
-        $sh_c "systemctl enable podman"
-        $sh_c "systemctl start podman"
-        $sh_c "systemctl enable podman.socket"
-        $sh_c "systemctl start podman.socket"
+        case "${INIT_SYSTEM:-unknown}" in
+            systemd)
+                $sh_c "systemctl enable podman" 2>/dev/null || true
+                $sh_c "systemctl enable podman.socket" 2>/dev/null || true
+                ;;
+            openrc)
+                $sh_c "rc-update add podman default" 2>/dev/null || true
+                ;;
+            sysvinit)
+                $sh_c "update-rc.d podman defaults" 2>/dev/null || $sh_c "chkconfig podman on" 2>/dev/null || true
+                ;;
+            *) ;;
+        esac
+        start_podman
         return
     fi
-    
+
     # Original Docker daemon configuration
     if [ ! -f /etc/docker/daemon.json ]; then
         echo "Creating /etc/docker/daemon.json..."
@@ -102,8 +158,16 @@ EOF'
         echo "/etc/docker/daemon.json already exists"
     fi
     echo "Restarting Docker daemon..."
-    $sh_c "systemctl daemon-reload"
-    $sh_c "systemctl restart docker"
+    case "${INIT_SYSTEM:-unknown}" in
+        systemd)
+            $sh_c "systemctl daemon-reload"
+            $sh_c "systemctl restart docker"
+            ;;
+        *)
+            $sh_c "systemctl daemon-reload" 2>/dev/null || true
+            $sh_c "systemctl restart docker" 2>/dev/null || start_docker
+            ;;
+    esac
 }
 
 do_set_datasance_repo() {
@@ -180,6 +244,49 @@ do_install_wasm_shim() {
 }
 
 do_install_container_engine() {
+    if [ "$PACKAGE_TYPE" = "apk" ]; then
+        if command_exists docker && check_docker_version; then
+            echo "# Docker already installed (>= 25)"
+            start_docker
+            do_modify_daemon
+            return 0
+        fi
+        echo "# Installing Docker on Alpine..."
+        $sh_c "apk add docker"
+        $sh_c "rc-update add docker default"
+        $sh_c "service docker start"
+        $sh_c "addgroup $user docker"
+        if ! command_exists docker; then
+            echo "Failed to install Docker"
+            exit 1
+        fi
+        if ! check_docker_version; then
+            echo "Error: Docker 25+ is required. Please upgrade the Docker package or install Docker 25+ manually."
+            exit 1
+        fi
+        start_docker
+        do_modify_daemon
+        return 0
+    fi
+
+    if [ "$PACKAGE_TYPE" = "other" ]; then
+        if check_docker_version; then
+            USE_PODMAN="false"
+            echo "# Docker (>= 25) found; using Docker."
+            start_docker
+            do_modify_daemon
+            return 0
+        fi
+        if check_podman_version; then
+            USE_PODMAN="true"
+            echo "# Podman (>= 4) found; using Podman."
+            do_modify_daemon
+            return 0
+        fi
+        echo "Error: $CONTAINER_ENGINE_MSG"
+        exit 1
+    fi
+
     if [ "$USE_PODMAN" = "true" ]; then
         echo "# Installing Podman and related packages..."
         case "$lsb_dist" in
@@ -190,23 +297,24 @@ do_install_container_engine() {
                 $sh_c "zypper install -y podman crun podman-docker"
             ;;
         esac
-        
-        # Modify daemon and enable podman services
-		do_modify_daemon
+        if ! check_podman_version; then
+            echo "Error: Podman 4+ is required. Please upgrade Podman."
+            exit 1
+        fi
+        do_modify_daemon
         return
     fi
-    
-    # Docker installation for Debian-based systems only
-    if [ "$USE_PODMAN" = "false" ] && command_exists docker; then
-        docker_version=$(docker -v | sed 's/.*version \(.*\),.*/\1/' | tr -d '.')
-        if [ "$docker_version" -ge 2500 ]; then
-            echo "# Docker $docker_version already installed"
+
+    if command_exists docker; then
+        docker_version=$(docker -v 2>/dev/null | sed 's/.*version \([^,]*\),.*/\1/' | tr -d '.')
+        if [ -n "$docker_version" ] && [ "$docker_version" -ge 2500 ] 2>/dev/null; then
+            echo "# Docker already installed (>= 25)"
             start_docker
             do_modify_daemon
             return
         fi
     fi
-    
+
     echo "# Installing Docker..."
     case "$lsb_dist" in
         debian|ubuntu|raspbian)
@@ -227,9 +335,13 @@ do_install_container_engine() {
             curl -fsSL https://get.docker.com/ | $sh_c "sh"
         ;;
     esac
-    
+
     if ! command_exists docker; then
         echo "Failed to install Docker"
+        exit 1
+    fi
+    if ! check_docker_version; then
+        echo "Error: Docker 25+ is required. Please upgrade Docker."
         exit 1
     fi
     start_docker
@@ -260,10 +372,9 @@ determine_container_engine
 # Install appropriate container engine
 do_install_container_engine
 
-# Set up Datasance repository
-do_set_datasance_repo
-
-# Install WebAssembly runtime support
-do_install_wasm_shim
+if [ "$PACKAGE_TYPE" = "deb" ] || [ "$PACKAGE_TYPE" = "rpm" ]; then
+    do_set_datasance_repo
+    do_install_wasm_shim
+fi
 
 echo "# Installation completed successfully"

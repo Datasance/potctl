@@ -14,9 +14,11 @@
 package deployagent
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/datasance/potctl/internal/config"
+	deployairgap "github.com/datasance/potctl/internal/deploy/airgap"
 	rsc "github.com/datasance/potctl/internal/resource"
 
 	// clientutil "github.com/datasance/potctl/internal/util/client"
@@ -65,6 +67,10 @@ func (exe *remoteExecutor) ProvisionAgent() (string, error) {
 			exe.agent.UUID,
 			exe.agent.Config.TimeZone,
 		)
+		if err == nil {
+			// Set airgap flag if enabled
+			agent.SetAirgap(exe.agent.Airgap)
+		}
 	} else {
 		// Use NewRemoteAgent for "native" deployment type
 		agent, err = install.NewRemoteAgent(
@@ -212,6 +218,68 @@ func (exe *remoteExecutor) Execute() (err error) {
 	// // Set version
 	// agent.SetVersion(exe.agent.Package.Version)
 	// agent.SetRepository(exe.agent.Package.Repo, exe.agent.Package.Token)
+
+	// Handle airgap deployment if enabled
+	if exe.agent.Airgap {
+		// Validate airgap requirements
+		if err := deployairgap.ValidateAirgapRequirements(exe.agent.Config); err != nil {
+			return fmt.Errorf("airgap deployment requires valid configuration: %w", err)
+		}
+
+		// Resolve platform and container engine
+		platform, err := deployairgap.ResolvePlatform(exe.agent.Config.FogType)
+		if err != nil {
+			return fmt.Errorf("failed to resolve platform: %w", err)
+		}
+
+		engine, err := deployairgap.ResolveContainerEngine(exe.agent.Config.AgentConfiguration.ContainerEngine)
+		if err != nil {
+			return fmt.Errorf("failed to resolve container engine: %w", err)
+		}
+
+		// Determine if this is initial deployment
+		isInitial, err := deployairgap.IsInitialDeployment(exe.namespace)
+		if err != nil {
+			return fmt.Errorf("failed to determine deployment type: %w", err)
+		}
+
+		// Collect required images
+		// For Kubernetes control planes, pass nil and always fetch from catalog (existing control plane)
+		var remoteControlPlane *rsc.RemoteControlPlane
+		if remoteCP, ok := controlPlane.(*rsc.RemoteControlPlane); ok {
+			remoteControlPlane = remoteCP
+		} else {
+			// For Kubernetes or other control planes, treat as existing control plane
+			// and fetch images from catalog items
+			isInitial = false
+		}
+
+		images, err := deployairgap.CollectAgentImages(exe.namespace, exe.agent, remoteControlPlane, isInitial)
+		if err != nil {
+			return fmt.Errorf("failed to collect agent images: %w", err)
+		}
+
+		// Get router image for the platform
+		routerImage, err := deployairgap.GetImageForPlatform(images, platform)
+		if err != nil {
+			return fmt.Errorf("failed to get router image for platform %s: %w", platform, err)
+		}
+
+		// Prepare image list (agent, router for platform, debugger if available)
+		imageList := []string{images.Agent}
+		if routerImage != "" {
+			imageList = append(imageList, routerImage)
+		}
+		if images.Debugger != "" {
+			imageList = append(imageList, images.Debugger)
+		}
+
+		// Transfer images before bootstrap
+		ctx := context.Background()
+		if err := deployairgap.TransferAirgapImages(ctx, exe.namespace, exe.agent.Host, &exe.agent.SSH, platform, engine, imageList); err != nil {
+			return fmt.Errorf("failed to transfer airgap images: %w", err)
+		}
+	}
 
 	// Try the deploy
 	err = agent.Bootstrap()

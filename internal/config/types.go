@@ -33,6 +33,9 @@ const (
 	OfflineImageKind           Kind = "OfflineImage"
 	CertificateKind            Kind = "Certificate"
 	CertificateAuthorityKind   Kind = "CertificateAuthority"
+	RoleKind                   Kind = "Role"
+	RoleBindingKind            Kind = "RoleBinding"
+	ServiceAccountKind         Kind = "ServiceAccount"
 )
 
 // Header contains k8s yaml header

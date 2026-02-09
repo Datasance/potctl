@@ -34,6 +34,7 @@ type RemoteAgent struct {
 	dir           string
 	procs         AgentProcedures
 	customInstall bool // Flag set when custom install scripts are provided
+	airgap        bool // Flag set when airgap deployment is enabled
 }
 
 type AgentProcedures struct {
@@ -159,7 +160,7 @@ func NewRemoteContainerAgent(user, host string, port int, privKeyFilename, agent
 	}
 	// Get script contents from embedded files
 	for _, scriptName := range agent.procs.scriptNames {
-		scriptContent, err := util.GetStaticFile(addContainerAgentAssetPrefix(scriptName))
+		scriptContent, err := util.GetStaticFile(agent.addContainerAgentAssetPrefix(scriptName))
 		if err != nil {
 			return nil, err
 		}
@@ -255,6 +256,10 @@ func (agent *RemoteAgent) SetContainerImage(image string) {
 		return
 	}
 	agent.procs.Install.Args[0] = image
+}
+
+func (agent *RemoteAgent) SetAirgap(airgap bool) {
+	agent.airgap = airgap
 }
 
 // func (agent *RemoteAgent) SetRepository(repo, token string) {
@@ -602,7 +607,10 @@ func addAgentAssetPrefix(file string) string {
 	return fmt.Sprintf("agent/%s", file)
 }
 
-func addContainerAgentAssetPrefix(file string) string {
+func (agent *RemoteAgent) addContainerAgentAssetPrefix(file string) string {
+	if agent.airgap {
+		return fmt.Sprintf("airgap-agent/%s", file)
+	}
 	return fmt.Sprintf("container-agent/%s", file)
 }
 

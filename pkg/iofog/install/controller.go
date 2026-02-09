@@ -53,6 +53,7 @@ type ControllerOptions struct {
 	Https               *Https
 	SiteCA              *SiteCertificate
 	LocalCA             *SiteCertificate
+	Airgap              bool
 }
 
 type Https struct {
@@ -171,7 +172,7 @@ func NewController(options *ControllerOptions) (*Controller, error) {
 	}
 	// Get script contents from embedded files
 	for _, scriptName := range ctrl.procs.scriptNames {
-		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(scriptName))
+		scriptContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(scriptName))
 		if err != nil {
 			return nil, err
 		}
@@ -216,7 +217,10 @@ func (ctrl *Controller) SetControllerEvents(auditEnabled bool, retentionDays, cl
 	}
 }
 
-func addControllerAssetPrefix(file string) string {
+func (ctrl *Controller) addControllerAssetPrefix(file string) string {
+	if ctrl.Airgap {
+		return fmt.Sprintf("airgap-controller/%s", file)
+	}
 	return fmt.Sprintf("container-controller/%s", file)
 }
 
@@ -245,7 +249,7 @@ func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedu
 
 	// Add check_prereqs script and entrypoint (always required for both default and custom)
 	procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptPrereq)
-	prereqContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptPrereq))
+	prereqContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(pkg.controllerScriptPrereq))
 	if err != nil {
 		return err
 	}
@@ -256,7 +260,7 @@ func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedu
 	if procs.Deps.Name == "" {
 		procs.Deps = ctrl.procs.Deps
 		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptInstallContainerEngine)
-		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptInstallContainerEngine))
+		scriptContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(pkg.controllerScriptInstallContainerEngine))
 		if err != nil {
 			return err
 		}
@@ -265,7 +269,7 @@ func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedu
 	if procs.SetEnv.Name == "" {
 		procs.SetEnv = ctrl.procs.SetEnv
 		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptSetEnv)
-		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptSetEnv))
+		scriptContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(pkg.controllerScriptSetEnv))
 		if err != nil {
 			return err
 		}
@@ -274,7 +278,7 @@ func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedu
 	if procs.Install.Name == "" {
 		procs.Install = ctrl.procs.Install
 		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptInstall)
-		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptInstall))
+		scriptContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(pkg.controllerScriptInstall))
 		if err != nil {
 			return err
 		}
@@ -285,7 +289,7 @@ func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedu
 	if procs.Uninstall.Name == "" {
 		procs.Uninstall = ctrl.procs.Uninstall
 		procs.scriptNames = append(procs.scriptNames, pkg.controllerScriptUninstall)
-		scriptContent, err := util.GetStaticFile(addControllerAssetPrefix(pkg.controllerScriptUninstall))
+		scriptContent, err := util.GetStaticFile(ctrl.addControllerAssetPrefix(pkg.controllerScriptUninstall))
 		if err != nil {
 			return err
 		}
@@ -375,13 +379,21 @@ func (ctrl *Controller) Uninstall() (err error) {
 			}
 		} else {
 			// Fallback to default uninstall script
-			if err := ctrl.CopyScript("container-controller", pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
+			assetPrefix := "container-controller"
+			if ctrl.Airgap {
+				assetPrefix = "airgap-controller"
+			}
+			if err := ctrl.CopyScript(assetPrefix, pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
 				return err
 			}
 		}
 	} else {
 		// Fallback to default method for backward compatibility
-		if err := ctrl.CopyScript("container-controller", pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
+		assetPrefix := "container-controller"
+		if ctrl.Airgap {
+			assetPrefix = "airgap-controller"
+		}
+		if err := ctrl.CopyScript(assetPrefix, pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
 			return err
 		}
 	}
@@ -422,6 +434,10 @@ func (ctrl *Controller) copyInstallScripts() error {
 	}
 
 	// Fallback to default method for backward compatibility
+	assetPrefix := "container-controller"
+	if ctrl.Airgap {
+		assetPrefix = "airgap-controller"
+	}
 	scripts := []string{
 		pkg.controllerScriptPrereq,
 		pkg.controllerScriptInit,
@@ -430,7 +446,7 @@ func (ctrl *Controller) copyInstallScripts() error {
 		pkg.controllerScriptSetEnv,
 	}
 	for _, script := range scripts {
-		if err := ctrl.CopyScript("container-controller", script, ctrl.ctrlDir); err != nil {
+		if err := ctrl.CopyScript(assetPrefix, script, ctrl.ctrlDir); err != nil {
 			return err
 		}
 	}

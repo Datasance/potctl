@@ -18,17 +18,7 @@ do_stop_iofog() {
 	fi
 }
 
-# do_check_iofog_on_arm() {
-#   if [ "$lsb_dist" = "raspbian" ] || [ "$(uname -m)" = "armv7l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$(uname -m)" = "armv8" ]; then
-#     echo "# We re on ARM ($(uname -m)) : Updating config.xml to use correct docker_url"
-#     $sh_c 'sed -i -e "s|<docker_url>.*</docker_url>|<docker_url>tcp://127.0.0.1:2375/</docker_url>|g" /etc/iofog-agent/config.xml'
 
-#     echo "# Restarting iofog-agent service"
-#     $sh_c "systemctl stop iofog-agent"
-#     sleep 3
-#     $sh_c "systemctl start iofog-agent"
-#  fi
-# }
 
 do_install_iofog() {
 	AGENT_CONFIG_FOLDER=/etc/iofog-agent
@@ -93,6 +83,19 @@ echo "version: $agent_version"
 
 . /etc/iofog/agent/init.sh
 init
+
+# Native agent is supported only on package-managed OSes (deb/rpm) with systemd
+if [ "$PACKAGE_TYPE" != "deb" ] && [ "$PACKAGE_TYPE" != "rpm" ]; then
+	echo "Error: This operating system is not supported for native agent installation."
+	echo "Please deploy the agent as a container (container agent) on this host."
+	exit 1
+fi
+if [ "$INIT_SYSTEM" != "systemd" ]; then
+	echo "Error: Native agent is supported only on systemd. This system uses $INIT_SYSTEM."
+	echo "Please deploy the agent as a container (container agent) on this host."
+	exit 1
+fi
+
 do_check_install
 do_stop_iofog
 do_install_iofog

@@ -28,18 +28,18 @@ var (
 	agentTag          = "undefined"
 	operatorTag       = "undefined"
 	routerTag         = "undefined"
-	routerAdaptorTag  = "undefined"
 	controllerVersion = "undefined"
 	agentVersion      = "undefined"
+	debuggerTag       = "undefined"
 )
 
 const (
-	controllerImage    = "controller"
-	agentImage         = "agent"
-	operatorImage      = "operator"
-	routerAdaptorImage = "router-adaptor"
-	routerImage        = "router"
-	routerARMImage     = "router"
+	controllerImage = "controller"
+	agentImage      = "agent"
+	operatorImage   = "operator"
+	routerImage     = "router"
+	routerARMImage  = "router"
+	debuggerImage   = "node-debugger"
 )
 
 type Version struct {
@@ -68,6 +68,4 @@ func GetAgentImage() string     { return fmt.Sprintf("%s/%s:%s", repo, agentImag
 func GetOperatorImage() string  { return fmt.Sprintf("%s/%s:%s", repo, operatorImage, operatorTag) }
 func GetRouterImage() string    { return fmt.Sprintf("%s/%s:%s", repo, routerImage, routerTag) }
 func GetRouterARMImage() string { return fmt.Sprintf("%s/%s:%s", repo, routerARMImage, routerTag) }
-func GetRouterAdaptorImage() string {
-	return fmt.Sprintf("%s/%s:%s", repo, routerAdaptorImage, routerAdaptorTag)
-}
+func GetDebuggerImage() string  { return fmt.Sprintf("%s/%s:%s", repo, debuggerImage, debuggerTag) }

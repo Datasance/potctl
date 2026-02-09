@@ -58,6 +58,12 @@ func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Exe
 		return newVolumeMountExecutor(namespace), nil
 	case "certificates":
 		return newCertificateExecutor(namespace), nil
+	case "roles":
+		return newRoleExecutor(namespace), nil
+	case "rolebindings":
+		return newRoleBindingExecutor(namespace), nil
+	case "serviceaccounts":
+		return newServiceAccountExecutor(namespace), nil
 	default:
 		msg := "Unknown resource: '" + resourceType + "'"
 		return nil, util.NewInputError(msg)

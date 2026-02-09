@@ -88,3 +88,23 @@ func (m *Message) IsStdoutMessage() bool {
 func (m *Message) IsStderrMessage() bool {
 	return m.Type == MessageTypeStderr
 }
+
+// IsLogLineMessage checks if the message is a log line message
+func (m *Message) IsLogLineMessage() bool {
+	return m.Type == MessageTypeLogLine
+}
+
+// IsLogStartMessage checks if the message is a log start message
+func (m *Message) IsLogStartMessage() bool {
+	return m.Type == MessageTypeLogStart
+}
+
+// IsLogStopMessage checks if the message is a log stop message
+func (m *Message) IsLogStopMessage() bool {
+	return m.Type == MessageTypeLogStop
+}
+
+// IsLogErrorMessage checks if the message is a log error message
+func (m *Message) IsLogErrorMessage() bool {
+	return m.Type == MessageTypeLogError
+}

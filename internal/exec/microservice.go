@@ -58,6 +58,7 @@ func (exe *microserviceExecutor) Execute() error {
 	}
 
 	exe.msvc, err = clt.GetMicroserviceByName(appName, msvcName)
+	isSystem := false
 	if err != nil {
 		// Check if error indicates application not found
 		if strings.Contains(err.Error(), "Invalid application id") {
@@ -66,6 +67,7 @@ func (exe *microserviceExecutor) Execute() error {
 			if err != nil {
 				return err
 			}
+			isSystem = true
 		} else {
 			// Return other types of errors
 			return err
@@ -80,7 +82,12 @@ func (exe *microserviceExecutor) Execute() error {
 	// Convert http(s):// to ws(s)://
 	wsURL := strings.Replace(controllerURL, "http://", "ws://", 1)
 	wsURL = strings.Replace(wsURL, "https://", "wss://", 1)
-	wsURL = fmt.Sprintf("%s/microservices/exec/%s", wsURL, exe.msvc.UUID)
+	// Use system endpoint for system microservices
+	if isSystem {
+		wsURL = fmt.Sprintf("%s/microservices/system/exec/%s", wsURL, exe.msvc.UUID)
+	} else {
+		wsURL = fmt.Sprintf("%s/microservices/exec/%s", wsURL, exe.msvc.UUID)
+	}
 
 	// Set up headers
 	headers := http.Header{}

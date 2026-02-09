@@ -48,6 +48,9 @@ Most resources require a working Controller in the Namespace in order to be desc
 		newDescribeServiceCommand(),
 		newDescribeVolumeMountCommand(),
 		newDescribeCertificateCommand(),
+		newDescribeRoleCommand(),
+		newDescribeRoleBindingCommand(),
+		newDescribeServiceAccountCommand(),
 	)
 
 	// Register Flags

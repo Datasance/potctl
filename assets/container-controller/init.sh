@@ -218,6 +218,55 @@ refine_distribution_version() {
     esac
 }
 
+# Detect init system 
+detect_init_system() {
+    if command -v systemctl >/dev/null 2>&1 && [ -d /etc/systemd/system ]; then
+        INIT_SYSTEM="systemd"
+    elif [ -f /sbin/init ] && /sbin/init --version 2>/dev/null | grep -q upstart; then
+        INIT_SYSTEM="upstart"
+    elif command -v openrc >/dev/null 2>&1 || [ -f /sbin/openrc ]; then
+        INIT_SYSTEM="openrc"
+    elif [ -d /etc/s6 ] || command -v s6-svc >/dev/null 2>&1; then
+        INIT_SYSTEM="s6"
+    elif command -v runit >/dev/null 2>&1 || [ -d /etc/runit ]; then
+        INIT_SYSTEM="runit"
+    elif [ -d /etc/init.d ]; then
+        INIT_SYSTEM="sysvinit"
+    else
+        INIT_SYSTEM="unknown"
+    fi
+    export INIT_SYSTEM
+    echo "# Detected init system: $INIT_SYSTEM"
+}
+
+# Detect package type (deb, rpm, or other)
+detect_package_type() {
+    case "$lsb_dist" in
+        debian|ubuntu|raspbian|mendel)
+            PACKAGE_TYPE="deb"
+            ;;
+        fedora|centos|rhel|ol|sles|opensuse*)
+            PACKAGE_TYPE="rpm"
+            ;;
+        alpine)
+            PACKAGE_TYPE="apk"
+            ;;
+        *)
+            if command_exists apt-get || command_exists dpkg; then
+                PACKAGE_TYPE="deb"
+            elif command_exists yum || command_exists dnf || command_exists zypper; then
+                PACKAGE_TYPE="rpm"
+            elif command_exists apk; then
+                PACKAGE_TYPE="apk"
+            else
+                PACKAGE_TYPE="other"
+            fi
+            ;;
+    esac
+    export PACKAGE_TYPE
+    echo "# Detected package type: $PACKAGE_TYPE"
+}
+
 # Init function
 init() {
     # Detect basic distribution info
@@ -232,10 +281,16 @@ init() {
     # Check if this is a forked distro
     check_forked
     
+    # Detect init system and package type (for universal OS/init support)
+    detect_init_system
+    detect_package_type
+    
     # Print final distribution information
     echo "----------------------------------------"
     echo "Linux Distribution: $lsb_dist"
     echo "Version: $dist_version"
+    echo "Init system: $INIT_SYSTEM"
+    echo "Package type: $PACKAGE_TYPE"
     echo "----------------------------------------"
     
 }

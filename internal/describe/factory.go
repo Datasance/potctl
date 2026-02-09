@@ -67,6 +67,12 @@ func NewExecutor(opt *Options) (execute.Executor, error) {
 		return newVolumeMountExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	case "certificate":
 		return newCertificateExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "role":
+		return newRoleExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "rolebinding":
+		return newRoleBindingExecutor(opt.Namespace, opt.Name, opt.Filename), nil
+	case "serviceaccount":
+		return newServiceAccountExecutor(opt.Namespace, opt.Name, opt.Filename), nil
 	default:
 		return nil, util.NewInputError(fmt.Sprintf("Unknown resources: %s", opt.Resource))
 	}

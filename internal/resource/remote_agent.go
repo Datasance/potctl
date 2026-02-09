@@ -33,6 +33,7 @@ type RemoteAgent struct {
 	Config             *AgentConfiguration `yaml:"config,omitempty"`
 	Scripts            *AgentScripts       `yaml:"scripts,omitempty"`
 	ControllerEndpoint string              `yaml:"controllerEndpoint,omitempty"`
+	Airgap             bool                `yaml:"airgap,omitempty"`
 }
 
 func (agent *RemoteAgent) GetName() string {
@@ -110,6 +111,7 @@ func (agent *RemoteAgent) Clone() Agent {
 		Scripts:            scripts,
 		Config:             config,
 		ControllerEndpoint: agent.ControllerEndpoint,
+		Airgap:             agent.Airgap,
 	}
 }
 
