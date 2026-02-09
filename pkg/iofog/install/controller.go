@@ -26,6 +26,11 @@ import (
 	"github.com/datasance/potctl/pkg/util"
 )
 
+const (
+	controllerAssetPrefixContainer = "container-controller"
+	controllerAssetPrefixAirgap    = "airgap-controller"
+)
+
 type RemoteSystemImages struct {
 	ARM string `yaml:"arm,omitempty"`
 	X86 string `yaml:"x86,omitempty"`
@@ -219,9 +224,9 @@ func (ctrl *Controller) SetControllerEvents(auditEnabled bool, retentionDays, cl
 
 func (ctrl *Controller) addControllerAssetPrefix(file string) string {
 	if ctrl.Airgap {
-		return fmt.Sprintf("airgap-controller/%s", file)
+		return fmt.Sprintf("%s/%s", controllerAssetPrefixAirgap, file)
 	}
-	return fmt.Sprintf("container-controller/%s", file)
+	return fmt.Sprintf("%s/%s", controllerAssetPrefixContainer, file)
 }
 
 func (ctrl *Controller) CustomizeProcedures(dir string, procs *ControllerProcedures) error {
@@ -379,9 +384,9 @@ func (ctrl *Controller) Uninstall() (err error) {
 			}
 		} else {
 			// Fallback to default uninstall script
-			assetPrefix := "container-controller"
+			assetPrefix := controllerAssetPrefixContainer
 			if ctrl.Airgap {
-				assetPrefix = "airgap-controller"
+				assetPrefix = controllerAssetPrefixAirgap
 			}
 			if err := ctrl.CopyScript(assetPrefix, pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
 				return err
@@ -389,9 +394,9 @@ func (ctrl *Controller) Uninstall() (err error) {
 		}
 	} else {
 		// Fallback to default method for backward compatibility
-		assetPrefix := "container-controller"
+		assetPrefix := controllerAssetPrefixContainer
 		if ctrl.Airgap {
-			assetPrefix = "airgap-controller"
+			assetPrefix = controllerAssetPrefixAirgap
 		}
 		if err := ctrl.CopyScript(assetPrefix, pkg.controllerScriptUninstall, ctrl.ctrlDir); err != nil {
 			return err
@@ -434,9 +439,9 @@ func (ctrl *Controller) copyInstallScripts() error {
 	}
 
 	// Fallback to default method for backward compatibility
-	assetPrefix := "container-controller"
+	assetPrefix := controllerAssetPrefixContainer
 	if ctrl.Airgap {
-		assetPrefix = "airgap-controller"
+		assetPrefix = controllerAssetPrefixAirgap
 	}
 	scripts := []string{
 		pkg.controllerScriptPrereq,
