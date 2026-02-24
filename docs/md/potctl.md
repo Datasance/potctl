@@ -32,6 +32,7 @@ potctl [flags]
 * [potctl legacy](potctl_legacy.md)	 - Execute commands using legacy CLI
 * [potctl logs](potctl_logs.md)	 - Get log contents of deployed resource
 * [potctl move](potctl_move.md)	 - Move an existing resources inside the current Namespace
+* [potctl nats](potctl_nats.md)	 - Manage NATS resources
 * [potctl prune](potctl_prune.md)	 - prune ioFog resources
 * [potctl rebuild](potctl_rebuild.md)	 - Rebuilds a microservice or system-microservice
 * [potctl rename](potctl_rename.md)	 - Rename the iofog resources that are currently deployed

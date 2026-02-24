@@ -25,7 +25,8 @@ const (
 	MicroserviceKind           Kind = Kind(apps.MicroserviceKind)
 	ApplicationKind            Kind = Kind(apps.ApplicationKind)
 	ApplicationTemplateKind    Kind = Kind(apps.ApplicationTemplateKind)
-	RouteKind                  Kind = Kind(apps.RouteKind)
+	NatsAccountRuleKind        Kind = "NatsAccountRule"
+	NatsUserRuleKind           Kind = "NatsUserRule"
 	SecretKind                 Kind = "Secret"
 	ConfigMapKind              Kind = "ConfigMap"
 	ServiceKind                Kind = "Service"

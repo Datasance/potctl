@@ -17,8 +17,6 @@ import (
 	"fmt"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
-
 	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 	rsc "github.com/datasance/potctl/internal/resource"
@@ -175,14 +173,6 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	envs := mapEnvs(msvcInfo.Env)
 	extraHosts := mapExtraHosts(msvcInfo.ExtraHosts)
 	msvc.Images = &images
-	jsonConfig := make(map[string]interface{})
-	if err := jsoniter.Unmarshal([]byte(msvcInfo.Config), &jsonConfig); err != nil {
-		return msvc, nil, nil, err
-	}
-	jsonAnnotations := make(map[string]interface{})
-	if err := jsoniter.Unmarshal([]byte(msvcInfo.Annotations), &jsonAnnotations); err != nil {
-		return msvc, nil, nil, err
-	}
 	var healthCheck apps.MicroserviceHealthCheck
 	var hasHealthCheck bool
 	// Fix 1: Check if HealthCheck has a Test field (assuming it's a struct, not pointer)
@@ -210,8 +200,16 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 			healthCheck.StartInterval = msvcInfo.HealthCheck.StartInterval
 		}
 	}
-	msvc.Config = jsonConfig
-	msvc.Container.Annotations = jsonAnnotations
+	var config apps.ArbitraryJSON
+	if err := config.UnmarshalJSON([]byte(msvcInfo.Config)); err != nil {
+		return msvc, nil, nil, err
+	}
+	msvc.Config = config
+	var annotations apps.ArbitraryJSON
+	if err := annotations.UnmarshalJSON([]byte(msvcInfo.Annotations)); err != nil {
+		return msvc, nil, nil, err
+	}
+	msvc.Container.Annotations = annotations
 	msvc.Container.HostNetworkMode = msvcInfo.HostNetworkMode
 	msvc.Container.IsPrivileged = msvcInfo.IsPrivileged
 	msvc.Container.PidMode = msvcInfo.PidMode
@@ -232,9 +230,11 @@ func constructMicroservice(msvcInfo *client.MicroserviceInfo, agentName, appName
 	if hasHealthCheck {
 		msvc.Container.HealthCheck = &healthCheck
 	}
-	msvc.MsRoutes = apps.MsRoutes{
-		PubTags: msvcInfo.PubTags,
-		SubTags: msvcInfo.SubTags,
+	if msvcInfo.NatsConfig != nil {
+		msvc.NatsConfig = &apps.MicroserviceNatsConfig{
+			NatsAccess: msvcInfo.NatsConfig.NatsAccess,
+			NatsRule:   msvcInfo.NatsConfig.NatsRule,
+		}
 	}
 	msvc.Schedule = msvcInfo.Schedule
 	msvc.Application = &appName

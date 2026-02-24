@@ -32,7 +32,6 @@ func newRenameCommand() *cobra.Command {
 		newRenameAgentCommand(),
 		newRenameApplicationCommand(),
 		newRenameMicroserviceCommand(),
-		newRenameRouteCommand(),
 		newRenameEdgeResourceCommand(),
 	)
 

@@ -58,8 +58,8 @@ func (exe *agentExecutor) Execute() error {
 		return fmt.Errorf(msg, err.Error())
 	}
 
-	appName := fmt.Sprintf("system-%s", agent.UUID)
-	msvcName := fmt.Sprintf("debug-%s", agent.UUID)
+	appName := fmt.Sprintf("system-%s", agent.Name)
+	msvcName := fmt.Sprintf("debug-%s", agent.Name)
 
 	exe.msvc, err = clt.GetMicroserviceByName(appName, msvcName)
 	if err != nil {

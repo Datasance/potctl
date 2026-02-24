@@ -32,4 +32,5 @@ const (
 
 	// RouterMode values
 	RouterModeInterior string = "interior"
+	NatsModeServer     string = "server"
 )

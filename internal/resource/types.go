@@ -20,7 +20,6 @@ import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"
 )
 
-type Route = apps.Route
 type Microservice = apps.Microservice
 type Application = apps.Application
 type ApplicationTemplate = apps.ApplicationTemplate

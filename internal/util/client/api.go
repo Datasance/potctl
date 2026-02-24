@@ -242,6 +242,15 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 			NetworkRouter:             networkRouterPtr,
 			RouterConfig:              routerConfig,
 			TimeZone:                  agentInfo.TimeZone,
+			NatsMode:                  agentInfo.NatsMode,
+			NatsServerPort:            agentInfo.NatsServerPort,
+			NatsLeafPort:              agentInfo.NatsLeafPort,
+			NatsClusterPort:           agentInfo.NatsClusterPort,
+			NatsMqttPort:              agentInfo.NatsMqttPort,
+			NatsHttpPort:              agentInfo.NatsHttpPort,
+			JsStorageSize:             agentInfo.JsStorageSize,
+			JsMemoryStoreSize:         agentInfo.JsMemoryStoreSize,
+			UpstreamNatsServers:       agentInfo.UpstreamNatsServers,
 		},
 	}
 

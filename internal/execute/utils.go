@@ -79,6 +79,10 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 	if err != nil {
 		return exe, err
 	}
+	fullYamlBytes, err := yaml.Marshal(header)
+	if err != nil {
+		return exe, err
+	}
 
 	createExecutorFunc, found := kindHandlers[header.Kind]
 	if !found {
@@ -91,6 +95,7 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 		Namespace: namespace,
 		Name:      header.Metadata.Name,
 		YAML:      subYamlBytes,
+		FullYAML:  fullYamlBytes,
 		Data:      dataYamlBytes,
 		Tags:      header.Metadata.Tags,
 	})
@@ -101,6 +106,7 @@ type KindHandlerOpt struct {
 	Namespace string
 	Name      string
 	YAML      []byte
+	FullYAML  []byte
 	Data      []byte
 	Tags      *[]string
 }
@@ -137,7 +143,7 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 
 		decodeErr = dec.Decode(&h)
 	}
-	if decodeErr != io.EOF && decodeErr != nil {
+	if decodeErr != io.EOF {
 		return nil, decodeErr
 	}
 

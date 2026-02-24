@@ -28,6 +28,9 @@ const (
 	EdgeRouter     RouterMode = "edge"
 	InteriorRouter RouterMode = "interior"
 	NoneRouter     RouterMode = "none"
+	NatsNone       string     = "none"
+	NatsLeaf       string     = "leaf"
+	NatsServer     string     = "server"
 )
 
 func getRouterMode(config *rsc.AgentConfiguration) RouterMode {
@@ -55,6 +58,10 @@ func Validate(config *rsc.AgentConfiguration) error {
 	if routerMode != InteriorRouter && (config.RouterConfig.EdgeRouterPort != nil || config.RouterConfig.InterRouterPort != nil) {
 		msg := "agent config %s validation failed. Cannot have an edgeRouterPort or interRouterPort if routerMode is different from interior. Current router mode is: %s"
 		return util.NewInputError(fmt.Sprintf(msg, config.Name, routerMode))
+	}
+	if config.NatsMode != nil && *config.NatsMode != NatsNone && *config.NatsMode != NatsLeaf && *config.NatsMode != NatsServer {
+		msg := "agent config %s validation failed. natsMode has to be one of none, leaf, server"
+		return util.NewInputError(fmt.Sprintf(msg, config.Name))
 	}
 
 	return nil
@@ -98,6 +105,19 @@ func Process(agentConfig *rsc.AgentConfiguration, name, agentIP string, otherAge
 			return err
 		}
 		agentConfig.NetworkRouter = &uuid
+	}
+	if agentConfig.UpstreamNatsServers != nil {
+		upstreamNatsServersUUID := []string{}
+		for _, agentName := range *agentConfig.UpstreamNatsServers {
+			uuid, err := findAgentUUIDInList(otherAgents, agentName)
+			if err != nil {
+				// Keep raw value for controller-reserved NATS hub aliases.
+				upstreamNatsServersUUID = append(upstreamNatsServersUUID, agentName)
+				continue
+			}
+			upstreamNatsServersUUID = append(upstreamNatsServersUUID, uuid)
+		}
+		agentConfig.UpstreamNatsServers = &upstreamNatsServersUUID
 	}
 
 	if routerMode != NoneRouter && agentConfig.Host == nil {
