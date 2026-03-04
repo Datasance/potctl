@@ -302,7 +302,7 @@ func getBackendAgents(namespace string, ioClient *client.Client) ([]client.Agent
 	return agentList.Agents, nil
 }
 
-func getAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid string) (name string) {
+func getRouterAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid string) (name string) {
 	// if uuid == iofog.VanillaRemoteAgentName {
 	// 	return uuid
 	// }
@@ -313,6 +313,21 @@ func getAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid strin
 	if !found {
 		util.PrintNotify(fmt.Sprintf("Could not find Router: %s\n", uuid))
 		name = "UNKNOWN ROUTER: " + uuid
+	} else {
+		name = agent.Name
+	}
+	return
+}
+
+func getNatsAgentNameFromUUID(agentMapByUUID map[string]client.AgentInfo, uuid string) (name string) {
+
+	if uuid == iofog.VanillaNatsAgentName {
+		return uuid
+	}
+	agent, found := agentMapByUUID[uuid]
+	if !found {
+		util.PrintNotify(fmt.Sprintf("Could not find NATS: %s\n", uuid))
+		name = "UNKNOWN NATS: " + uuid
 	} else {
 		name = agent.Name
 	}

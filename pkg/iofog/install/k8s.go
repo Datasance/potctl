@@ -113,6 +113,14 @@ func (k8s *Kubernetes) SetControllerImage(image string) {
 	}
 }
 
+func (k8s *Kubernetes) SetNatsImage(image string) {
+	if image != "" {
+		k8s.images.Nats = image
+	} else {
+		k8s.images.Nats = util.GetNatsImage()
+	}
+}
+
 func (k8s *Kubernetes) SetPullSecret(pullSecret string) {
 	if pullSecret != "" {
 		k8s.images.PullSecret = pullSecret
@@ -228,6 +236,9 @@ func (k8s *Kubernetes) CreateControlPlane(conf *K8SControllerConfig) (endpoint s
 
 	// Set specification
 	cp.Spec.Replicas.Controller = conf.Replicas
+	if conf.ReplicasNats >= 2 {
+		cp.Spec.Replicas.Nats = conf.ReplicasNats
+	}
 	cp.Spec.Database = cpv3.Database(conf.Database)
 	cp.Spec.Auth = cpv3.Auth(conf.Auth)
 	cp.Spec.Events = cpv3.Events(conf.Events)
@@ -235,6 +246,12 @@ func (k8s *Kubernetes) CreateControlPlane(conf *K8SControllerConfig) (endpoint s
 	cp.Spec.Services = k8s.services
 	cp.Spec.Ingresses = k8s.ingresses
 	cp.Spec.Images = k8s.images
+	if conf.Nats != nil {
+		cp.Spec.Nats = conf.Nats
+	}
+	if conf.Vault != nil {
+		cp.Spec.Vault = conf.Vault
+	}
 	// cp.Spec.Router = k8s.router
 	cp.Spec.Controller.EcnViewerPort = conf.EcnViewerPort
 	cp.Spec.Controller.EcnViewerURL = conf.EcnViewerURL
@@ -669,7 +686,7 @@ func (k8s *Kubernetes) handleLoadBalancer(svc *corev1.Service, targetPort int32)
 	return
 }
 
-func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string) {
+func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations map[string]string, externalTrafficPolicy string) {
 	if svcType != "" {
 		k8s.services.Controller.Type = svcType
 	} else {
@@ -677,9 +694,10 @@ func (k8s *Kubernetes) SetControllerService(svcType, address string, annotations
 	}
 	k8s.services.Controller.Address = address
 	k8s.services.Controller.Annotations = annotations
+	k8s.services.Controller.ExternalTrafficPolicy = externalTrafficPolicy
 }
 
-func (k8s *Kubernetes) SetRouterService(svcType, address string, annotations map[string]string) {
+func (k8s *Kubernetes) SetRouterService(svcType, address string, annotations map[string]string, externalTrafficPolicy string) {
 	if svcType != "" {
 		k8s.services.Router.Type = svcType
 	} else {
@@ -687,6 +705,7 @@ func (k8s *Kubernetes) SetRouterService(svcType, address string, annotations map
 	}
 	k8s.services.Router.Address = address
 	k8s.services.Router.Annotations = annotations
+	k8s.services.Router.ExternalTrafficPolicy = externalTrafficPolicy
 }
 
 func (k8s *Kubernetes) SetControllerIngress(annotations map[string]string, ingressClassName string, host string, secretName string) {
@@ -701,6 +720,37 @@ func (k8s *Kubernetes) SetRouterIngress(address string, messagePort int, interio
 	k8s.ingresses.Router.MessagePort = messagePort
 	k8s.ingresses.Router.InteriorPort = interiorPort
 	k8s.ingresses.Router.EdgePort = edgePort
+}
+
+func (k8s *Kubernetes) SetNatsService(svcType, address string, annotations map[string]string, externalTrafficPolicy string) {
+	if svcType != "" {
+		k8s.services.Nats.Type = svcType
+	} else {
+		k8s.services.Nats.Type = string(corev1.ServiceTypeClusterIP)
+	}
+	k8s.services.Nats.Address = address
+	k8s.services.Nats.Annotations = annotations
+	k8s.services.Nats.ExternalTrafficPolicy = externalTrafficPolicy
+}
+
+func (k8s *Kubernetes) SetNatsServerService(svcType, address string, annotations map[string]string, externalTrafficPolicy string) {
+	if svcType != "" {
+		k8s.services.NatsServer.Type = svcType
+	} else {
+		k8s.services.NatsServer.Type = string(corev1.ServiceTypeLoadBalancer)
+	}
+	k8s.services.NatsServer.Address = address
+	k8s.services.NatsServer.Annotations = annotations
+	k8s.services.NatsServer.ExternalTrafficPolicy = externalTrafficPolicy
+}
+
+func (k8s *Kubernetes) SetNatsIngress(address string, serverPort, clusterPort, leafPort, mqttPort, httpPort int) {
+	k8s.ingresses.Nats.Address = address
+	k8s.ingresses.Nats.ServerPort = serverPort
+	k8s.ingresses.Nats.ClusterPort = clusterPort
+	k8s.ingresses.Nats.LeafPort = leafPort
+	k8s.ingresses.Nats.MqttPort = mqttPort
+	k8s.ingresses.Nats.HttpPort = httpPort
 }
 
 // func (k8s *Kubernetes) SetRouterConfig(HA *bool) {

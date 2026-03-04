@@ -18,11 +18,13 @@ import (
 )
 
 type LocalControlPlane struct {
-	IofogUser  IofogUser        `yaml:"iofogUser"`
-	Controller *LocalController `yaml:"controller,omitempty"`
-	Database   Database         `yaml:"database"`
-	Auth       Auth             `yaml:"auth"`
-	Events     Events           `yaml:"events,omitempty"`
+	IofogUser           IofogUser                 `yaml:"iofogUser"`
+	Controller          *LocalController          `yaml:"controller,omitempty"`
+	Database            Database                  `yaml:"database"`
+	Auth                Auth                      `yaml:"auth"`
+	Events              Events                    `yaml:"events,omitempty"`
+	SystemMicroservices *LocalSystemMicroservices `yaml:"systemMicroservices,omitempty"`
+	Nats                *NatsEnabledConfig        `yaml:"nats,omitempty"`
 }
 
 func (cp *LocalControlPlane) GetUser() IofogUser {
@@ -94,10 +96,20 @@ func (cp *LocalControlPlane) Sanitize() error {
 }
 
 func (cp *LocalControlPlane) Clone() ControlPlane {
+	var sys *LocalSystemMicroservices
+	if cp.SystemMicroservices != nil {
+		sys = &LocalSystemMicroservices{
+			Router: cp.SystemMicroservices.Router,
+			Nats:   cp.SystemMicroservices.Nats,
+		}
+	}
 	return &LocalControlPlane{
-		IofogUser:  cp.IofogUser,
-		Controller: cp.Controller.Clone().(*LocalController),
-		Database:   cp.Database,
-		Auth:       cp.Auth,
+		IofogUser:           cp.IofogUser,
+		Controller:          cp.Controller.Clone().(*LocalController),
+		Database:            cp.Database,
+		Auth:                cp.Auth,
+		Events:              cp.Events,
+		SystemMicroservices: sys,
+		Nats:                cp.Nats,
 	}
 }

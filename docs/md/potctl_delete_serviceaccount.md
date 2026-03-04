@@ -4,16 +4,16 @@ Delete a ServiceAccount
 
 ### Synopsis
 
-Delete a ServiceAccount from the Controller.
+Delete a ServiceAccount from the Controller. ServiceAccounts are application-scoped; use APPLICATION_NAME/SERVICE_ACCOUNT_NAME (e.g. myapp/my-sa).
 
 ```
-potctl delete serviceaccount NAME [flags]
+potctl delete serviceaccount APPLICATION_NAME/SERVICE_ACCOUNT_NAME [flags]
 ```
 
 ### Examples
 
 ```
-potctl delete serviceaccount NAME
+potctl delete serviceaccount myapp/my-sa
 ```
 
 ### Options

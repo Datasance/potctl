@@ -15,6 +15,7 @@ package deploymicroservice
 
 import (
 	"fmt"
+	"strings"
 
 	apps "github.com/datasance/iofog-go-sdk/v3/pkg/apps"
 	"github.com/datasance/potctl/internal/config"
@@ -93,9 +94,18 @@ func NewExecutor(opt Options) (exe execute.Executor, err error) {
 		return
 	}
 
+	name := opt.Name
+	if !strings.Contains(name, "/") {
+		if m, ok := microservice.(map[interface{}]interface{}); ok {
+			if app, ok := m["application"].(string); ok && app != "" {
+				name = app + "/" + name
+			}
+		}
+	}
+
 	return &remoteExecutor{
 		namespace:    opt.Namespace,
 		microservice: &microservice,
-		name:         opt.Name,
+		name:         name,
 	}, nil
 }

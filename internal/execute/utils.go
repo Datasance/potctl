@@ -190,10 +190,11 @@ func headerDecodeToHeader(h *headerDecode) *config.Header {
 		}
 	case config.ServiceAccountKind:
 		if h.RoleRef != nil {
-			// Controller-style: roleRef at top level
+			// Controller-style: metadata.applicationName and roleRef at top level
 			header.Spec = map[string]interface{}{
-				"name":    h.Metadata.Name,
-				"roleRef": h.RoleRef,
+				"name":            h.Metadata.Name,
+				"applicationName": h.Metadata.ApplicationName,
+				"roleRef":         h.RoleRef,
 			}
 		}
 	}

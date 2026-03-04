@@ -25,10 +25,10 @@ func newDescribeServiceAccountCommand() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:     "serviceaccount NAME",
+		Use:     "serviceaccount APPLICATION_NAME/SERVICE_ACCOUNT_NAME",
 		Short:   "Get detailed information about a ServiceAccount",
-		Long:    `Get detailed information about a ServiceAccount.`,
-		Example: `potctl describe serviceaccount NAME`,
+		Long:    `Get detailed information about a ServiceAccount. ServiceAccounts are application-scoped; use APPLICATION_NAME/SERVICE_ACCOUNT_NAME (e.g. myapp/my-sa).`,
+		Example: `potctl describe serviceaccount myapp/my-sa`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error

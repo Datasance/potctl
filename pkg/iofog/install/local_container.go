@@ -144,7 +144,7 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 				"iofog-agent-log:/var/log/iofog-agent:rw",
 				"iofog-agent-backup:/var/backups/iofog-agent:rw",
 				"iofog-agent-version:/usr/share/iofog-agent:rw",
-				"iofog-agent-directory:/var/lib/iofog-agent:rw",
+				"/var/lib/iofog-agent:/var/lib/iofog-agent:rw",
 				// "/sbin/shutdown:/sbin/shutdown",
 			},
 			Envs: []string{
@@ -157,8 +157,15 @@ func NewLocalAgentConfig(name, image string, ctrlConfig *LocalContainerConfig, c
 	}
 }
 
+// LocalSystemImages optionally sets Router and Nats images and NATS enabling for the local controller.
+type LocalSystemImages struct {
+	Router      string
+	Nats        string
+	NatsEnabled *bool // nil = default enabled
+}
+
 // NewLocalControllerConfig generats a static controller config
-func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, db Database, events Events) *LocalContainerConfig {
+func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, db Database, events Events, systemImages *LocalSystemImages) *LocalContainerConfig {
 	if image == "" {
 		image = util.GetControllerImage()
 	}
@@ -211,6 +218,24 @@ func NewLocalControllerConfig(image string, credentials Credentials, auth Auth, 
 				envs = append(envs, fmt.Sprintf("EVENT_CAPTURE_IP_ADDRESS=%t", *events.CaptureIpAddress))
 			}
 		}
+	}
+
+	if systemImages != nil {
+		if systemImages.Router != "" {
+			envs = append(envs, "ROUTER_IMAGE_1="+systemImages.Router, "ROUTER_IMAGE_2="+systemImages.Router)
+		}
+		natsImg := systemImages.Nats
+		if natsImg == "" {
+			natsImg = util.GetNatsImage()
+		}
+		if natsImg != "" {
+			envs = append(envs, "NATS_IMAGE_1="+natsImg, "NATS_IMAGE_2="+natsImg)
+		}
+		natsEnabled := true
+		if systemImages.NatsEnabled != nil {
+			natsEnabled = *systemImages.NatsEnabled
+		}
+		envs = append(envs, fmt.Sprintf("NATS_ENABLED=%t", natsEnabled))
 	}
 
 	return &LocalContainerConfig{

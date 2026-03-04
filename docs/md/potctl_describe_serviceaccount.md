@@ -4,16 +4,16 @@ Get detailed information about a ServiceAccount
 
 ### Synopsis
 
-Get detailed information about a ServiceAccount.
+Get detailed information about a ServiceAccount. ServiceAccounts are application-scoped; use APPLICATION_NAME/SERVICE_ACCOUNT_NAME (e.g. myapp/my-sa).
 
 ```
-potctl describe serviceaccount NAME [flags]
+potctl describe serviceaccount APPLICATION_NAME/SERVICE_ACCOUNT_NAME [flags]
 ```
 
 ### Examples
 
 ```
-potctl describe serviceaccount NAME
+potctl describe serviceaccount myapp/my-sa
 ```
 
 ### Options

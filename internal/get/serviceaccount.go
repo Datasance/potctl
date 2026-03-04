@@ -46,7 +46,7 @@ func generateServiceAccountsOutput(namespace string) error {
 		return err
 	}
 
-	list, err := clt.ListServiceAccounts()
+	list, err := clt.ListServiceAccounts("")
 	if err != nil {
 		return err
 	}
@@ -57,6 +57,7 @@ func generateServiceAccountsOutput(namespace string) error {
 func tabulateServiceAccounts(accounts []client.ServiceAccountInfo) error {
 	table := make([][]string, len(accounts)+1)
 	headers := []string{
+		"APPLICATION",
 		"NAME",
 		"ROLE",
 	}
@@ -64,7 +65,9 @@ func tabulateServiceAccounts(accounts []client.ServiceAccountInfo) error {
 
 	for idx, sa := range accounts {
 		roleName := sa.RoleRef.Name
+		appName := sa.ApplicationName
 		row := []string{
+			appName,
 			sa.Name,
 			roleName,
 		}

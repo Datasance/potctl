@@ -21,10 +21,10 @@ import (
 
 func newDeleteServiceAccountCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "serviceaccount NAME",
+		Use:     "serviceaccount APPLICATION_NAME/SERVICE_ACCOUNT_NAME",
 		Short:   "Delete a ServiceAccount",
-		Long:    `Delete a ServiceAccount from the Controller.`,
-		Example: `potctl delete serviceaccount NAME`,
+		Long:    `Delete a ServiceAccount from the Controller. ServiceAccounts are application-scoped; use APPLICATION_NAME/SERVICE_ACCOUNT_NAME (e.g. myapp/my-sa).`,
+		Example: `potctl delete serviceaccount myapp/my-sa`,
 		Args:    cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			name := args[0]

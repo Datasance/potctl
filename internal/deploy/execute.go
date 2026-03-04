@@ -227,6 +227,14 @@ func Execute(opt *Options) (err error) {
 		host := agentExecutor.GetHost()
 		tags := agentExecutor.GetTags()
 		deployConfig := agentExecutor.GetConfig()
+
+		// Determine the host value to send to the Controller (AgentConfiguration.Host).
+		// Prefer the host explicitly set in the agent configuration; otherwise, fall back to the spec host.
+		apiHost := host
+		if deployConfig != nil && deployConfig.AgentConfiguration.Host != nil && *deployConfig.AgentConfiguration.Host != "" {
+			apiHost = *deployConfig.AgentConfiguration.Host
+		}
+
 		for _, configGenericExecutor := range executorsMap[config.AgentConfigKind] {
 			configExecutor, ok := configGenericExecutor.(deployagentconfig.AgentConfigExecutor)
 			if !ok {
@@ -234,14 +242,14 @@ func Execute(opt *Options) (err error) {
 			}
 			if agentExecutor.GetName() == configExecutor.GetName() {
 				found = true
-				configExecutor.SetHost(host)
+				configExecutor.SetHost(apiHost)
 				configExecutor.SetTags(tags)
 				break
 			}
 		}
 		if !found {
 			agentConfig := client.AgentConfiguration{
-				Host: &host,
+				Host: &apiHost,
 			}
 			if util.IsLocalHost(host) && isLocalControlPlane { // Set de default local config to interior standalone for LocalControlPlane
 				isSystem := true
@@ -257,31 +265,37 @@ func Execute(opt *Options) (err error) {
 				natsClusterPort := 6222
 				natsMqttPort := 8883
 				natsHttpPort := 8222
+				jsStorageSize := "10G"
+				jsMemoryStoreSize := "1G"
 				agentConfig.IsSystem = &isSystem
 				agentConfig.DeploymentType = &deploymentType
 				agentConfig.UpstreamRouters = &upstreamRouters
-				agentConfig.UpstreamNatsServers = &upstreamNatsServers
 				agentConfig.RouterConfig = client.RouterConfig{
 					RouterMode:      &routerMode,
 					EdgeRouterPort:  &edgeRouterPort,
 					InterRouterPort: &interRouterPort,
 				}
-				agentConfig.NatsMode = &natsMode
-				agentConfig.NatsServerPort = &natsServerPort
-				agentConfig.NatsLeafPort = &natsLeafPort
-				agentConfig.NatsClusterPort = &natsClusterPort
-				agentConfig.NatsMqttPort = &natsMqttPort
-				agentConfig.NatsHttpPort = &natsHttpPort
+				agentConfig.UpstreamNatsServers = &upstreamNatsServers
+				agentConfig.NatsConfig = client.NatsConfig{
+					NatsMode:          &natsMode,
+					NatsServerPort:    &natsServerPort,
+					NatsLeafPort:      &natsLeafPort,
+					NatsClusterPort:   &natsClusterPort,
+					NatsMqttPort:      &natsMqttPort,
+					NatsHttpPort:      &natsHttpPort,
+					JsStorageSize:     &jsStorageSize,
+					JsMemoryStoreSize: &jsMemoryStoreSize,
+				}
 			} else {
 				// For remote agents, use the configuration from the agent executor
 				if deployConfig == nil {
 					// Initialize default remote agent configuration
 					agentConfig = client.AgentConfiguration{
-						Host: &host,
+						Host: &apiHost,
 					}
 				} else {
 					agentConfig = deployConfig.AgentConfiguration
-					agentConfig.Host = &host
+					agentConfig.Host = &apiHost
 				}
 			}
 			executorsMap[config.AgentConfigKind] = append(executorsMap[config.AgentConfigKind], deployagentconfig.NewRemoteExecutor(

@@ -22,7 +22,8 @@ type Options struct {
 type executor struct {
 	namespace string
 	name      string
-	fullYAML  []byte
+	specYAML  []byte // spec-only payload sent to API (controller expects rule payload, not full doc)
+	fullYAML  []byte // full doc used only for validation
 }
 
 func (exe *executor) GetName() string {
@@ -36,7 +37,7 @@ func (exe *executor) Execute() error {
 		return err
 	}
 
-	reader := bytes.NewReader(exe.fullYAML)
+	reader := bytes.NewReader(exe.specYAML)
 	_, err = clt.UpdateNatsAccountRuleFromYAML(exe.name, reader)
 	if err == nil {
 		return nil
@@ -45,7 +46,7 @@ func (exe *executor) Execute() error {
 		return err
 	}
 
-	reader = bytes.NewReader(exe.fullYAML)
+	reader = bytes.NewReader(exe.specYAML)
 	_, err = clt.CreateNatsAccountRuleFromYAML(reader)
 	return err
 }
@@ -65,17 +66,34 @@ func NewExecutor(opt Options) (execute.Executor, error) {
 
 	// Validate YAML shape using strict decode against expected top-level fields.
 	var validateDoc struct {
-		Kind     config.Kind            `yaml:"kind"`
-		Metadata config.HeaderMetadata  `yaml:"metadata"`
-		Spec     map[string]interface{} `yaml:"spec"`
+		APIVersion string                 `yaml:"apiVersion"`
+		Kind       config.Kind            `yaml:"kind"`
+		Metadata   config.HeaderMetadata  `yaml:"metadata"`
+		Spec       map[string]interface{} `yaml:"spec"`
 	}
 	if err = yaml.UnmarshalStrict(opt.FullYAML, &validateDoc); err != nil {
 		return nil, util.NewUnmarshalError(err.Error())
 	}
 
+	// Controller expects full document: apiVersion, kind, metadata, and spec (metadata and spec required).
+	specPayload := opt.Yaml
+	var specMap map[interface{}]interface{}
+	if err = yaml.Unmarshal(opt.Yaml, &specMap); err == nil {
+		doc := map[interface{}]interface{}{
+			"apiVersion": "datasance.com/v3",
+			"kind":       "NatsAccountRule",
+			"metadata":   map[interface{}]interface{}{"name": opt.Name},
+			"spec":       specMap,
+		}
+		if specPayload, err = yaml.Marshal(doc); err != nil {
+			specPayload = opt.Yaml
+		}
+	}
+
 	return &executor{
 		namespace: opt.Namespace,
 		name:      opt.Name,
+		specYAML:  specPayload,
 		fullYAML:  opt.FullYAML,
 	}, nil
 }

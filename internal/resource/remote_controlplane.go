@@ -28,6 +28,8 @@ type RemoteControlPlane struct {
 	Events              Events                    `yaml:"events,omitempty"`
 	Package             Package                   `yaml:"package,omitempty"`
 	SystemMicroservices RemoteSystemMicroservices `yaml:"systemMicroservices,omitempty"`
+	Nats                *NatsEnabledConfig        `yaml:"nats,omitempty"`
+	Vault               *VaultSpec                `yaml:"vault,omitempty"`
 	Endpoint            string                    `yaml:"endpoint,omitempty"`
 	Airgap              bool                      `yaml:"airgap,omitempty"`
 }
@@ -139,8 +141,11 @@ func (cp *RemoteControlPlane) Clone() ControlPlane {
 		IofogUser:           cp.IofogUser,
 		Database:            cp.Database,
 		Auth:                cp.Auth,
+		Events:              cp.Events,
 		Package:             cp.Package,
 		SystemMicroservices: cp.SystemMicroservices,
+		Nats:                cp.Nats,
+		Vault:               cp.Vault,
 		Controllers:         controllers,
 		Endpoint:            cp.Endpoint,
 		Airgap:              cp.Airgap,

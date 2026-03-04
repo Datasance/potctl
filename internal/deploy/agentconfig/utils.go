@@ -24,13 +24,15 @@ import (
 
 type RouterMode string
 
+type NatsMode string
+
 const (
 	EdgeRouter     RouterMode = "edge"
 	InteriorRouter RouterMode = "interior"
 	NoneRouter     RouterMode = "none"
-	NatsNone       string     = "none"
-	NatsLeaf       string     = "leaf"
-	NatsServer     string     = "server"
+	NatsNone       NatsMode   = "none"
+	NatsLeaf       NatsMode   = "leaf"
+	NatsServer     NatsMode   = "server"
 )
 
 func getRouterMode(config *rsc.AgentConfiguration) RouterMode {
@@ -40,8 +42,16 @@ func getRouterMode(config *rsc.AgentConfiguration) RouterMode {
 	return EdgeRouter
 }
 
+func getNatsMode(config *rsc.AgentConfiguration) NatsMode {
+	if config.NatsConfig.NatsMode != nil {
+		return NatsMode(*config.NatsConfig.NatsMode)
+	}
+	return NatsLeaf
+}
+
 func Validate(config *rsc.AgentConfiguration) error {
 	routerMode := getRouterMode(config)
+	natsMode := getNatsMode(config)
 
 	if routerMode != EdgeRouter && routerMode != InteriorRouter && routerMode != NoneRouter {
 		msg := "agent config %s validation failed. RouterMode has to be one of edge, interior, none. Default is: edge"
@@ -59,8 +69,8 @@ func Validate(config *rsc.AgentConfiguration) error {
 		msg := "agent config %s validation failed. Cannot have an edgeRouterPort or interRouterPort if routerMode is different from interior. Current router mode is: %s"
 		return util.NewInputError(fmt.Sprintf(msg, config.Name, routerMode))
 	}
-	if config.NatsMode != nil && *config.NatsMode != NatsNone && *config.NatsMode != NatsLeaf && *config.NatsMode != NatsServer {
-		msg := "agent config %s validation failed. natsMode has to be one of none, leaf, server"
+	if natsMode != NatsServer && (config.NatsConfig.NatsClusterPort != nil) {
+		msg := "agent config %s validation failed. Cannot have a natsClusterPort if natsMode is different from server"
 		return util.NewInputError(fmt.Sprintf(msg, config.Name))
 	}
 

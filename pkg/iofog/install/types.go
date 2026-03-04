@@ -13,6 +13,10 @@
 
 package install
 
+import (
+	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
+)
+
 type IofogUser struct {
 	Name            string
 	Surname         string
@@ -51,6 +55,41 @@ type Events struct {
 	CaptureIpAddress *bool
 }
 
+// VaultConfig is used by the remote controller install to pass VAULT_* env vars (operator-compatible shape).
+type VaultConfig struct {
+	Enabled   *bool
+	Provider  string
+	BasePath  string
+	Hashicorp *VaultHashicorpConfig
+	Aws       *VaultAwsConfig
+	Azure     *VaultAzureConfig
+	Google    *VaultGoogleConfig
+}
+
+type VaultHashicorpConfig struct {
+	Address string
+	Token   string
+	Mount   string
+}
+
+type VaultAwsConfig struct {
+	Region      string
+	AccessKeyId string
+	AccessKey   string
+}
+
+type VaultAzureConfig struct {
+	URL          string
+	TenantId     string
+	ClientId     string
+	ClientSecret string
+}
+
+type VaultGoogleConfig struct {
+	ProjectId   string
+	Credentials string
+}
+
 type Pod struct {
 	Name   string
 	Status string
@@ -59,6 +98,7 @@ type Pod struct {
 type K8SControllerConfig struct {
 	// User          IofogUser
 	Replicas      int32
+	ReplicasNats  int32
 	Database      Database
 	PidBaseDir    string
 	EcnViewerPort int
@@ -68,4 +108,6 @@ type K8SControllerConfig struct {
 	Events        Events
 	Https         *bool
 	SecretName    string
+	Nats          *cpv3.Nats
+	Vault         *cpv3.Vault
 }

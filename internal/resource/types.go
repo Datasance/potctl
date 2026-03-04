@@ -53,21 +53,26 @@ type KubeImages struct {
 	Controller string `yaml:"controller,omitempty"`
 	Operator   string `yaml:"operator,omitempty"`
 	Router     string `yaml:"router,omitempty"`
+	Nats       string `yaml:"nats,omitempty"`
 }
 
 type Services struct {
-	Controller Service `json:"controller,omitempty"`
-	Router     Service `json:"router,omitempty"`
+	Controller Service `json:"controller,omitempty" yaml:"controller,omitempty"`
+	Router     Service `json:"router,omitempty" yaml:"router,omitempty"`
+	Nats       Service `json:"nats,omitempty" yaml:"nats,omitempty"`
+	NatsServer Service `json:"natsServer,omitempty" yaml:"natsServer,omitempty"`
 }
 
 type Service struct {
-	Type        string            `json:"type,omitempty"`
-	Address     string            `json:"address,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Type                  string            `json:"type,omitempty"`
+	Address               string            `json:"address,omitempty"`
+	Annotations           map[string]string `json:"annotations,omitempty"`
+	ExternalTrafficPolicy string            `json:"externalTrafficPolicy,omitempty" yaml:"externalTrafficPolicy,omitempty"`
 }
 
 type Replicas struct {
 	Controller int32 `yaml:"controller"`
+	Nats       int32 `yaml:"nats,omitempty"`
 }
 
 // Credentials credentials used to log into docker when deploying a local stack
@@ -262,9 +267,79 @@ type Ingress struct {
 	Address string `yaml:"address,omitempty"`
 }
 
+// NatsIngress specifies the external address and ports for NATS hub (required when using ingress).
+type NatsIngress struct {
+	Address     string `yaml:"address,omitempty"`
+	ServerPort  int    `yaml:"serverPort,omitempty"`
+	ClusterPort int    `yaml:"clusterPort,omitempty"`
+	LeafPort    int    `yaml:"leafPort,omitempty"`
+	MqttPort    int    `yaml:"mqttPort,omitempty"`
+	HttpPort    int    `yaml:"httpPort,omitempty"`
+}
+
 type Ingresses struct {
 	Controller ControllerIngress `yaml:"controller,omitempty"`
 	Router     RouterIngress     `yaml:"router,omitempty"`
+	Nats       NatsIngress       `yaml:"nats,omitempty"`
+}
+
+// NatsJetStreamSpec configures JetStream storage (operator-compatible).
+type NatsJetStreamSpec struct {
+	StorageSize      string `yaml:"storageSize,omitempty"`
+	MemoryStoreSize  string `yaml:"memoryStoreSize,omitempty"`
+	StorageClassName string `yaml:"storageClassName,omitempty"`
+}
+
+// NatsSpec configures the NATS hub. When omitted, NATS is enabled with defaults.
+type NatsSpec struct {
+	Enabled   *bool             `yaml:"enabled,omitempty"`
+	JetStream NatsJetStreamSpec `yaml:"jetStream,omitempty"`
+}
+
+// VaultSpec configures vault integration for the Controller (Kubernetes and Remote).
+type VaultSpec struct {
+	Enabled   *bool           `yaml:"enabled,omitempty"`
+	Provider  string          `yaml:"provider,omitempty"`
+	BasePath  string          `yaml:"basePath,omitempty"`
+	Hashicorp *VaultHashicorp `yaml:"hashicorp,omitempty"`
+	Aws       *VaultAws       `yaml:"aws,omitempty"`
+	Azure     *VaultAzure     `yaml:"azure,omitempty"`
+	Google    *VaultGoogle    `yaml:"google,omitempty"`
+}
+
+type VaultHashicorp struct {
+	Address string `yaml:"address,omitempty"`
+	Token   string `yaml:"token,omitempty"`
+	Mount   string `yaml:"mount,omitempty"`
+}
+
+type VaultAws struct {
+	Region      string `yaml:"region,omitempty"`
+	AccessKeyId string `yaml:"accessKeyId,omitempty"`
+	AccessKey   string `yaml:"accessKey,omitempty"`
+}
+
+type VaultAzure struct {
+	URL          string `yaml:"url,omitempty"`
+	TenantId     string `yaml:"tenantId,omitempty"`
+	ClientId     string `yaml:"clientId,omitempty"`
+	ClientSecret string `yaml:"clientSecret,omitempty"`
+}
+
+type VaultGoogle struct {
+	ProjectId   string `yaml:"projectId,omitempty"`
+	Credentials string `yaml:"credentials,omitempty"`
+}
+
+// LocalSystemMicroservices holds optional system image overrides for local control plane.
+type LocalSystemMicroservices struct {
+	Router string `yaml:"router,omitempty"`
+	Nats   string `yaml:"nats,omitempty"`
+}
+
+// NatsEnabledConfig is the NATS config for remote and local control planes (enabling only; no service/ingress/jetStream).
+type NatsEnabledConfig struct {
+	Enabled *bool `yaml:"enabled,omitempty"`
 }
 
 // type RouterConfig struct {
@@ -316,9 +391,11 @@ type RoleBinding struct {
 	Subjects []Subject `yaml:"subjects,omitempty"`
 }
 
+// ServiceAccount is application-scoped; Controller identifies it by (applicationName, name).
 type ServiceAccount struct {
-	Name    string  `yaml:"name,omitempty"`
-	RoleRef RoleRef `yaml:"roleRef,omitempty"`
+	Name            string  `yaml:"name,omitempty"`
+	ApplicationName string  `yaml:"applicationName,omitempty"`
+	RoleRef         RoleRef `yaml:"roleRef,omitempty"`
 }
 
 type ClusterService struct {
