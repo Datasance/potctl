@@ -63,7 +63,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.64.0
+          version: v1.64.4
           args: --timeout=5m0s
           working-directory: .
       - name: Run bootstrap
