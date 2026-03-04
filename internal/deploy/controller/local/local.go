@@ -127,7 +127,7 @@ func newExecutor(namespace string, controlPlane *rsc.LocalControlPlane, ctrl *rs
 			RetentionDays:    controlPlane.Events.RetentionDays,
 			CleanupInterval:  controlPlane.Events.CleanupInterval,
 			CaptureIpAddress: controlPlane.Events.CaptureIpAddress,
-		}),
+		}, localSystemImagesToInstall(controlPlane.SystemMicroservices, controlPlane.Nats)),
 		iofogUser: controlPlane.GetUser(),
 		ctrlPlane: controlPlane,
 	}
@@ -198,6 +198,19 @@ func (exe *localExecutor) Execute() error {
 	exe.ctrl.Endpoint = endpoint
 	exe.ctrl.Created = util.NowUTC()
 	return exe.ctrlPlane.UpdateController(exe.ctrl)
+}
+
+func localSystemImagesToInstall(s *rsc.LocalSystemMicroservices, nats *rsc.NatsEnabledConfig) *install.LocalSystemImages {
+	// Always pass a non-nil struct so local controller gets default NATS_IMAGE_1/2 and NATS_ENABLED when not overridden
+	out := &install.LocalSystemImages{}
+	if s != nil {
+		out.Router = s.Router
+		out.Nats = s.Nats
+	}
+	if nats != nil && nats.Enabled != nil {
+		out.NatsEnabled = nats.Enabled
+	}
+	return out
 }
 
 func Validate(ctrl rsc.Controller) error {

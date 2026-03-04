@@ -41,7 +41,6 @@ Most resources require a working Controller in the Namespace in order to be desc
 		newDescribeApplicationCommand(),
 		newDescribeApplicationTemplateCommand(),
 		newDescribeVolumeCommand(),
-		newDescribeRouteCommand(),
 		newDescribeEdgeResourceCommand(),
 		newDescribeSecretCommand(),
 		newDescribeConfigMapCommand(),
@@ -51,6 +50,10 @@ Most resources require a working Controller in the Namespace in order to be desc
 		newDescribeRoleCommand(),
 		newDescribeRoleBindingCommand(),
 		newDescribeServiceAccountCommand(),
+		newDescribeNatsAccountCommand(),
+		newDescribeNatsUserCommand(),
+		newDescribeNatsAccountRuleCommand(),
+		newDescribeNatsUserRuleCommand(),
 	)
 
 	// Register Flags

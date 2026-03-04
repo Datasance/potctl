@@ -195,14 +195,34 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 	if agentInfo.UpstreamRouters != nil {
 		upstreamRouters := []string{}
 		for _, upstreamRouterAgentUUID := range *agentInfo.UpstreamRouters {
-			upstreamRouters = append(upstreamRouters, getAgentNameFromUUID(agentMapByUUID, upstreamRouterAgentUUID))
+			upstreamRouters = append(upstreamRouters, getRouterAgentNameFromUUID(agentMapByUUID, upstreamRouterAgentUUID))
 		}
 		upstreamRoutersPtr = &upstreamRouters
 	}
 
+	natsConfig := client.NatsConfig{
+		NatsMode:          agentInfo.NatsMode,
+		NatsServerPort:    agentInfo.NatsServerPort,
+		NatsLeafPort:      agentInfo.NatsLeafPort,
+		NatsClusterPort:   agentInfo.NatsClusterPort,
+		NatsMqttPort:      agentInfo.NatsMqttPort,
+		NatsHttpPort:      agentInfo.NatsHttpPort,
+		JsStorageSize:     agentInfo.JsStorageSize,
+		JsMemoryStoreSize: agentInfo.JsMemoryStoreSize,
+	}
+
+	var upstreamNatsServersPtr *[]string
+	if agentInfo.UpstreamNatsServers != nil {
+		upstreamNatsServers := []string{}
+		for _, upstreamNatsServerUUID := range *agentInfo.UpstreamNatsServers {
+			upstreamNatsServers = append(upstreamNatsServers, getNatsAgentNameFromUUID(agentMapByUUID, upstreamNatsServerUUID))
+		}
+		upstreamNatsServersPtr = &upstreamNatsServers
+	}
+
 	var networkRouterPtr *string
 	if agentInfo.NetworkRouter != nil {
-		networkRouter := getAgentNameFromUUID(agentMapByUUID, *agentInfo.NetworkRouter)
+		networkRouter := getRouterAgentNameFromUUID(agentMapByUUID, *agentInfo.NetworkRouter)
 		networkRouterPtr = &networkRouter
 	}
 
@@ -241,6 +261,8 @@ func GetAgentConfig(agentName, namespace string) (agentConfig rsc.AgentConfigura
 			UpstreamRouters:           upstreamRoutersPtr,
 			NetworkRouter:             networkRouterPtr,
 			RouterConfig:              routerConfig,
+			UpstreamNatsServers:       upstreamNatsServersPtr,
+			NatsConfig:                natsConfig,
 			TimeZone:                  agentInfo.TimeZone,
 		},
 	}

@@ -11,7 +11,7 @@
  *
  */
 
-package deployroute
+package deployedgeresource
 
 import (
 	"github.com/datasance/iofog-go-sdk/v3/pkg/client"

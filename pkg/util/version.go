@@ -28,6 +28,7 @@ var (
 	agentTag          = "undefined"
 	operatorTag       = "undefined"
 	routerTag         = "undefined"
+	natsTag           = "undefined"
 	controllerVersion = "undefined"
 	agentVersion      = "undefined"
 	debuggerTag       = "undefined"
@@ -39,6 +40,7 @@ const (
 	operatorImage   = "operator"
 	routerImage     = "router"
 	routerARMImage  = "router"
+	natsImage       = "nats"
 	debuggerImage   = "node-debugger"
 )
 
@@ -68,4 +70,5 @@ func GetAgentImage() string     { return fmt.Sprintf("%s/%s:%s", repo, agentImag
 func GetOperatorImage() string  { return fmt.Sprintf("%s/%s:%s", repo, operatorImage, operatorTag) }
 func GetRouterImage() string    { return fmt.Sprintf("%s/%s:%s", repo, routerImage, routerTag) }
 func GetRouterARMImage() string { return fmt.Sprintf("%s/%s:%s", repo, routerARMImage, routerTag) }
+func GetNatsImage() string      { return fmt.Sprintf("%s/%s:%s", repo, natsImage, natsTag) }
 func GetDebuggerImage() string  { return fmt.Sprintf("%s/%s:%s", repo, debuggerImage, debuggerTag) }

@@ -37,7 +37,6 @@ func newGetCommand() *cobra.Command {
 		"catalog",
 		"registries",
 		"volumes",
-		"routes",
 		"secrets",
 		"configmaps",
 		"services",
@@ -46,6 +45,10 @@ func newGetCommand() *cobra.Command {
 		"roles",
 		"rolebindings",
 		"serviceaccounts",
+		"nats-accounts",
+		"nats-users",
+		"nats-account-rules",
+		"nats-user-rules",
 	}
 	cmd := &cobra.Command{
 		Use:   "get RESOURCE",
@@ -66,7 +69,6 @@ Resources like Agents will require a working Controller in the namespace to disp
              catalog
              registries
              volumes
-             routes
              secrets
              configmaps
              services
@@ -74,7 +76,11 @@ Resources like Agents will require a working Controller in the namespace to disp
              certificates
              roles
              rolebindings
-             serviceaccounts`,
+             serviceaccounts
+             nats-accounts
+             nats-users
+             nats-account-rules
+             nats-user-rules`,
 		ValidArgs: validResources,
 		Args:      cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

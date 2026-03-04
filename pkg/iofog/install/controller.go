@@ -38,19 +38,20 @@ type RemoteSystemImages struct {
 
 type RemoteSystemMicroservices struct {
 	Router RemoteSystemImages `yaml:"router,omitempty"`
+	Nats   RemoteSystemImages `yaml:"nats,omitempty"`
 }
 
 type ControllerOptions struct {
-	User            string
-	Host            string
-	Port            int
-	Namespace       string
-	PrivKeyFilename string
-	Version         string
-	Image           string
-	// Repo                string
-	// Token               string
+	User                string
+	Host                string
+	Port                int
+	Namespace           string
+	PrivKeyFilename     string
+	Version             string
+	Image               string
 	SystemMicroservices RemoteSystemMicroservices
+	NatsEnabled         *bool // NATS enabling for remote control plane (nil = default enabled)
+	Vault               *VaultConfig
 	PidBaseDir          string
 	EcnViewerPort       int
 	EcnViewerURL        string
@@ -513,6 +514,85 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	if ctrl.SystemMicroservices.Router.ARM != "" {
 		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
 	}
+	natsX86 := ctrl.SystemMicroservices.Nats.X86
+	natsARM := ctrl.SystemMicroservices.Nats.ARM
+	if natsX86 == "" && natsARM != "" {
+		natsX86 = natsARM
+	}
+	if natsARM == "" && natsX86 != "" {
+		natsARM = natsX86
+	}
+	if natsX86 == "" && natsARM == "" {
+		natsX86 = util.GetNatsImage()
+		natsARM = natsX86
+	}
+	if natsX86 != "" {
+		env = append(env, fmt.Sprintf("\"NATS_IMAGE_1=%s\"", natsX86))
+	}
+	if natsARM != "" {
+		env = append(env, fmt.Sprintf("\"NATS_IMAGE_2=%s\"", natsARM))
+	}
+	// NATS enabling (remote/local control plane: only enabling parameter)
+	natsEnabled := true
+	if ctrl.NatsEnabled != nil {
+		natsEnabled = *ctrl.NatsEnabled
+	}
+	env = append(env, fmt.Sprintf("\"NATS_ENABLED=%t\"", natsEnabled))
+	if ctrl.Vault != nil {
+		if ctrl.Vault.Enabled != nil {
+			env = append(env, fmt.Sprintf("\"VAULT_ENABLED=%t\"", *ctrl.Vault.Enabled))
+		}
+		if ctrl.Vault.Provider != "" {
+			env = append(env, fmt.Sprintf("\"VAULT_PROVIDER=%s\"", ctrl.Vault.Provider))
+		}
+		if ctrl.Vault.BasePath != "" {
+			env = append(env, fmt.Sprintf("\"VAULT_BASE_PATH=%s\"", ctrl.Vault.BasePath))
+		}
+		if ctrl.Vault.Hashicorp != nil {
+			if ctrl.Vault.Hashicorp.Address != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_ADDRESS=%s\"", ctrl.Vault.Hashicorp.Address))
+			}
+			if ctrl.Vault.Hashicorp.Token != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_TOKEN=%s\"", ctrl.Vault.Hashicorp.Token))
+			}
+			if ctrl.Vault.Hashicorp.Mount != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_MOUNT=%s\"", ctrl.Vault.Hashicorp.Mount))
+			}
+		}
+		if ctrl.Vault.Aws != nil {
+			if ctrl.Vault.Aws.Region != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AWS_REGION=%s\"", ctrl.Vault.Aws.Region))
+			}
+			if ctrl.Vault.Aws.AccessKeyId != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY_ID=%s\"", ctrl.Vault.Aws.AccessKeyId))
+			}
+			if ctrl.Vault.Aws.AccessKey != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY=%s\"", ctrl.Vault.Aws.AccessKey))
+			}
+		}
+		if ctrl.Vault.Azure != nil {
+			if ctrl.Vault.Azure.URL != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AZURE_URL=%s\"", ctrl.Vault.Azure.URL))
+			}
+			if ctrl.Vault.Azure.TenantId != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AZURE_TENANT_ID=%s\"", ctrl.Vault.Azure.TenantId))
+			}
+			if ctrl.Vault.Azure.ClientId != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_ID=%s\"", ctrl.Vault.Azure.ClientId))
+			}
+			if ctrl.Vault.Azure.ClientSecret != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_SECRET=%s\"", ctrl.Vault.Azure.ClientSecret))
+			}
+		}
+		if ctrl.Vault.Google != nil {
+			if ctrl.Vault.Google.ProjectId != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_PROJECT_ID=%s\"", ctrl.Vault.Google.ProjectId))
+			}
+			if ctrl.Vault.Google.Credentials != "" {
+				env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_CREDENTIALS=%s\"", ctrl.Vault.Google.Credentials))
+			}
+		}
+	}
 	if ctrl.LogLevel != "" {
 		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
 	}
@@ -630,13 +710,14 @@ func (ctrl *Controller) waitForControllerToStart() (string, error) {
 
 func (ctrl *Controller) deployRouterCertificates(endpoint string) error {
 	if ctrl.SiteCA != nil {
-		if err := DeployRouterSecrets(endpoint, "pot-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
+		if err := DeployRouterSecrets(endpoint, "router-site-ca", ctrl.SiteCA.TLSCert, ctrl.SiteCA.TLSKey); err != nil {
 			return err
 		}
-		if err := ImportRouterCertificate(endpoint, "pot-site-ca"); err != nil {
+		if err := ImportRouterCertificate(endpoint, "router-site-ca"); err != nil {
 			return err
 		}
 	}
+	// TODO: Remove LocalCA as it is only valid for k8s deployments. Also remove LocalCA from Remote ControllerOptions.
 	if ctrl.LocalCA != nil {
 		if err := DeployRouterSecrets(endpoint, "default-router-local-ca", ctrl.LocalCA.TLSCert, ctrl.LocalCA.TLSKey); err != nil {
 			return err

@@ -265,10 +265,13 @@ func (exe *remoteExecutor) Execute() (err error) {
 			return fmt.Errorf("failed to get router image for platform %s: %w", platform, err)
 		}
 
-		// Prepare image list (agent, router for platform, debugger if available)
+		// Prepare image list (agent, router for platform, NATS, debugger if available)
 		imageList := []string{images.Agent}
 		if routerImage != "" {
 			imageList = append(imageList, routerImage)
+		}
+		if images.Nats != "" {
+			imageList = append(imageList, images.Nats)
 		}
 		if images.Debugger != "" {
 			imageList = append(imageList, images.Debugger)

@@ -79,6 +79,10 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 	if err != nil {
 		return exe, err
 	}
+	fullYamlBytes, err := yaml.Marshal(header)
+	if err != nil {
+		return exe, err
+	}
 
 	createExecutorFunc, found := kindHandlers[header.Kind]
 	if !found {
@@ -91,6 +95,7 @@ func generateExecutor(header *config.Header, namespace string, kindHandlers map[
 		Namespace: namespace,
 		Name:      header.Metadata.Name,
 		YAML:      subYamlBytes,
+		FullYAML:  fullYamlBytes,
 		Data:      dataYamlBytes,
 		Tags:      header.Metadata.Tags,
 	})
@@ -101,6 +106,7 @@ type KindHandlerOpt struct {
 	Namespace string
 	Name      string
 	YAML      []byte
+	FullYAML  []byte
 	Data      []byte
 	Tags      *[]string
 }
@@ -137,7 +143,7 @@ func GetExecutorsFromYAML(inputFile, namespace string, kindHandlers map[config.K
 
 		decodeErr = dec.Decode(&h)
 	}
-	if decodeErr != io.EOF && decodeErr != nil {
+	if decodeErr != io.EOF {
 		return nil, decodeErr
 	}
 
@@ -184,10 +190,11 @@ func headerDecodeToHeader(h *headerDecode) *config.Header {
 		}
 	case config.ServiceAccountKind:
 		if h.RoleRef != nil {
-			// Controller-style: roleRef at top level
+			// Controller-style: metadata.applicationName and roleRef at top level
 			header.Spec = map[string]interface{}{
-				"name":    h.Metadata.Name,
-				"roleRef": h.RoleRef,
+				"name":            h.Metadata.Name,
+				"applicationName": h.Metadata.ApplicationName,
+				"roleRef":         h.RoleRef,
 			}
 		}
 	}

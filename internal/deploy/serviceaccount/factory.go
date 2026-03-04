@@ -34,6 +34,7 @@ type Options struct {
 type executor struct {
 	serviceAccount rsc.ServiceAccount
 	namespace      string
+	appName        string
 	name           string
 }
 
@@ -48,7 +49,7 @@ func (exe *executor) Execute() error {
 		return err
 	}
 
-	if _, err = clt.GetServiceAccount(exe.name); err != nil {
+	if _, err = clt.GetServiceAccount(exe.appName, exe.name); err != nil {
 		return exe.createServiceAccount(clt)
 	}
 	return exe.updateServiceAccount(clt)
@@ -56,8 +57,9 @@ func (exe *executor) Execute() error {
 
 func (exe *executor) createServiceAccount(clt *client.Client) error {
 	req := &client.ServiceAccountCreateRequest{
-		Name:    exe.name,
-		RoleRef: toClientRoleRef(exe.serviceAccount.RoleRef),
+		Name:            exe.name,
+		ApplicationName: exe.appName,
+		RoleRef:         toClientRoleRef(exe.serviceAccount.RoleRef),
 	}
 	_, err := clt.CreateServiceAccount(req)
 	return err
@@ -68,7 +70,7 @@ func (exe *executor) updateServiceAccount(clt *client.Client) error {
 		Name:    exe.name,
 		RoleRef: toClientRoleRef(exe.serviceAccount.RoleRef),
 	}
-	_, err := clt.UpdateServiceAccount(exe.name, &req)
+	_, err := clt.UpdateServiceAccount(exe.appName, exe.name, &req)
 	return err
 }
 
@@ -101,10 +103,14 @@ func NewExecutor(opt Options) (execute.Executor, error) {
 	if name == "" {
 		return nil, util.NewInputError("Name must be specified")
 	}
+	if sa.ApplicationName == "" {
+		return nil, util.NewInputError("ServiceAccount must have applicationName (application-scoped)")
+	}
 
 	return &executor{
 		namespace:      opt.Namespace,
 		serviceAccount: sa,
+		appName:        sa.ApplicationName,
 		name:           name,
 	}, nil
 }

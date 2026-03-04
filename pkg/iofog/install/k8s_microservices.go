@@ -103,6 +103,7 @@ func newOperatorMicroservice() *microservice {
 				},
 				Resources: []string{
 					"deployments",
+					"statefulsets",
 				},
 				Verbs: []string{
 					"*",

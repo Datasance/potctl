@@ -15,7 +15,7 @@ potctl logs RESOURCE NAME [flags]
 ```
 potctl logs controller   NAME
               agent        NAME
-              microservice NAME
+              microservice AppName/MsvcName
 ```
 
 ### Options

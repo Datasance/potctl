@@ -91,6 +91,7 @@ func NewRootCommand() *cobra.Command {
 		newUpgradeCommand(),
 		newRollbackCommand(),
 		newExecCommand(),
+		newNatsCommand(),
 	)
 
 	return cmd

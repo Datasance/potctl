@@ -16,6 +16,7 @@ package deployk8scontrolplane
 import (
 	"fmt"
 
+	cpv3 "github.com/datasance/iofog-operator/v3/apis/controlplanes/v3"
 	"github.com/datasance/potctl/internal/config"
 	"github.com/datasance/potctl/internal/execute"
 	rsc "github.com/datasance/potctl/internal/resource"
@@ -94,10 +95,14 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	installer.SetPullSecret(exe.controlPlane.Images.PullSecret)
 	installer.SetRouterImage(exe.controlPlane.Images.Router)
 	installer.SetControllerImage(exe.controlPlane.Images.Controller)
-	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.Address, exe.controlPlane.Services.Controller.Annotations)
-	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations)
+	installer.SetNatsImage(exe.controlPlane.Images.Nats)
+	installer.SetControllerService(exe.controlPlane.Services.Controller.Type, exe.controlPlane.Services.Controller.Address, exe.controlPlane.Services.Controller.Annotations, exe.controlPlane.Services.Controller.ExternalTrafficPolicy)
+	installer.SetRouterService(exe.controlPlane.Services.Router.Type, exe.controlPlane.Services.Router.Address, exe.controlPlane.Services.Router.Annotations, exe.controlPlane.Services.Router.ExternalTrafficPolicy)
+	installer.SetNatsService(exe.controlPlane.Services.Nats.Type, exe.controlPlane.Services.Nats.Address, exe.controlPlane.Services.Nats.Annotations, exe.controlPlane.Services.Nats.ExternalTrafficPolicy)
+	installer.SetNatsServerService(exe.controlPlane.Services.NatsServer.Type, exe.controlPlane.Services.NatsServer.Address, exe.controlPlane.Services.NatsServer.Annotations, exe.controlPlane.Services.NatsServer.ExternalTrafficPolicy)
 	installer.SetControllerIngress(exe.controlPlane.Ingresses.Controller.Annotations, exe.controlPlane.Ingresses.Controller.IngressClassName, exe.controlPlane.Ingresses.Controller.Host, exe.controlPlane.Ingresses.Controller.SecretName)
 	installer.SetRouterIngress(exe.controlPlane.Ingresses.Router.Address, exe.controlPlane.Ingresses.Router.MessagePort, exe.controlPlane.Ingresses.Router.InteriorPort, exe.controlPlane.Ingresses.Router.EdgePort)
+	installer.SetNatsIngress(exe.controlPlane.Ingresses.Nats.Address, exe.controlPlane.Ingresses.Nats.ServerPort, exe.controlPlane.Ingresses.Nats.ClusterPort, exe.controlPlane.Ingresses.Nats.LeafPort, exe.controlPlane.Ingresses.Nats.MqttPort, exe.controlPlane.Ingresses.Nats.HttpPort)
 	// installer.SetRouterConfig(exe.controlPlane.Router.HA)
 
 	// Set isViewerDns based on EcnViewerURL presence
@@ -110,11 +115,15 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 	if exe.controlPlane.Replicas.Controller != 0 {
 		replicas = exe.controlPlane.Replicas.Controller
 	}
+	replicasNats := exe.controlPlane.Replicas.Nats
+	natsSpec := natsSpecToCpv3(exe.controlPlane.Nats)
+	vaultSpec := vaultSpecToCpv3(exe.controlPlane.Vault)
 	// Create controller on cluster
 	// user := install.IofogUser(exe.controlPlane.IofogUser)
 	conf := install.K8SControllerConfig{
 		// User:          user,
 		Replicas:      replicas,
+		ReplicasNats:  replicasNats,
 		Auth:          install.Auth(exe.controlPlane.Auth),
 		Database:      install.Database(exe.controlPlane.Database),
 		Events:        install.Events(exe.controlPlane.Events),
@@ -124,6 +133,8 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 		LogLevel:      exe.controlPlane.Controller.LogLevel,
 		Https:         exe.controlPlane.Controller.Https,
 		SecretName:    exe.controlPlane.Controller.SecretName,
+		Nats:          natsSpec,
+		Vault:         vaultSpec,
 	}
 	endpoint, err := installer.CreateControlPlane(&conf)
 	if err != nil {
@@ -190,5 +201,89 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 			return util.NewInputError("When Router service type is ClusterIP, You must provide Ingress configuration for Default-Router")
 		}
 	}
+	// NATS: when replicas.nats is set it must be >= 2
+	if controlPlane.Replicas.Nats > 0 && controlPlane.Replicas.Nats < 2 {
+		return util.NewInputError("When NATS is enabled, replicas.nats must be at least 2")
+	}
+	// Vault: when set, validate provider and required provider fields
+	if controlPlane.Vault != nil {
+		if controlPlane.Vault.Provider != "" {
+			switch controlPlane.Vault.Provider {
+			case "hashicorp", "openbao", "vault":
+				if controlPlane.Vault.Hashicorp == nil || (controlPlane.Vault.Hashicorp.Address == "" && controlPlane.Vault.Hashicorp.Token == "") {
+					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires hashicorp block with address and token")
+				}
+			case "aws", "aws-secrets-manager":
+				if controlPlane.Vault.Aws == nil {
+					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires aws block")
+				}
+			case "azure", "azure-key-vault":
+				if controlPlane.Vault.Azure == nil {
+					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires azure block")
+				}
+			case "google", "google-secret-manager":
+				if controlPlane.Vault.Google == nil {
+					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires google block")
+				}
+			}
+		}
+	}
 	return
+}
+
+func natsSpecToCpv3(n *rsc.NatsSpec) *cpv3.Nats {
+	if n == nil {
+		return nil
+	}
+	out := &cpv3.Nats{
+		Enabled: n.Enabled,
+	}
+	if n.JetStream.StorageSize != "" || n.JetStream.MemoryStoreSize != "" || n.JetStream.StorageClassName != "" {
+		out.JetStream = cpv3.NatsJetStream{
+			StorageSize:      n.JetStream.StorageSize,
+			MemoryStoreSize:  n.JetStream.MemoryStoreSize,
+			StorageClassName: n.JetStream.StorageClassName,
+		}
+	}
+	return out
+}
+
+func vaultSpecToCpv3(v *rsc.VaultSpec) *cpv3.Vault {
+	if v == nil {
+		return nil
+	}
+	out := &cpv3.Vault{
+		Enabled:  v.Enabled,
+		Provider: v.Provider,
+		BasePath: v.BasePath,
+	}
+	if v.Hashicorp != nil {
+		out.Hashicorp = &cpv3.VaultHashicorp{
+			Address: v.Hashicorp.Address,
+			Token:   v.Hashicorp.Token,
+			Mount:   v.Hashicorp.Mount,
+		}
+	}
+	if v.Aws != nil {
+		out.Aws = &cpv3.VaultAws{
+			Region:      v.Aws.Region,
+			AccessKeyId: v.Aws.AccessKeyId,
+			AccessKey:   v.Aws.AccessKey,
+		}
+	}
+	if v.Azure != nil {
+		out.Azure = &cpv3.VaultAzure{
+			URL:          v.Azure.URL,
+			TenantId:     v.Azure.TenantId,
+			ClientId:     v.Azure.ClientId,
+			ClientSecret: v.Azure.ClientSecret,
+		}
+	}
+	if v.Google != nil {
+		out.Google = &cpv3.VaultGoogle{
+			ProjectId:   v.Google.ProjectId,
+			Credentials: v.Google.Credentials,
+		}
+	}
+	return out
 }

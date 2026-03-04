@@ -16,12 +16,134 @@ type RequiredImages struct {
 	Agent      string
 	RouterX86  string
 	RouterARM  string
+	Nats       string
 	Debugger   string
 }
 
-// CollectControllerImages collects required images for controller deployment
-// For initial deployment: uses YAML/defaults
-// For existing control plane: fetches router/debugger from controller catalog items
+// getCatalogItemByName tries the given name, then fallbackNames if the first lookup fails (e.g. casing).
+func getCatalogItemByName(clt *client.Client, name string, fallbackNames ...string) (item *client.CatalogItemInfo, err error) {
+	item, err = clt.GetCatalogItemByName(name)
+	if err == nil {
+		return item, nil
+	}
+	for _, n := range fallbackNames {
+		item, err = clt.GetCatalogItemByName(n)
+		if err == nil {
+			return item, nil
+		}
+	}
+	return nil, err
+}
+
+// applyRouterImagesFromCatalog sets RouterX86 and RouterARM from catalog item images.
+func applyRouterImagesFromCatalog(images *RequiredImages, item *client.CatalogItemInfo) {
+	if item == nil || len(item.Images) == 0 {
+		return
+	}
+	for _, img := range item.Images {
+		switch client.AgentTypeIDAgentTypeDict[img.AgentTypeID] {
+		case "x86":
+			images.RouterX86 = img.ContainerImage
+		case "arm":
+			images.RouterARM = img.ContainerImage
+		}
+	}
+}
+
+// applyDebuggerImageFromCatalog sets Debugger from catalog item (first x86 or arm image).
+func applyDebuggerImageFromCatalog(images *RequiredImages, item *client.CatalogItemInfo) {
+	if item == nil || len(item.Images) == 0 {
+		return
+	}
+	for _, img := range item.Images {
+		if client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "x86" || client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "arm" {
+			images.Debugger = img.ContainerImage
+			return
+		}
+	}
+}
+
+// applyNatsImageFromCatalog sets Nats from catalog item (first image).
+func applyNatsImageFromCatalog(images *RequiredImages, item *client.CatalogItemInfo) {
+	if item == nil || len(item.Images) == 0 {
+		return
+	}
+	images.Nats = item.Images[0].ContainerImage
+}
+
+// applyYAMLFallbackForController fills any empty router/nats/debugger from controlPlane.SystemMicroservices; util is last fallback.
+func applyYAMLAndUtilFallbackForController(images *RequiredImages, controlPlane *rsc.RemoteControlPlane) {
+	if controlPlane == nil {
+		return
+	}
+	sm := &controlPlane.SystemMicroservices
+	if images.RouterX86 == "" {
+		if sm.Router.X86 != "" {
+			images.RouterX86 = sm.Router.X86
+		} else {
+			images.RouterX86 = util.GetRouterImage()
+		}
+	}
+	if images.RouterARM == "" {
+		if sm.Router.ARM != "" {
+			images.RouterARM = sm.Router.ARM
+		} else {
+			images.RouterARM = util.GetRouterARMImage()
+		}
+	}
+	if images.Nats == "" {
+		if sm.Nats.X86 != "" {
+			images.Nats = sm.Nats.X86
+		} else if sm.Nats.ARM != "" {
+			images.Nats = sm.Nats.ARM
+		} else {
+			images.Nats = util.GetNatsImage()
+		}
+	}
+	if images.Debugger == "" {
+		images.Debugger = util.GetDebuggerImage()
+	}
+}
+
+// applyYAMLAndUtilFallbackForAgent fills any empty router/nats/debugger from controlPlane (if non-nil) then util.
+func applyYAMLAndUtilFallbackForAgent(images *RequiredImages, controlPlane *rsc.RemoteControlPlane) {
+	if images.RouterX86 == "" {
+		if controlPlane != nil && controlPlane.SystemMicroservices.Router.X86 != "" {
+			images.RouterX86 = controlPlane.SystemMicroservices.Router.X86
+		} else {
+			images.RouterX86 = util.GetRouterImage()
+		}
+	}
+	if images.RouterARM == "" {
+		if controlPlane != nil && controlPlane.SystemMicroservices.Router.ARM != "" {
+			images.RouterARM = controlPlane.SystemMicroservices.Router.ARM
+		} else {
+			images.RouterARM = util.GetRouterARMImage()
+		}
+	}
+	if images.Nats == "" {
+		if controlPlane != nil {
+			if controlPlane.SystemMicroservices.Nats.X86 != "" {
+				images.Nats = controlPlane.SystemMicroservices.Nats.X86
+			} else if controlPlane.SystemMicroservices.Nats.ARM != "" {
+				images.Nats = controlPlane.SystemMicroservices.Nats.ARM
+			}
+			if images.Nats == "" {
+				images.Nats = util.GetNatsImage()
+			}
+		} else {
+			images.Nats = util.GetNatsImage()
+		}
+	}
+	if images.Debugger == "" {
+		// RemoteSystemMicroservices has no Debugger field; use util as fallback
+		images.Debugger = util.GetDebuggerImage()
+	}
+}
+
+// CollectControllerImages collects required images for controller deployment.
+// When a controller already exists (!isInitialDeployment): catalog first, then YAML, then util.
+// When no controller yet (isInitialDeployment): YAML then util (no catalog).
 func CollectControllerImages(namespace string, controlPlane *rsc.RemoteControlPlane, isInitialDeployment bool) (*RequiredImages, error) {
 	images := &RequiredImages{}
 
@@ -32,75 +154,43 @@ func CollectControllerImages(namespace string, controlPlane *rsc.RemoteControlPl
 		images.Controller = util.GetControllerImage()
 	}
 
-	// Router and debugger images
 	if isInitialDeployment {
-		// Use YAML or defaults
-		if controlPlane.SystemMicroservices.Router.X86 != "" {
-			images.RouterX86 = controlPlane.SystemMicroservices.Router.X86
-		} else {
-			images.RouterX86 = util.GetRouterImage()
-		}
-
-		if controlPlane.SystemMicroservices.Router.ARM != "" {
-			images.RouterARM = controlPlane.SystemMicroservices.Router.ARM
-		} else {
-			images.RouterARM = util.GetRouterARMImage()
-		}
-
-		// Debugger image
-		// TODO: Add debugger image to RemoteSystemMicroservices
-		images.Debugger = util.GetDebuggerImage()
-	} else {
-		// Fetch from controller catalog items
-		clt, err := clientutil.NewControllerClient(namespace)
-		if err != nil {
-			return nil, fmt.Errorf("failed to connect to controller: %w", err)
-		}
-
-		// Get router catalog item
-		routerItem, err := clt.GetCatalogItemByName("router")
-		if err != nil {
-			return nil, fmt.Errorf("failed to get router catalog item from controller: %w", err)
-		}
-
-		// Extract router images from catalog item
-		for _, img := range routerItem.Images {
-			switch client.AgentTypeIDAgentTypeDict[img.AgentTypeID] {
-			case "x86":
-				images.RouterX86 = img.ContainerImage
-			case "arm":
-				images.RouterARM = img.ContainerImage
-			}
-		}
-
-		// Get debugger catalog item
-		debuggerItem, err := clt.GetCatalogItemByName("debugger")
-		if err != nil {
-			// Debugger is optional, log but don't fail
-			util.PrintNotify("Warning: Could not fetch debugger catalog item from controller. Debugger image will not be transferred.")
-			images.Debugger = ""
-		} else {
-			// Extract debugger image (typically x86, but check both)
-			for _, img := range debuggerItem.Images {
-				if client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "x86" {
-					images.Debugger = img.ContainerImage
-					break
-				} else if client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "arm" {
-					images.Debugger = img.ContainerImage
-					break
-				}
-			}
-		}
+		// No controller to query; use YAML then util
+		applyYAMLAndUtilFallbackForController(images, controlPlane)
+		return images, nil
 	}
 
+	// Controller exists: try catalog first, then YAML, then util
+	clt, err := clientutil.NewControllerClient(namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to controller: %w", err)
+	}
+
+	routerItem, err := getCatalogItemByName(clt, "router", "Router")
+	if err == nil {
+		applyRouterImagesFromCatalog(images, routerItem)
+	}
+
+	debuggerItem, err := getCatalogItemByName(clt, "debugger", "Debug")
+	if err == nil {
+		applyDebuggerImageFromCatalog(images, debuggerItem)
+	} else {
+		util.PrintNotify("Warning: Could not fetch debugger catalog item from controller. Debugger image will not be transferred.")
+	}
+
+	natsItem, err := getCatalogItemByName(clt, "nats", "NATS")
+	if err == nil {
+		applyNatsImageFromCatalog(images, natsItem)
+	}
+
+	applyYAMLAndUtilFallbackForController(images, controlPlane)
 	return images, nil
 }
 
-// CollectAgentImages collects required images for agent deployment
-// For initial deployment: uses YAML/defaults (only for RemoteControlPlane)
-// For existing control plane: fetches router/debugger from controller catalog items
-// controlPlane can be nil for Kubernetes or other non-remote control planes
-func CollectAgentImages(namespace string, agent *rsc.RemoteAgent, controlPlane *rsc.RemoteControlPlane, isInitialDeployment bool) (*RequiredImages, error) {
+// CollectAgentImages collects required images for agent deployment.
+// When deploying an agent, a controller already exists; so we always try catalog first, then YAML, then util.
+// controlPlane can be nil for Kubernetes or other non-remote control planes (catalog + util still apply).
+func CollectAgentImages(namespace string, agent *rsc.RemoteAgent, controlPlane *rsc.RemoteControlPlane, _ bool) (*RequiredImages, error) {
 	images := &RequiredImages{}
 
 	// Agent image
@@ -110,66 +200,30 @@ func CollectAgentImages(namespace string, agent *rsc.RemoteAgent, controlPlane *
 		images.Agent = util.GetAgentImage()
 	}
 
-	// Router and debugger images
-	if isInitialDeployment && controlPlane != nil {
-		// Use YAML or defaults (only for RemoteControlPlane initial deployment)
-		if controlPlane.SystemMicroservices.Router.X86 != "" {
-			images.RouterX86 = controlPlane.SystemMicroservices.Router.X86
-		} else {
-			images.RouterX86 = util.GetRouterImage()
-		}
-
-		if controlPlane.SystemMicroservices.Router.ARM != "" {
-			images.RouterARM = controlPlane.SystemMicroservices.Router.ARM
-		} else {
-			images.RouterARM = util.GetRouterARMImage()
-		}
-
-		// Debugger image - no default in YAML structure
-		images.Debugger = ""
-	} else {
-		// Fetch from controller catalog items (for existing control plane or non-remote control planes)
-		clt, err := clientutil.NewControllerClient(namespace)
-		if err != nil {
-			return nil, fmt.Errorf("failed to connect to controller: %w", err)
-		}
-
-		// Get router catalog item
-		routerItem, err := clt.GetCatalogItemByName("Router")
-		if err != nil {
-			return nil, fmt.Errorf("failed to get router catalog item from controller: %w", err)
-		}
-
-		// Extract router images from catalog item
-		for _, img := range routerItem.Images {
-			switch client.AgentTypeIDAgentTypeDict[img.AgentTypeID] {
-			case "x86":
-				images.RouterX86 = img.ContainerImage
-			case "arm":
-				images.RouterARM = img.ContainerImage
-			}
-		}
-
-		// Get debugger catalog item
-		debuggerItem, err := clt.GetCatalogItemByName("Debug")
-		if err != nil {
-			// Debugger is optional, log but don't fail
-			util.PrintNotify("Warning: Could not fetch debugger catalog item from controller. Debugger image will not be transferred.")
-			images.Debugger = ""
-		} else {
-			// Extract debugger image (typically x86, but check both)
-			for _, img := range debuggerItem.Images {
-				if client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "x86" {
-					images.Debugger = img.ContainerImage
-					break
-				} else if client.AgentTypeIDAgentTypeDict[img.AgentTypeID] == "arm" {
-					images.Debugger = img.ContainerImage
-					break
-				}
-			}
-		}
+	// Router, NATS, debugger: catalog first (controller must exist when deploying agent), then YAML, then util
+	clt, err := clientutil.NewControllerClient(namespace)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to controller: %w", err)
 	}
 
+	routerItem, err := getCatalogItemByName(clt, "router", "Router")
+	if err == nil {
+		applyRouterImagesFromCatalog(images, routerItem)
+	}
+
+	debuggerItem, err := getCatalogItemByName(clt, "debugger", "Debug")
+	if err == nil {
+		applyDebuggerImageFromCatalog(images, debuggerItem)
+	} else {
+		util.PrintNotify("Warning: Could not fetch debugger catalog item from controller. Debugger image will not be transferred.")
+	}
+
+	natsItem, err := getCatalogItemByName(clt, "nats")
+	if err == nil {
+		applyNatsImageFromCatalog(images, natsItem)
+	}
+
+	applyYAMLAndUtilFallbackForAgent(images, controlPlane)
 	return images, nil
 }
 

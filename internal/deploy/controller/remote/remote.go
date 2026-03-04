@@ -109,20 +109,20 @@ func (exe *remoteExecutor) Execute() (err error) {
 	}
 	// Instantiate deployer
 	controllerOptions := &install.ControllerOptions{
-		Namespace:       exe.namespace,
-		User:            exe.controller.SSH.User,
-		Host:            exe.controller.Host,
-		Port:            exe.controller.SSH.Port,
-		PrivKeyFilename: exe.controller.SSH.KeyFile,
-		PidBaseDir:      exe.controller.PidBaseDir,
-		EcnViewerPort:   exe.controller.EcnViewerPort,
-		EcnViewerURL:    exe.controller.EcnViewerURL,
-		LogLevel:        exe.controller.LogLevel,
-		Version:         exe.controlPlane.Package.Version,
-		Image:           exe.controlPlane.Package.Container.Image,
-		// Repo:                exe.controlPlane.Package.Repo,
-		// Token:               exe.controlPlane.Package.Token,
+		Namespace:           exe.namespace,
+		User:                exe.controller.SSH.User,
+		Host:                exe.controller.Host,
+		Port:                exe.controller.SSH.Port,
+		PrivKeyFilename:     exe.controller.SSH.KeyFile,
+		PidBaseDir:          exe.controller.PidBaseDir,
+		EcnViewerPort:       exe.controller.EcnViewerPort,
+		EcnViewerURL:        exe.controller.EcnViewerURL,
+		LogLevel:            exe.controller.LogLevel,
+		Version:             exe.controlPlane.Package.Version,
+		Image:               exe.controlPlane.Package.Container.Image,
 		SystemMicroservices: exe.controlPlane.SystemMicroservices,
+		NatsEnabled:         natsEnabledFromSpec(exe.controlPlane.Nats),
+		Vault:               vaultSpecToInstall(exe.controlPlane.Vault),
 	}
 
 	// Add HTTPS configuration if present
@@ -217,6 +217,59 @@ func (exe *remoteExecutor) setDefaultValues() {
 	if exe.controlPlane.SystemMicroservices.Router.ARM == "" {
 		exe.controlPlane.SystemMicroservices.Router.ARM = util.GetRouterARMImage()
 	}
+	if exe.controlPlane.SystemMicroservices.Nats.X86 == "" {
+		exe.controlPlane.SystemMicroservices.Nats.X86 = util.GetNatsImage()
+	}
+	if exe.controlPlane.SystemMicroservices.Nats.ARM == "" {
+		exe.controlPlane.SystemMicroservices.Nats.ARM = util.GetNatsImage()
+	}
+}
+
+func natsEnabledFromSpec(n *rsc.NatsEnabledConfig) *bool {
+	if n == nil || n.Enabled == nil {
+		return nil
+	}
+	return n.Enabled
+}
+
+func vaultSpecToInstall(v *rsc.VaultSpec) *install.VaultConfig {
+	if v == nil {
+		return nil
+	}
+	out := &install.VaultConfig{
+		Enabled:  v.Enabled,
+		Provider: v.Provider,
+		BasePath: v.BasePath,
+	}
+	if v.Hashicorp != nil {
+		out.Hashicorp = &install.VaultHashicorpConfig{
+			Address: v.Hashicorp.Address,
+			Token:   v.Hashicorp.Token,
+			Mount:   v.Hashicorp.Mount,
+		}
+	}
+	if v.Aws != nil {
+		out.Aws = &install.VaultAwsConfig{
+			Region:      v.Aws.Region,
+			AccessKeyId: v.Aws.AccessKeyId,
+			AccessKey:   v.Aws.AccessKey,
+		}
+	}
+	if v.Azure != nil {
+		out.Azure = &install.VaultAzureConfig{
+			URL:          v.Azure.URL,
+			TenantId:     v.Azure.TenantId,
+			ClientId:     v.Azure.ClientId,
+			ClientSecret: v.Azure.ClientSecret,
+		}
+	}
+	if v.Google != nil {
+		out.Google = &install.VaultGoogleConfig{
+			ProjectId:   v.Google.ProjectId,
+			Credentials: v.Google.Credentials,
+		}
+	}
+	return out
 }
 
 func Validate(ctrl rsc.Controller) error {

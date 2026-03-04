@@ -25,7 +25,8 @@ const (
 	MicroserviceKind           Kind = Kind(apps.MicroserviceKind)
 	ApplicationKind            Kind = Kind(apps.ApplicationKind)
 	ApplicationTemplateKind    Kind = Kind(apps.ApplicationTemplateKind)
-	RouteKind                  Kind = Kind(apps.RouteKind)
+	NatsAccountRuleKind        Kind = "NatsAccountRule"
+	NatsUserRuleKind           Kind = "NatsUserRule"
 	SecretKind                 Kind = "Secret"
 	ConfigMapKind              Kind = "ConfigMap"
 	ServiceKind                Kind = "Service"
@@ -63,7 +64,8 @@ type potctlNamespace struct {
 
 // HeaderMetadata contains k8s metadata
 type HeaderMetadata struct {
-	Name      string    `yaml:"name" json:"name"`
-	Namespace string    `yaml:"namespace" json:"namespace"`
-	Tags      *[]string `yaml:"tags,omitempty" json:"tags,omitempty"`
+	Name            string    `yaml:"name" json:"name"`
+	Namespace       string    `yaml:"namespace" json:"namespace"`
+	ApplicationName string    `yaml:"applicationName,omitempty" json:"applicationName,omitempty"` // used by ServiceAccount (application-scoped)
+	Tags            *[]string `yaml:"tags,omitempty" json:"tags,omitempty"`
 }

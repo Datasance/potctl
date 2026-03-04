@@ -40,7 +40,46 @@ import (
 const (
 	deploymentTypeContainer = "container"
 	deploymentTypeNative    = "native"
+
+	defaultNatsServerPort    = 4222
+	defaultNatsClusterPort   = 6222
+	defaultNatsLeafPort      = 7422
+	defaultNatsMqttPort      = 8883
+	defaultNatsHttpPort      = 8222
+	defaultJsStorageSize     = "10G"
+	defaultJsMemoryStoreSize = "1G"
 )
+
+// applySystemAgentNatsDefaults sets NATS config defaults for system agents when not provided (natsMode=server, ports, JsStorageSize, JsMemoryStoreSize).
+func applySystemAgentNatsDefaults(cfg *rsc.AgentConfiguration) {
+	if cfg.NatsConfig.NatsMode == nil {
+		cfg.NatsConfig.NatsMode = iutil.MakeStrPtr(iofog.NatsModeServer)
+	} else {
+		// Force server mode for system agents (like router interior)
+		cfg.NatsConfig.NatsMode = iutil.MakeStrPtr(iofog.NatsModeServer)
+	}
+	if cfg.NatsConfig.NatsServerPort == nil {
+		cfg.NatsConfig.NatsServerPort = iutil.MakeIntPtr(defaultNatsServerPort)
+	}
+	if cfg.NatsConfig.NatsClusterPort == nil {
+		cfg.NatsConfig.NatsClusterPort = iutil.MakeIntPtr(defaultNatsClusterPort)
+	}
+	if cfg.NatsConfig.NatsLeafPort == nil {
+		cfg.NatsConfig.NatsLeafPort = iutil.MakeIntPtr(defaultNatsLeafPort)
+	}
+	if cfg.NatsConfig.NatsMqttPort == nil {
+		cfg.NatsMqttPort = iutil.MakeIntPtr(defaultNatsMqttPort)
+	}
+	if cfg.NatsConfig.NatsHttpPort == nil {
+		cfg.NatsConfig.NatsHttpPort = iutil.MakeIntPtr(defaultNatsHttpPort)
+	}
+	if cfg.NatsConfig.JsStorageSize == nil {
+		cfg.NatsConfig.JsStorageSize = iutil.MakeStrPtr(defaultJsStorageSize)
+	}
+	if cfg.NatsConfig.JsMemoryStoreSize == nil {
+		cfg.NatsConfig.JsMemoryStoreSize = iutil.MakeStrPtr(defaultJsMemoryStoreSize)
+	}
+}
 
 type Options struct {
 	Namespace string
@@ -97,16 +136,18 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		}
 
 		upstreamRouters := []string{}
+		upstreamNatsServers := []string{}
 
 		deployAgentConfig = rsc.AgentConfiguration{
 			Name:    ctrl.Name,
 			FogType: iutil.MakeStrPtr("auto"),
 			AgentConfiguration: client.AgentConfiguration{
-				IsSystem:        iutil.MakeBoolPtr(true),
-				DeploymentType:  iutil.MakeStrPtr(deploymentType),
-				Host:            &ctrl.Host,
-				RouterConfig:    RouterConfig,
-				UpstreamRouters: &upstreamRouters,
+				IsSystem:            iutil.MakeBoolPtr(true),
+				DeploymentType:      iutil.MakeStrPtr(deploymentType),
+				Host:                &ctrl.Host,
+				RouterConfig:        RouterConfig,
+				UpstreamRouters:     &upstreamRouters,
+				UpstreamNatsServers: &upstreamNatsServers,
 			},
 		}
 	}
@@ -134,6 +175,9 @@ func deploySystemAgent(namespace string, ctrl *rsc.RemoteController, systemAgent
 		messagingPort := 5671
 		deployAgentConfig.RouterConfig.MessagingPort = &messagingPort
 	}
+
+	// System agents run NATS in server mode (like router interior). Apply default natsConfig when not provided.
+	applySystemAgentNatsDefaults(&deployAgentConfig)
 
 	// Ensure name is set
 	if deployAgentConfig.Name == "" {
@@ -214,6 +258,23 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 				*deployAgentConfig.UpstreamRouters = append(*deployAgentConfig.UpstreamRouters, "default-router")
 			}
 		}
+		// Override upstream nats server for non-first controllers
+		if deployAgentConfig.UpstreamNatsServers == nil {
+			upstreamNatsServers := []string{"default-nats-hub"}
+			deployAgentConfig.UpstreamNatsServers = &upstreamNatsServers
+		} else {
+			// Add default-nats-hub if not already present
+			hasDefaultNatsHub := false
+			for _, natsServer := range *deployAgentConfig.UpstreamNatsServers {
+				if natsServer == "default-nats-hub" {
+					hasDefaultNatsHub = true
+					break
+				}
+			}
+			if !hasDefaultNatsHub {
+				*deployAgentConfig.UpstreamNatsServers = append(*deployAgentConfig.UpstreamNatsServers, "default-nats-hub")
+			}
+		}
 	} else {
 		// Use defaults with configurable ports (router mode always interior)
 		RouterConfig := client.RouterConfig{
@@ -260,6 +321,9 @@ func deployNextSystemAgent(namespace string, ctrl *rsc.RemoteController, systemA
 		messagingPort := 5671
 		deployAgentConfig.RouterConfig.MessagingPort = &messagingPort
 	}
+
+	// System agents run NATS in server mode (like router interior). Apply default natsConfig when not provided.
+	applySystemAgentNatsDefaults(&deployAgentConfig)
 
 	// Ensure name is set
 	if deployAgentConfig.Name == "" {
@@ -657,6 +721,40 @@ func validateMultiControllerConfig(controlPlane *rsc.RemoteControlPlane) error {
 		return err
 	}
 
+	// Validate Vault when set (provider and required provider fields)
+	if err := validateRemoteVault(controlPlane); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func validateRemoteVault(controlPlane *rsc.RemoteControlPlane) error {
+	if controlPlane.Vault == nil {
+		return nil
+	}
+	v := controlPlane.Vault
+	if v.Provider == "" {
+		return nil
+	}
+	switch v.Provider {
+	case "hashicorp", "openbao", "vault":
+		if v.Hashicorp == nil || (v.Hashicorp.Address == "" && v.Hashicorp.Token == "") {
+			return util.NewInputError("Vault provider " + v.Provider + " requires hashicorp block with address and token")
+		}
+	case "aws", "aws-secrets-manager":
+		if v.Aws == nil {
+			return util.NewInputError("Vault provider " + v.Provider + " requires aws block")
+		}
+	case "azure", "azure-key-vault":
+		if v.Azure == nil {
+			return util.NewInputError("Vault provider " + v.Provider + " requires azure block")
+		}
+	case "google", "google-secret-manager":
+		if v.Google == nil {
+			return util.NewInputError("Vault provider " + v.Provider + " requires google block")
+		}
+	}
 	return nil
 }
 
@@ -678,9 +776,12 @@ func (exe remoteControlPlaneExecutor) transferControllerImages() error {
 		return fmt.Errorf("failed to collect controller images: %w", err)
 	}
 
-	// Transfer only controller image; router and debugger are needed in agent phase only.
+	// Transfer controller and NATS images (remote Controller runs/starts NATS).
 	// Use platform and container engine from system agent config (validated when airgap is enabled).
 	imageList := []string{images.Controller}
+	if images.Nats != "" {
+		imageList = append(imageList, images.Nats)
+	}
 
 	controllers := remoteControlPlane.GetControllers()
 	ctx := context.Background()
@@ -767,10 +868,13 @@ func (exe remoteControlPlaneExecutor) transferSystemAgentImages() error {
 			return fmt.Errorf("failed to get router image for platform %s: %w", platform, err)
 		}
 
-		// Prepare image list (agent, router for platform, debugger if available)
+		// Prepare image list (agent, router for platform, NATS, debugger if available)
 		imageList := []string{images.Agent}
 		if routerImage != "" {
 			imageList = append(imageList, routerImage)
+		}
+		if images.Nats != "" {
+			imageList = append(imageList, images.Nats)
 		}
 		if images.Debugger != "" {
 			imageList = append(imageList, images.Debugger)

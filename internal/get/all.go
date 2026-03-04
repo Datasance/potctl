@@ -27,7 +27,6 @@ var (
 		getApplicationTable,
 		getSystemApplicationTable,
 		getVolumeTable,
-		getRouteTable,
 		getServiceTable,
 		getVolumeMountTable,
 	}
@@ -131,14 +130,6 @@ func getSystemApplicationTable(namespace string, tableChan tableChannel) {
 
 func getVolumeTable(namespace string, tableChan tableChannel) {
 	table, err := generateVolumeOutput(namespace)
-	tableChan <- tableQuery{
-		table: table,
-		err:   err,
-	}
-}
-
-func getRouteTable(namespace string, tableChan tableChannel) {
-	table, err := generateRouteOutput(namespace)
 	tableChan <- tableQuery{
 		table: table,
 		err:   err,

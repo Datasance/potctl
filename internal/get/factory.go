@@ -44,8 +44,6 @@ func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Exe
 		return newRegistryExecutor(namespace), nil
 	case "volumes":
 		return newVolumeExecutor(namespace), nil
-	case "routes":
-		return newRouteExecutor(namespace), nil
 	case "edge-resources":
 		return newEdgeResourceExecutor(namespace), nil
 	case "secrets":
@@ -64,6 +62,14 @@ func NewExecutor(resourceType, namespace string, showDetached bool) (execute.Exe
 		return newRoleBindingExecutor(namespace), nil
 	case "serviceaccounts":
 		return newServiceAccountExecutor(namespace), nil
+	case "nats-accounts":
+		return newNatsAccountExecutor(namespace), nil
+	case "nats-users":
+		return newNatsUserExecutor(namespace), nil
+	case "nats-account-rules":
+		return newNatsAccountRuleExecutor(namespace), nil
+	case "nats-user-rules":
+		return newNatsUserRuleExecutor(namespace), nil
 	default:
 		msg := "Unknown resource: '" + resourceType + "'"
 		return nil, util.NewInputError(msg)

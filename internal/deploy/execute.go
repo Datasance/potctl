@@ -32,11 +32,12 @@ import (
 	deployremotecontrolplane "github.com/datasance/potctl/internal/deploy/controlplane/remote"
 	deployedgeresource "github.com/datasance/potctl/internal/deploy/edgeresource"
 	deploymicroservice "github.com/datasance/potctl/internal/deploy/microservice"
+	deploynatsaccountrule "github.com/datasance/potctl/internal/deploy/natsaccountrule"
+	deploynatsuserrule "github.com/datasance/potctl/internal/deploy/natsuserrule"
 	deployofflineimage "github.com/datasance/potctl/internal/deploy/offlineimage"
 	deployregistry "github.com/datasance/potctl/internal/deploy/registry"
 	deployrole "github.com/datasance/potctl/internal/deploy/role"
 	deployrolebinding "github.com/datasance/potctl/internal/deploy/rolebinding"
-	deployroute "github.com/datasance/potctl/internal/deploy/route"
 	deploysecret "github.com/datasance/potctl/internal/deploy/secret"
 	deployservice "github.com/datasance/potctl/internal/deploy/service"
 	deployserviceaccount "github.com/datasance/potctl/internal/deploy/serviceaccount"
@@ -58,6 +59,8 @@ var kindOrder = []config.Kind{
 	config.RoleKind,
 	config.RoleBindingKind,
 	config.ServiceAccountKind,
+	config.NatsAccountRuleKind,
+	config.NatsUserRuleKind,
 	config.RemoteAgentKind,
 	config.LocalAgentKind,
 	config.EdgeResourceKind,
@@ -69,7 +72,6 @@ var kindOrder = []config.Kind{
 	config.CatalogItemKind,
 	config.ApplicationKind,
 	config.MicroserviceKind,
-	config.RouteKind,
 	config.ServiceKind,
 }
 
@@ -140,10 +142,6 @@ func deployVolume(opt *execute.KindHandlerOpt) (exe execute.Executor, err error)
 	return deployvolume.NewExecutor(deployvolume.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
 }
 
-func deployRoute(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
-	return deployroute.NewExecutor(deployroute.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
-}
-
 func deploySecret(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
 	return deploysecret.NewExecutor(deploysecret.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Data: opt.Data, Name: opt.Name})
 }
@@ -174,6 +172,24 @@ func deployRoleBinding(opt *execute.KindHandlerOpt) (exe execute.Executor, err e
 
 func deployServiceAccount(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
 	return deployserviceaccount.NewExecutor(deployserviceaccount.Options{Namespace: opt.Namespace, Yaml: opt.YAML, Name: opt.Name})
+}
+
+func deployNatsAccountRule(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deploynatsaccountrule.NewExecutor(deploynatsaccountrule.Options{
+		Namespace: opt.Namespace,
+		Yaml:      opt.YAML,
+		FullYAML:  opt.FullYAML,
+		Name:      opt.Name,
+	})
+}
+
+func deployNatsUserRule(opt *execute.KindHandlerOpt) (exe execute.Executor, err error) {
+	return deploynatsuserrule.NewExecutor(deploynatsuserrule.Options{
+		Namespace: opt.Namespace,
+		Yaml:      opt.YAML,
+		FullYAML:  opt.FullYAML,
+		Name:      opt.Name,
+	})
 }
 
 // Execute deploy from yaml file
@@ -211,6 +227,14 @@ func Execute(opt *Options) (err error) {
 		host := agentExecutor.GetHost()
 		tags := agentExecutor.GetTags()
 		deployConfig := agentExecutor.GetConfig()
+
+		// Determine the host value to send to the Controller (AgentConfiguration.Host).
+		// Prefer the host explicitly set in the agent configuration; otherwise, fall back to the spec host.
+		apiHost := host
+		if deployConfig != nil && deployConfig.AgentConfiguration.Host != nil && *deployConfig.AgentConfiguration.Host != "" {
+			apiHost = *deployConfig.AgentConfiguration.Host
+		}
+
 		for _, configGenericExecutor := range executorsMap[config.AgentConfigKind] {
 			configExecutor, ok := configGenericExecutor.(deployagentconfig.AgentConfigExecutor)
 			if !ok {
@@ -218,14 +242,14 @@ func Execute(opt *Options) (err error) {
 			}
 			if agentExecutor.GetName() == configExecutor.GetName() {
 				found = true
-				configExecutor.SetHost(host)
+				configExecutor.SetHost(apiHost)
 				configExecutor.SetTags(tags)
 				break
 			}
 		}
 		if !found {
 			agentConfig := client.AgentConfiguration{
-				Host: &host,
+				Host: &apiHost,
 			}
 			if util.IsLocalHost(host) && isLocalControlPlane { // Set de default local config to interior standalone for LocalControlPlane
 				isSystem := true
@@ -234,6 +258,15 @@ func Execute(opt *Options) (err error) {
 				routerMode := iofog.RouterModeInterior
 				edgeRouterPort := 45671
 				interRouterPort := 55671
+				upstreamNatsServers := []string{}
+				natsMode := iofog.NatsModeServer
+				natsServerPort := 4222
+				natsLeafPort := 7422
+				natsClusterPort := 6222
+				natsMqttPort := 8883
+				natsHttpPort := 8222
+				jsStorageSize := "10G"
+				jsMemoryStoreSize := "1G"
 				agentConfig.IsSystem = &isSystem
 				agentConfig.DeploymentType = &deploymentType
 				agentConfig.UpstreamRouters = &upstreamRouters
@@ -242,16 +275,27 @@ func Execute(opt *Options) (err error) {
 					EdgeRouterPort:  &edgeRouterPort,
 					InterRouterPort: &interRouterPort,
 				}
+				agentConfig.UpstreamNatsServers = &upstreamNatsServers
+				agentConfig.NatsConfig = client.NatsConfig{
+					NatsMode:          &natsMode,
+					NatsServerPort:    &natsServerPort,
+					NatsLeafPort:      &natsLeafPort,
+					NatsClusterPort:   &natsClusterPort,
+					NatsMqttPort:      &natsMqttPort,
+					NatsHttpPort:      &natsHttpPort,
+					JsStorageSize:     &jsStorageSize,
+					JsMemoryStoreSize: &jsMemoryStoreSize,
+				}
 			} else {
 				// For remote agents, use the configuration from the agent executor
-				if deployConfig == nil || deployConfig.AgentConfiguration == (client.AgentConfiguration{}) {
+				if deployConfig == nil {
 					// Initialize default remote agent configuration
 					agentConfig = client.AgentConfiguration{
-						Host: &host,
+						Host: &apiHost,
 					}
 				} else {
 					agentConfig = deployConfig.AgentConfiguration
-					agentConfig.Host = &host
+					agentConfig.Host = &apiHost
 				}
 			}
 			executorsMap[config.AgentConfigKind] = append(executorsMap[config.AgentConfigKind], deployagentconfig.NewRemoteExecutor(
@@ -331,12 +375,13 @@ func buildKindHandlers(noCache bool, transferPool int) map[config.Kind]func(*exe
 		config.AgentConfigKind:            deployAgentConfig,
 		config.RegistryKind:               deployRegistry,
 		config.VolumeKind:                 deployVolume,
-		config.RouteKind:                  deployRoute,
 		config.SecretKind:                 deploySecret,
 		config.ConfigMapKind:              deployConfigMap,
 		config.RoleKind:                   deployRole,
 		config.RoleBindingKind:            deployRoleBinding,
 		config.ServiceAccountKind:         deployServiceAccount,
+		config.NatsAccountRuleKind:        deployNatsAccountRule,
+		config.NatsUserRuleKind:           deployNatsUserRule,
 		config.ServiceKind:                deployService,
 		config.VolumeMountKind:            deployVolumeMount,
 		config.CertificateAuthorityKind:   deployCertificate,
@@ -424,7 +469,7 @@ func sortAndExecute(namespace string, executors []deployagentconfig.AgentConfigE
 		}
 		// Set dependencies for agent config topological sort
 		configuration := agentConfigExecutor.GetConfiguration()
-		dependencies := getDependencies(configuration.UpstreamRouters, configuration.NetworkRouter)
+		dependencies := getDependencies(configuration.UpstreamRouters, configuration.NetworkRouter, configuration.UpstreamNatsServers)
 		if err := makeEdges(g, node, nodeMap, agentNodeMap, agentByName, agentByUUID, dependencies); err != nil {
 			return err
 		}
@@ -479,7 +524,7 @@ func makeEdges(g *graph.Graph, node graph.Node, nodeMap, agentNodeMap map[string
 			}
 			if agent != nil {
 				// Fill dependency graph with agents on Controller
-				uuidDependencies := getDependencies(agent.UpstreamRouters, agent.NetworkRouter)
+				uuidDependencies := getDependencies(agent.UpstreamRouters, agent.NetworkRouter, agent.UpstreamNatsServers)
 				if err := makeEdges(g, dependsOnNode, nodeMap, agentNodeMap, agentByName, agentByUUID, mapUUIDsToNames(uuidDependencies, agentByUUID)); err != nil {
 					return err
 				}
@@ -493,13 +538,16 @@ func makeEdges(g *graph.Graph, node graph.Node, nodeMap, agentNodeMap map[string
 	return nil
 }
 
-func getDependencies(upstreamRouters *[]string, networkRouter *string) []string {
+func getDependencies(upstreamRouters *[]string, networkRouter *string, upstreamNatsServers *[]string) []string {
 	dependencies := []string{}
 	if upstreamRouters != nil {
 		dependencies = append(dependencies, *upstreamRouters...)
 	}
 	if networkRouter != nil {
 		dependencies = append(dependencies, *networkRouter)
+	}
+	if upstreamNatsServers != nil {
+		dependencies = append(dependencies, *upstreamNatsServers...)
 	}
 	return dependencies
 }

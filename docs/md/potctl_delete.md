@@ -39,10 +39,14 @@ potctl delete [flags]
 * [potctl delete edge-resource](potctl_delete_edge-resource.md)	 - Delete an Edge Resource
 * [potctl delete microservice](potctl_delete_microservice.md)	 - Delete a Microservice
 * [potctl delete namespace](potctl_delete_namespace.md)	 - Delete a Namespace
+* [potctl delete nats-account-rule](potctl_delete_nats-account-rule.md)	 - Delete a NATS account rule
+* [potctl delete nats-user-rule](potctl_delete_nats-user-rule.md)	 - Delete a NATS user rule
 * [potctl delete registry](potctl_delete_registry.md)	 - Delete a Registry
-* [potctl delete route](potctl_delete_route.md)	 - Delete a Route
+* [potctl delete role](potctl_delete_role.md)	 - Delete a Role
+* [potctl delete rolebinding](potctl_delete_rolebinding.md)	 - Delete a RoleBinding
 * [potctl delete secret](potctl_delete_secret.md)	 - Delete a Secret
 * [potctl delete service](potctl_delete_service.md)	 - Delete a Service
+* [potctl delete serviceaccount](potctl_delete_serviceaccount.md)	 - Delete a ServiceAccount
 * [potctl delete volume](potctl_delete_volume.md)	 - Delete an Volume
 * [potctl delete volume-mount](potctl_delete_volume-mount.md)	 - Delete a Volume Mount
 

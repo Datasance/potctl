@@ -30,7 +30,8 @@ type KubernetesControlPlane struct {
 	Endpoint       string                 `yaml:"endpoint,omitempty"`
 	Controller     K8SControllerConfig    `yaml:"controller,omitempty"`
 	Ingresses      Ingresses              `yaml:"ingresses,omitempty"`
-	// Router         RouterConfig           `yaml:"router,omitempty"`
+	Nats           *NatsSpec              `yaml:"nats,omitempty"`
+	Vault          *VaultSpec             `yaml:"vault,omitempty"`
 }
 
 func (cp *KubernetesControlPlane) GetUser() IofogUser {
@@ -148,16 +149,19 @@ func (cp *KubernetesControlPlane) Clone() ControlPlane {
 	controllerPods := make([]KubernetesController, len(cp.ControllerPods))
 	copy(controllerPods, cp.ControllerPods)
 	return &KubernetesControlPlane{
-		KubeConfig: cp.KubeConfig,
-		IofogUser:  cp.IofogUser,
-		Auth:       cp.Auth,
-		Database:   cp.Database,
-		Services:   cp.Services,
-		Ingresses:  cp.Ingresses,
-		// Router:         cp.Router,
+		KubeConfig:     cp.KubeConfig,
+		IofogUser:      cp.IofogUser,
+		Auth:           cp.Auth,
+		Database:       cp.Database,
+		Events:         cp.Events,
+		Services:       cp.Services,
+		Ingresses:      cp.Ingresses,
 		Replicas:       cp.Replicas,
 		Images:         cp.Images,
 		Endpoint:       cp.Endpoint,
+		Controller:     cp.Controller,
 		ControllerPods: controllerPods,
+		Nats:           cp.Nats,
+		Vault:          cp.Vault,
 	}
 }

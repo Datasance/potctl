@@ -29,6 +29,5 @@ Rename the iofog resources that are currently deployed
 * [potctl rename edge-resource](potctl_rename_edge-resource.md)	 - Rename an Edge Resource
 * [potctl rename microservice](potctl_rename_microservice.md)	 - Rename a Microservice
 * [potctl rename namespace](potctl_rename_namespace.md)	 - Rename a Namespace
-* [potctl rename route](potctl_rename_route.md)	 - Rename a Route
 
 
