@@ -165,18 +165,23 @@ func (exe *kubernetesControlPlaneExecutor) executeInstall() (err error) {
 
 const clusterIP = "ClusterIP"
 
-func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
-	// Validate user
+func validateControlPlaneUser(controlPlane *rsc.KubernetesControlPlane) error {
 	user := controlPlane.GetUser()
 	if user.Email == "" {
 		return util.NewInputError("Control Plane Iofog User must contain non-empty value in email field")
 	}
-	// Validate auth
+	return nil
+}
+
+func validateControlPlaneAuth(controlPlane *rsc.KubernetesControlPlane) error {
 	auth := controlPlane.Auth
 	if auth.URL == "" || auth.Realm == "" || auth.SSL == "" || auth.RealmKey == "" || auth.ControllerClient == "" || auth.ControllerSecret == "" || auth.ViewerClient == "" {
 		return util.NewInputError("Control Plane Auth Config must contain non-empty values in all fields")
 	}
-	// Validate database
+	return nil
+}
+
+func validateControlPlaneDatabase(controlPlane *rsc.KubernetesControlPlane) error {
 	db := controlPlane.Database
 	replicas := controlPlane.Replicas.Controller
 	if replicas > 1 {
@@ -185,7 +190,10 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 			return util.NewInputError(msg)
 		}
 	}
-	// Validate controller service and ingress
+	return nil
+}
+
+func validateControllerServiceAndIngress(controlPlane *rsc.KubernetesControlPlane) error {
 	controllerService := controlPlane.Services.Controller
 	controllerIngress := controlPlane.Ingresses.Controller
 	if controllerService.Type == clusterIP {
@@ -193,7 +201,10 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 			return util.NewInputError("When Controller service type is ClusterIP, You must provide Ingress configuration for Controller")
 		}
 	}
-	// Validate router service and ingress
+	return nil
+}
+
+func validateRouterServiceAndIngress(controlPlane *rsc.KubernetesControlPlane) error {
 	routerService := controlPlane.Services.Router
 	routerIngress := controlPlane.Ingresses.Router
 	if routerService.Type == clusterIP {
@@ -201,34 +212,67 @@ func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
 			return util.NewInputError("When Router service type is ClusterIP, You must provide Ingress configuration for Default-Router")
 		}
 	}
-	// NATS: when replicas.nats is set it must be >= 2
+	return nil
+}
+
+func validateNatsReplicas(controlPlane *rsc.KubernetesControlPlane) error {
 	if controlPlane.Replicas.Nats > 0 && controlPlane.Replicas.Nats < 2 {
 		return util.NewInputError("When NATS is enabled, replicas.nats must be at least 2")
 	}
-	// Vault: when set, validate provider and required provider fields
-	if controlPlane.Vault != nil {
-		if controlPlane.Vault.Provider != "" {
-			switch controlPlane.Vault.Provider {
-			case "hashicorp", "openbao", "vault":
-				if controlPlane.Vault.Hashicorp == nil || (controlPlane.Vault.Hashicorp.Address == "" && controlPlane.Vault.Hashicorp.Token == "") {
-					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires hashicorp block with address and token")
-				}
-			case "aws", "aws-secrets-manager":
-				if controlPlane.Vault.Aws == nil {
-					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires aws block")
-				}
-			case "azure", "azure-key-vault":
-				if controlPlane.Vault.Azure == nil {
-					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires azure block")
-				}
-			case "google", "google-secret-manager":
-				if controlPlane.Vault.Google == nil {
-					return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires google block")
-				}
-			}
+	return nil
+}
+
+func validateControlPlaneVault(controlPlane *rsc.KubernetesControlPlane) error {
+	if controlPlane.Vault == nil {
+		return nil
+	}
+	if controlPlane.Vault.Provider == "" {
+		return nil
+	}
+	switch controlPlane.Vault.Provider {
+	case "hashicorp", "openbao", "vault":
+		if controlPlane.Vault.Hashicorp == nil || (controlPlane.Vault.Hashicorp.Address == "" && controlPlane.Vault.Hashicorp.Token == "") {
+			return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires hashicorp block with address and token")
+		}
+	case "aws", "aws-secrets-manager":
+		if controlPlane.Vault.Aws == nil {
+			return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires aws block")
+		}
+	case "azure", "azure-key-vault":
+		if controlPlane.Vault.Azure == nil {
+			return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires azure block")
+		}
+	case "google", "google-secret-manager":
+		if controlPlane.Vault.Google == nil {
+			return util.NewInputError("Vault provider " + controlPlane.Vault.Provider + " requires google block")
 		}
 	}
-	return
+	return nil
+}
+
+func validate(controlPlane *rsc.KubernetesControlPlane) (err error) {
+	if err := validateControlPlaneUser(controlPlane); err != nil {
+		return err
+	}
+	if err := validateControlPlaneAuth(controlPlane); err != nil {
+		return err
+	}
+	if err := validateControlPlaneDatabase(controlPlane); err != nil {
+		return err
+	}
+	if err := validateControllerServiceAndIngress(controlPlane); err != nil {
+		return err
+	}
+	if err := validateRouterServiceAndIngress(controlPlane); err != nil {
+		return err
+	}
+	if err := validateNatsReplicas(controlPlane); err != nil {
+		return err
+	}
+	if err := validateControlPlaneVault(controlPlane); err != nil {
+		return err
+	}
+	return nil
 }
 
 func natsSpecToCpv3(n *rsc.NatsSpec) *cpv3.Nats {
