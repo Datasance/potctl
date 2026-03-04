@@ -67,7 +67,7 @@ golangci-lint: ## Install golangci
 ifeq (, $(shell which golangci-lint))
 	@{ \
 	set -e ;\
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1 ;\
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.0 ;\
 	}
 GOLANGCI_LINT=$(GOBIN)/golangci-lint
 else
