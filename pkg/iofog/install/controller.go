@@ -459,8 +459,7 @@ func (ctrl *Controller) copyInstallScripts() error {
 	return nil
 }
 
-func (ctrl *Controller) prepareEnvironmentVariables() string {
-	env := []string{}
+func appendControllerBaseEnv(env []string, ctrl *Controller) []string {
 	env = append(env, "CONTROL_PLANE=Remote")
 	env = append(env, fmt.Sprintf("\"CONTROLLER_NAMESPACE=%s\"", ctrl.Namespace))
 	if ctrl.Https != nil && ctrl.Https.Enabled != nil && *ctrl.Https.Enabled {
@@ -471,33 +470,8 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	if ctrl.Https != nil && ctrl.Https.CACert != "" {
 		env = append(env, fmt.Sprintf("\"SSL_BASE64_INTERMEDIATE_CERT=%s\"", ctrl.Https.CACert))
 	}
-	if ctrl.db.host != "" {
-		env = append(env,
-			fmt.Sprintf(`"DB_PROVIDER=%s"`, ctrl.db.provider),
-			fmt.Sprintf(`"DB_HOST=%s"`, ctrl.db.host),
-			fmt.Sprintf(`"DB_USERNAME=%s"`, ctrl.db.user),
-			fmt.Sprintf(`"DB_PASSWORD=%s"`, ctrl.db.password),
-			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
-			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
-	}
-	if ctrl.db.ssl != nil {
-		env = append(env, fmt.Sprintf(`"DB_USE_SSL=%t"`, *ctrl.db.ssl))
-	}
-	if ctrl.db.ca != nil {
-		env = append(env, fmt.Sprintf(`"DB_SSL_CA=%s"`, *ctrl.db.ca))
-	}
 	if ctrl.Host != "" {
 		env = append(env, fmt.Sprintf(`"CONTROLLER_HOST=%s"`, ctrl.Host))
-	}
-	if ctrl.auth.url != "" {
-		env = append(env,
-			fmt.Sprintf(`"KC_URL=%s"`, ctrl.auth.url),
-			fmt.Sprintf(`"KC_REALM=%s"`, ctrl.auth.realm),
-			fmt.Sprintf(`"KC_SSL_REQ=%s"`, ctrl.auth.ssl),
-			fmt.Sprintf(`"KC_REALM_KEY=%s"`, ctrl.auth.realmKey),
-			fmt.Sprintf(`"KC_CLIENT=%s"`, ctrl.auth.controllerClient),
-			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
-			fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
 	}
 	if ctrl.PidBaseDir != "" {
 		env = append(env, fmt.Sprintf("\"PID_BASE=%s\"", ctrl.PidBaseDir))
@@ -514,6 +488,43 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	if ctrl.SystemMicroservices.Router.ARM != "" {
 		env = append(env, fmt.Sprintf("\"ROUTER_IMAGE_2=%s\"", ctrl.SystemMicroservices.Router.ARM))
 	}
+	return env
+}
+
+func appendDBEnv(env []string, ctrl *Controller) []string {
+	if ctrl.db.host != "" {
+		env = append(env,
+			fmt.Sprintf(`"DB_PROVIDER=%s"`, ctrl.db.provider),
+			fmt.Sprintf(`"DB_HOST=%s"`, ctrl.db.host),
+			fmt.Sprintf(`"DB_USERNAME=%s"`, ctrl.db.user),
+			fmt.Sprintf(`"DB_PASSWORD=%s"`, ctrl.db.password),
+			fmt.Sprintf(`"DB_PORT=%d"`, ctrl.db.port),
+			fmt.Sprintf(`"DB_NAME=%s"`, ctrl.db.databaseName))
+	}
+	if ctrl.db.ssl != nil {
+		env = append(env, fmt.Sprintf(`"DB_USE_SSL=%t"`, *ctrl.db.ssl))
+	}
+	if ctrl.db.ca != nil {
+		env = append(env, fmt.Sprintf(`"DB_SSL_CA=%s"`, *ctrl.db.ca))
+	}
+	return env
+}
+
+func appendAuthEnv(env []string, ctrl *Controller) []string {
+	if ctrl.auth.url != "" {
+		env = append(env,
+			fmt.Sprintf(`"KC_URL=%s"`, ctrl.auth.url),
+			fmt.Sprintf(`"KC_REALM=%s"`, ctrl.auth.realm),
+			fmt.Sprintf(`"KC_SSL_REQ=%s"`, ctrl.auth.ssl),
+			fmt.Sprintf(`"KC_REALM_KEY=%s"`, ctrl.auth.realmKey),
+			fmt.Sprintf(`"KC_CLIENT=%s"`, ctrl.auth.controllerClient),
+			fmt.Sprintf(`"KC_CLIENT_SECRET=%s"`, ctrl.auth.controllerSecret),
+			fmt.Sprintf(`"KC_VIEWER_CLIENT=%s"`, ctrl.auth.viewerClient))
+	}
+	return env
+}
+
+func appendNatsEnv(env []string, ctrl *Controller) []string {
 	natsX86 := ctrl.SystemMicroservices.Nats.X86
 	natsARM := ctrl.SystemMicroservices.Nats.ARM
 	if natsX86 == "" && natsARM != "" {
@@ -532,90 +543,133 @@ func (ctrl *Controller) prepareEnvironmentVariables() string {
 	if natsARM != "" {
 		env = append(env, fmt.Sprintf("\"NATS_IMAGE_2=%s\"", natsARM))
 	}
-	// NATS enabling (remote/local control plane: only enabling parameter)
 	natsEnabled := true
 	if ctrl.NatsEnabled != nil {
 		natsEnabled = *ctrl.NatsEnabled
 	}
 	env = append(env, fmt.Sprintf("\"NATS_ENABLED=%t\"", natsEnabled))
-	if ctrl.Vault != nil {
-		if ctrl.Vault.Enabled != nil {
-			env = append(env, fmt.Sprintf("\"VAULT_ENABLED=%t\"", *ctrl.Vault.Enabled))
-		}
-		if ctrl.Vault.Provider != "" {
-			env = append(env, fmt.Sprintf("\"VAULT_PROVIDER=%s\"", ctrl.Vault.Provider))
-		}
-		if ctrl.Vault.BasePath != "" {
-			env = append(env, fmt.Sprintf("\"VAULT_BASE_PATH=%s\"", ctrl.Vault.BasePath))
-		}
-		if ctrl.Vault.Hashicorp != nil {
-			if ctrl.Vault.Hashicorp.Address != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_ADDRESS=%s\"", ctrl.Vault.Hashicorp.Address))
-			}
-			if ctrl.Vault.Hashicorp.Token != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_TOKEN=%s\"", ctrl.Vault.Hashicorp.Token))
-			}
-			if ctrl.Vault.Hashicorp.Mount != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_MOUNT=%s\"", ctrl.Vault.Hashicorp.Mount))
-			}
-		}
-		if ctrl.Vault.Aws != nil {
-			if ctrl.Vault.Aws.Region != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AWS_REGION=%s\"", ctrl.Vault.Aws.Region))
-			}
-			if ctrl.Vault.Aws.AccessKeyId != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY_ID=%s\"", ctrl.Vault.Aws.AccessKeyId))
-			}
-			if ctrl.Vault.Aws.AccessKey != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY=%s\"", ctrl.Vault.Aws.AccessKey))
-			}
-		}
-		if ctrl.Vault.Azure != nil {
-			if ctrl.Vault.Azure.URL != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AZURE_URL=%s\"", ctrl.Vault.Azure.URL))
-			}
-			if ctrl.Vault.Azure.TenantId != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AZURE_TENANT_ID=%s\"", ctrl.Vault.Azure.TenantId))
-			}
-			if ctrl.Vault.Azure.ClientId != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_ID=%s\"", ctrl.Vault.Azure.ClientId))
-			}
-			if ctrl.Vault.Azure.ClientSecret != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_SECRET=%s\"", ctrl.Vault.Azure.ClientSecret))
-			}
-		}
-		if ctrl.Vault.Google != nil {
-			if ctrl.Vault.Google.ProjectId != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_PROJECT_ID=%s\"", ctrl.Vault.Google.ProjectId))
-			}
-			if ctrl.Vault.Google.Credentials != "" {
-				env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_CREDENTIALS=%s\"", ctrl.Vault.Google.Credentials))
-			}
-		}
+	return env
+}
+
+func appendVaultEnv(env []string, ctrl *Controller) []string {
+	if ctrl.Vault == nil {
+		return env
 	}
+	if ctrl.Vault.Enabled != nil {
+		env = append(env, fmt.Sprintf("\"VAULT_ENABLED=%t\"", *ctrl.Vault.Enabled))
+	}
+	if ctrl.Vault.Provider != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_PROVIDER=%s\"", ctrl.Vault.Provider))
+	}
+	if ctrl.Vault.BasePath != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_BASE_PATH=%s\"", ctrl.Vault.BasePath))
+	}
+	env = appendVaultHashicorpEnv(env, ctrl.Vault.Hashicorp)
+	env = appendVaultAwsEnv(env, ctrl.Vault.Aws)
+	env = appendVaultAzureEnv(env, ctrl.Vault.Azure)
+	env = appendVaultGoogleEnv(env, ctrl.Vault.Google)
+	return env
+}
+
+func appendVaultHashicorpEnv(env []string, h *VaultHashicorpConfig) []string {
+	if h == nil {
+		return env
+	}
+	if h.Address != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_ADDRESS=%s\"", h.Address))
+	}
+	if h.Token != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_TOKEN=%s\"", h.Token))
+	}
+	if h.Mount != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_HASHICORP_MOUNT=%s\"", h.Mount))
+	}
+	return env
+}
+
+func appendVaultAwsEnv(env []string, a *VaultAwsConfig) []string {
+	if a == nil {
+		return env
+	}
+	if a.Region != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AWS_REGION=%s\"", a.Region))
+	}
+	if a.AccessKeyId != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY_ID=%s\"", a.AccessKeyId))
+	}
+	if a.AccessKey != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AWS_ACCESS_KEY=%s\"", a.AccessKey))
+	}
+	return env
+}
+
+func appendVaultAzureEnv(env []string, a *VaultAzureConfig) []string {
+	if a == nil {
+		return env
+	}
+	if a.URL != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AZURE_URL=%s\"", a.URL))
+	}
+	if a.TenantId != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AZURE_TENANT_ID=%s\"", a.TenantId))
+	}
+	if a.ClientId != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_ID=%s\"", a.ClientId))
+	}
+	if a.ClientSecret != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_AZURE_CLIENT_SECRET=%s\"", a.ClientSecret))
+	}
+	return env
+}
+
+func appendVaultGoogleEnv(env []string, g *VaultGoogleConfig) []string {
+	if g == nil {
+		return env
+	}
+	if g.ProjectId != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_PROJECT_ID=%s\"", g.ProjectId))
+	}
+	if g.Credentials != "" {
+		env = append(env, fmt.Sprintf("\"VAULT_GOOGLE_CREDENTIALS=%s\"", g.Credentials))
+	}
+	return env
+}
+
+func appendLogLevelEnv(env []string, ctrl *Controller) []string {
 	if ctrl.LogLevel != "" {
 		env = append(env, fmt.Sprintf("\"LOG_LEVEL=%s\"", ctrl.LogLevel))
 	}
-	// Add Events environment variables only if events were explicitly configured
-	if ctrl.events.auditEnabled != nil {
-		// Always set EVENT_AUDIT_ENABLED (true or false)
-		env = append(env, fmt.Sprintf("\"EVENT_AUDIT_ENABLED=%t\"", *ctrl.events.auditEnabled))
+	return env
+}
 
-		// Set optional fields only if audit is enabled
-		if *ctrl.events.auditEnabled {
-			if ctrl.events.retentionDays != 0 {
-				env = append(env, fmt.Sprintf("\"EVENT_RETENTION_DAYS=%d\"", ctrl.events.retentionDays))
-			}
-			if ctrl.events.cleanupInterval != 0 {
-				env = append(env, fmt.Sprintf("\"EVENT_CLEANUP_INTERVAL=%d\"", ctrl.events.cleanupInterval))
-			}
+func appendEventsEnv(env []string, ctrl *Controller) []string {
+	if ctrl.events.auditEnabled == nil {
+		return env
+	}
+	env = append(env, fmt.Sprintf("\"EVENT_AUDIT_ENABLED=%t\"", *ctrl.events.auditEnabled))
+	if *ctrl.events.auditEnabled {
+		if ctrl.events.retentionDays != 0 {
+			env = append(env, fmt.Sprintf("\"EVENT_RETENTION_DAYS=%d\"", ctrl.events.retentionDays))
 		}
-
-		// Set EVENT_CAPTURE_IP_ADDRESS if explicitly configured
-		if ctrl.events.captureIpAddress != nil {
-			env = append(env, fmt.Sprintf("\"EVENT_CAPTURE_IP_ADDRESS=%t\"", *ctrl.events.captureIpAddress))
+		if ctrl.events.cleanupInterval != 0 {
+			env = append(env, fmt.Sprintf("\"EVENT_CLEANUP_INTERVAL=%d\"", ctrl.events.cleanupInterval))
 		}
 	}
+	if ctrl.events.captureIpAddress != nil {
+		env = append(env, fmt.Sprintf("\"EVENT_CAPTURE_IP_ADDRESS=%t\"", *ctrl.events.captureIpAddress))
+	}
+	return env
+}
+
+func (ctrl *Controller) prepareEnvironmentVariables() string {
+	env := []string{}
+	env = appendControllerBaseEnv(env, ctrl)
+	env = appendDBEnv(env, ctrl)
+	env = appendAuthEnv(env, ctrl)
+	env = appendNatsEnv(env, ctrl)
+	env = appendVaultEnv(env, ctrl)
+	env = appendLogLevelEnv(env, ctrl)
+	env = appendEventsEnv(env, ctrl)
 	return strings.Join(env, " ")
 }
 
