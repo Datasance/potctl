@@ -447,6 +447,9 @@ func sortAndExecute(namespace string, executors []deployagentconfig.AgentConfigE
 	// Add default router
 	agentByName[iofog.VanillaRouterAgentName] = &client.AgentInfo{Name: iofog.VanillaRouterAgentName}
 
+	// Add default nats server
+	agentByName[iofog.VanillaNatsAgentName] = &client.AgentInfo{Name: iofog.VanillaNatsAgentName}
+
 	// Agent config are the representation of agents in Controller. They need to be deployed sequentially because of router dependencies
 	// First create the acyclic graph of dependencies
 	g := graph.New(graph.Directed)
