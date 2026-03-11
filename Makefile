@@ -21,9 +21,9 @@ PREFIX = github.com/datasance/potctl/pkg/util
 LDFLAGS += -X $(PREFIX).versionNumber=$(VERSION) -X $(PREFIX).commit=$(COMMIT) -X $(PREFIX).date=$(BUILD_DATE) -X $(PREFIX).platform=$(GOOS)/$(GOARCH)
 LDFLAGS += -X $(PREFIX).operatorTag=3.7.1
 LDFLAGS += -X $(PREFIX).routerTag=3.7.0
-LDFLAGS += -X $(PREFIX).controllerTag=3.7.0
+LDFLAGS += -X $(PREFIX).controllerTag=3.7.1
 LDFLAGS += -X $(PREFIX).agentTag=3.7.0
-LDFLAGS += -X $(PREFIX).controllerVersion=3.7.0
+LDFLAGS += -X $(PREFIX).controllerVersion=3.7.1
 LDFLAGS += -X $(PREFIX).agentVersion=3.7.0
 LDFLAGS += -X $(PREFIX).debuggerTag=latest
 LDFLAGS += -X $(PREFIX).natsTag=2.12.4
