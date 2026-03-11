@@ -14,6 +14,8 @@
 package resource
 
 import (
+	"strings"
+
 	"github.com/datasance/potctl/pkg/util"
 )
 
@@ -72,19 +74,17 @@ func (cp *KubernetesControlPlane) GetController(name string) (ret Controller, er
 func (cp *KubernetesControlPlane) GetEndpoint() (string, error) {
 	// If HTTPS is enabled in the controller configuration, regenerate the endpoint with HTTPS
 	if cp.Controller.Https != nil && *cp.Controller.Https {
-		// Extract host and port from the existing endpoint
-		// The endpoint format is typically "http://host:port" or "https://host:port"
-		// We need to change the scheme to https
 		if cp.Endpoint != "" {
-			// Use the util.GetControllerEndpoint function to regenerate with HTTPS
-			// First, extract the host part (remove the scheme)
+			// Endpoint already uses HTTPS (e.g. from ingress: https://hostname); return as-is
+			// to avoid util.GetControllerEndpoint incorrectly adding :51121 when given a hostname without scheme
+			if strings.HasPrefix(cp.Endpoint, "https://") {
+				return cp.Endpoint, nil
+			}
+			// Convert http to https
 			host := cp.Endpoint
 			if len(host) > 7 && host[:7] == "http://" {
 				host = host[7:]
-			} else if len(host) > 8 && host[:8] == "https://" {
-				host = host[8:]
 			}
-			// Regenerate with HTTPS
 			return util.GetControllerEndpoint(host, true)
 		}
 	}
