@@ -9,7 +9,7 @@ require (
 	github.com/briandowns/spinner v1.23.1
 	github.com/containers/image/v5 v5.32.1
 	github.com/datasance/iofog-go-sdk/v3 v3.7.0
-	github.com/datasance/iofog-operator/v3 v3.7.1
+	github.com/datasance/iofog-operator/v3 v3.7.2
 	github.com/docker/docker v27.4.1+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/gorilla/websocket v1.5.3
@@ -21,7 +21,7 @@ require (
 	github.com/twmb/algoimpl v0.0.0-20170717182524-076353e90b94
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.46.0
-	golang.org/x/oauth2 v0.23.0
+	golang.org/x/oauth2 v0.27.0
 	golang.org/x/sys v0.40.0
 	golang.org/x/term v0.39.0
 	gopkg.in/yaml.v2 v2.4.0
